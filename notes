@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /Users/jenn/Projects/Pixel-Pages
+mvn exec:java -Dexec.mainClass="com.pixelpages.cli.PixelPagesCLI" -Dexec.args="$*"
