@@ -7,3 +7,6 @@ public static void searchNotes(String query)
 public static void printHelp() 
 public static Path getNoteFilePath(String noteId) 
 public static void openFileInEditor(Path filePath) throws IOException, InterruptedException
+
+
+what if i want. connections to allow me to list all of the connections individually and then you can select the connection and see which words are connected and then get the option to open each

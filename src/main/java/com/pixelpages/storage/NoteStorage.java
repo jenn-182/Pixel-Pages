@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,13 +60,6 @@ public class NoteStorage {
         String fileContent = yamlHeader.toString() + note.getContent();
         Files.writeString(filePath, fileContent);
 
-
-        // //simple format
-        // String contentToSave = note.getTitle() + "\n" +
-        //                        "----------------------------------------\n\n" + // A simple separator
-        //                        note.getContent();
-        // // Write the note content to the file                       
-        // Files.writeString(filePath, contentToSave);
     }
 
 
@@ -207,26 +200,9 @@ public class NoteStorage {
     }
 
     //Helper method to get the actual filename of a note
-    //Temporary until we include dilename in the Note object itself
-    public String getFilenameForNote(Note targetNote) {
-        // Generate a filename based on the note's title
-        List<Path> allNoteFiles = getNoteFiles(); // Reload all notes to find the matching filename
-        for (Path filePath : allNoteFiles) {
-            String filename = filePath.getFileName().toString();
-            try {
-                Note storedNote = readNote(filename);
-                // Check if the stored note matches the target note by title and created timestamp
-                // This assumes that the title and created timestamp are sufficient to identify a note uniquely
-                if (storedNote.getTitle().equals(targetNote.getTitle()) && storedNote.getCreated().equals(targetNote.getCreated())) {
-                    return filename;
-                }
-            } catch (IOException e) {
-                // Ignore errors reading files for this lookup
-            }
-        }
-        return null; // Note not found
+    public String getFilenameForNote(Note note) {
+        return generateUniqueFilename(note.getTitle());
     }
-
 
     public List<Path> getNoteFiles() {
         try (Stream<Path> paths = Files.walk(Paths.get(notesDirectory))) {
