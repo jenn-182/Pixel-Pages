@@ -84,13 +84,13 @@ public class DisplayFormatter {
         
         // Display motivational message
         if (progressPercentage == 100.0) {
-            output.displayLine("LEGENDARY STATUS: You've mastered everything! You are the ultimate adventurer!");
+            output.displayLine("LEGENDARY STATUS: All achievements completed. You've mastered the system!");
         } else if (progressPercentage >= 80.0) {
-            output.displayLine("Almost there! Just a few more achievements to unlock!");
+            output.displayLine("Nearly complete. Just a few more achievements to unlock!");
         } else if (progressPercentage >= 50.0) {
-            output.displayLine("Halfway to legendary status! Keep pushing forward!");
+            output.displayLine("Halfway to legendary status! Keep going...");
         } else {
-            output.displayLine("Your adventure has just begun! Keep logging and exploring!");
+            output.displayLine("You're just getting started! Keep going to unlock more.");
         }
     }
 }

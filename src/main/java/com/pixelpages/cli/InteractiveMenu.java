@@ -56,8 +56,6 @@ public class InteractiveMenu {
             case "8":
                 return handleAchievements();
             case "9":
-                return handleBackup();
-            case "10":
                 return handleRefreshMenu();
             case "0":
                 return handleExit();
@@ -156,12 +154,6 @@ public class InteractiveMenu {
     private boolean handleAchievements() throws IOException {
         outputHandler.clear();
         commandHandler.executeCommand("achievements", "");
-        return false;
-    }
-
-    private boolean handleBackup() throws IOException {
-        outputHandler.clear();
-        commandHandler.executeCommand("backup", "");
         return false;
     }
 

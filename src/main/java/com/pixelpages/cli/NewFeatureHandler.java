@@ -6,10 +6,6 @@ import com.pixelpages.model.Note;
 import com.pixelpages.storage.NoteStorage;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,11 +15,11 @@ public class NewFeatureHandler {
     private final NoteStorage noteStorage;
     private final InputHandler inputHandler;
     private final OutputHandler outputHandler;
-    private static final String NOTES_DIRECTORY = "pixel_pages_notes";
-    private static final DateTimeFormatter DISPLAY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     private final UIRenderer ui;
 
-    public NewFeatureHandler(NoteStorage noteStorage, InputHandler inputHandler, OutputHandler outputHandler, UIRenderer ui) {
+    public NewFeatureHandler(NoteStorage noteStorage, InputHandler inputHandler, OutputHandler outputHandler,
+            UIRenderer ui) {
         this.noteStorage = noteStorage;
         this.inputHandler = inputHandler;
         this.outputHandler = outputHandler;
@@ -48,6 +44,14 @@ public class NewFeatureHandler {
 
     private void displayPlayerProfileWithRanking(List<Note> allNotes) {
         int totalNotes = allNotes.size();
+        
+        // XP System Calculations (do this first)
+        int totalXP = calculateXP(allNotes);
+        int currentLevel = calculateLevel(totalXP);
+        int currentLevelXP = getCurrentLevelXP(totalXP, currentLevel);
+        int xpNeededForLevel = getXPNeededForCurrentLevel(currentLevel);
+        
+        // Get rank based on XP level
         String rank = GameUtilities.getUserRank(allNotes);
         String nextGoal = GameUtilities.getNextGoal(allNotes);
 
@@ -63,12 +67,11 @@ public class NewFeatureHandler {
         int totalCharacters = allNotes.stream().mapToInt(n -> n.getContent().length()).sum();
         long daysActive = GameUtilities.calculateDaysActive(allNotes);
         double avgWordsPerNote = totalWords / (double) totalNotes;
-        int level = Math.max(1, totalNotes / 5 + totalWords / 100);
 
-        // Display Player Statistics
+        // Display Player Statistics (remove duplicate level display)
         outputHandler.displayLine("DETAILED PLAYER STATISTICS:");
         outputHandler.displayLine("═".repeat(62));
-        outputHandler.displayLine(String.format("Player Level: %d", level));
+        outputHandler.displayLine(String.format("Total XP: %d", totalXP));
         outputHandler.displayLine(String.format("Total Notes Completed: %d", totalNotes));
         outputHandler.displayLine(String.format("Total Words Written: %d", totalWords));
         outputHandler.displayLine(String.format("Total Characters Typed: %d", totalCharacters));
@@ -78,10 +81,24 @@ public class NewFeatureHandler {
         outputHandler.displayLine("═".repeat(62));
         outputHandler.displayLine("");
 
+        // XP Progress Bar
+        outputHandler.displayLine("RANK PROGRESSION:");
+        outputHandler.displayLine("─".repeat(62));
+        
+        displayXPBar(currentLevelXP, xpNeededForLevel);
+
+        outputHandler.displayLine("");
+        
+        // XP Breakdown Section
+        displayXPBreakdown(allNotes, totalXP);
+        
+        outputHandler.displayLine("─".repeat(62));
+        outputHandler.displayLine("");
+
         // Add Random Fun Fact Section
         if (totalNotes > 0) {
             outputHandler.displayLine("");
-            outputHandler.displayLine("INSIGHTS:");
+            outputHandler.displayLine("INSIGHT:");
             outputHandler.displayLine("─".repeat(62));
             String[] funFacts = generateFunFacts(allNotes);
             Random random = new Random();
@@ -90,6 +107,101 @@ public class NewFeatureHandler {
             outputHandler.displayLine("─".repeat(62));
             outputHandler.displayLine("");
         }
+    }
+
+    private void displayXPBreakdown(List<Note> allNotes, int totalXP) {
+        outputHandler.displayLine("XP BREAKDOWN:");
+        outputHandler.displayLine("─".repeat(62));
+
+        // Calculate individual XP components
+        int baseXP = allNotes.size() * 10;
+
+        int contentXP = allNotes.stream().mapToInt(note -> Math.min(note.getContent().split("\\s+").length / 10, 50))
+                .sum();
+
+        int tagXP = allNotes.stream().mapToInt(note -> note.getTags().size() * 5).sum();
+
+        int titleXP = (int) allNotes.stream()
+                .filter(note -> note.getTitle().length() > 20)
+                .count() * 5;
+
+        // Display breakdown with simple numbers
+        outputHandler.displayLine(String.format("Base XP (10 per note):     %4d", baseXP));
+        outputHandler.displayLine(String.format("Content XP (word bonus):   %4d", contentXP));
+        outputHandler.displayLine(String.format("Tag XP (5 per tag):       %4d", tagXP));
+        outputHandler.displayLine(String.format("Title XP (detailed):      %4d", titleXP));
+        outputHandler.displayLine("─".repeat(32));
+        outputHandler.displayLine(String.format("Total XP Earned:          %4d", totalXP));
+    }
+
+    private void displayXPBar(int currentXP, int nextLevelXP) {
+        int barWidth = 30;
+        int filledBars = (int) ((double) currentXP / nextLevelXP * barWidth);
+
+        outputHandler.displayLine("PROGRESS TO NEXT RANK:");
+        outputHandler.displayLine("┌" + "─".repeat(barWidth + 2) + "┐");
+
+        StringBuilder xpBar = new StringBuilder("│");
+        for (int i = 0; i < barWidth; i++) {
+            if (i < filledBars) {
+                xpBar.append("█");
+            } else if (i == filledBars && currentXP < nextLevelXP) {
+                xpBar.append("▌");
+            } else {
+                xpBar.append("░");
+            }
+        }
+        xpBar.append("│");
+
+        outputHandler.displayLine(xpBar.toString());
+        outputHandler.displayLine("└" + "─".repeat(barWidth + 2) + "┘");
+        outputHandler.displayLine(String.format("  %d / %d XP to next rank", currentXP, nextLevelXP));
+    }
+
+    private int calculateXP(List<Note> notes) {
+        int totalXP = 0;
+
+        for (Note note : notes) {
+            // Base XP per note
+            totalXP += 10;
+
+            // Bonus XP for content length
+            int wordCount = note.getContent().split("\\s+").length;
+            totalXP += Math.min(wordCount / 10, 50); // Max 50 bonus XP per note
+
+            // Bonus XP for using tags
+            totalXP += note.getTags().size() * 5;
+
+            // Bonus XP for longer titles
+            if (note.getTitle().length() > 20) {
+                totalXP += 5;
+            }
+        }
+
+        return totalXP;
+    }
+
+    private int calculateLevel(int totalXP) {
+        // Each level requires more XP: Level 1 = 100 XP, Level 2 = 250 XP, etc.
+        return (int) (Math.sqrt(totalXP / 50.0)) + 1;
+    }
+
+    private int getXPForNextLevel(int currentLevel) {
+        // XP required for next level
+        return (int) (Math.pow(currentLevel, 2) * 50);
+    }
+
+    private int getCurrentLevelXP(int totalXP, int currentLevel) {
+        // XP within current level
+        int previousLevelXP = currentLevel > 1 ? (int) (Math.pow(currentLevel - 1, 2) * 50) : 0;
+        return totalXP - previousLevelXP;
+    }
+
+    private int getXPNeededForCurrentLevel(int currentLevel) {
+        // Total XP needed to complete current level
+        int nextLevelXP = getXPForNextLevel(currentLevel);
+        int previousLevelXP = currentLevel > 1 ? (int) (Math.pow(currentLevel - 1, 2) * 50) : 0;
+        return nextLevelXP - previousLevelXP;
     }
 
     // ----------- ACHIEVEMENTS FEATURE -----------
@@ -124,194 +236,34 @@ public class NewFeatureHandler {
         }
 
         // Use DisplayFormatter for cleaner output
-        DisplayFormatter.displayAchievementSection(outputHandler, "COMPLETED ACHIEVEMENTS", completedAchievements, true);
+        DisplayFormatter.displayAchievementSection(outputHandler, "COMPLETED ACHIEVEMENTS", completedAchievements,
+                true);
         DisplayFormatter.displayAchievementSection(outputHandler, "PENDING ACHIEVEMENTS", pendingAchievements, false);
         DisplayFormatter.displayProgressSummary(outputHandler, completedAchievements.size(), achievements.size());
+        displayProgressBar(completedAchievements.size(), achievements.size());
     }
 
-    // ----------- BACKUP FEATURE -----------
-
-    public void handleBackup() throws IOException {
-        outputHandler.clear();
-        ui.displayBackupHeader();
+    private void displayProgressBar(int completed, int total) {
         outputHandler.displayLine("");
-
-        List<Note> allNotes = noteStorage.listAllNotes();
-        if (allNotes.isEmpty()) {
-            outputHandler.displayLine("No save files detected! Complete some logs first!");
-            return;
-        }
-
-        String wantBackup = inputHandler.promptWithRetry(
-                "Would you like to create an extra backup of your notes? (y/n): ",
-                "ERROR 404: Please enter 'y' or 'n'");
-
-        if (wantBackup == null || (!wantBackup.toLowerCase().equals("y"))) {
-            outputHandler.displayLine("Backup cancelled. Your data remains unprotected... living dangerously!");
-            return;
-        }
-
-        outputHandler.displayLine("");
-        outputHandler.displayLine("BACKUP CONFIRMED! Proceeding with data protection protocol...");
-        outputHandler.displayLine("");
-
-        String backupChoice = inputHandler.promptWithRetry(
-                "What would you like to backup?\n" +
-                        "  1. ALL notes (complete vault backup)\n" +
-                        "  2. SPECIFIC note (single quest backup)\n" +
-                        "Enter your choice (1 or 2): ",
-                "Choose 1 for all notes or 2 for a specific note... not that complicated!");
-
-        if (backupChoice == null) {
-            outputHandler.displayLine("Backup cancelled. Your quest data remains at risk!");
-            return;
-        }
-
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-
-        switch (backupChoice.trim()) {
-            case "1":
-                performFullBackup(allNotes, timestamp);
-                break;
-            case "2":
-                performSpecificNoteBackup(allNotes, timestamp);
-                break;
-            default:
-                outputHandler.displayLine("Invalid choice! Backup protocol aborted!");
-                outputHandler.displayLine("Next time, choose 1 or 2... it's literally that simple!");
-        }
-    }
-
-    private void performFullBackup(List<Note> allNotes, String timestamp) throws IOException {
-        String backupDirName = "full_backup_" + timestamp;
-        Path backupDir = Paths.get(NOTES_DIRECTORY, backupDirName);
-
-        outputHandler.displayLine("Creating complete save vault: " + backupDirName);
-        outputHandler.displayLine("");
-        outputHandler.displayLine("VAULT INITIALIZED!");
-        outputHandler.displayLine("");
-
-        try {
-            Files.createDirectories(backupDir);
-            outputHandler.displayLine("Cloning your entire quest archive...");
-
-            List<Path> noteFiles = noteStorage.getNoteFiles();
-            int backupCount = 0;
-
-            for (Path noteFile : noteFiles) {
-                Path backupFile = backupDir.resolve(noteFile.getFileName());
-                Files.copy(noteFile, backupFile);
-                backupCount++;
-
-                if (backupCount % 5 == 0) {
-                    outputHandler.displayLine("Backing up log " + backupCount + " of " + noteFiles.size() + "...");
-                }
-            }
-
-            outputHandler.displayLine("");
-            outputHandler.displayLine("FULL BACKUP ACCOMPLISHED! Your entire legacy is now immortal!");
-            outputHandler.displayLine("━".repeat(62));
-            outputHandler.displayLine(String.format("Save files backed up: %d logs", backupCount));
-            outputHandler.displayLine(String.format("Vault location: %s", backupDir.toString()));
-            outputHandler.displayLine(String.format("Backup completed: %s", LocalDateTime.now().format(DISPLAY_DATE_FORMATTER)));
-            outputHandler.displayLine("━".repeat(62));
-            outputHandler.displayLine("");
-            outputHandler.displayLine("Sleep well knowing your adventure is safe from digital destruction!");
-
-        } catch (IOException e) {
-            outputHandler.displayLine("FULL BACKUP FAILED! The digital save gods have abandoned you!");
-            outputHandler.displayLine("Error Log: " + e.getMessage());
-        }
-    }
-
-    private void performSpecificNoteBackup(List<Note> allNotes, String timestamp) throws IOException {
-        outputHandler.displayLine("");
-        outputHandler.displayLine("AVAILABLE QUEST LOGS FOR BACKUP:");
+        outputHandler.displayLine("PROGRESS:");
         outputHandler.displayLine("─".repeat(62));
 
-        for (int i = 0; i < allNotes.size(); i++) {
-            Note note = allNotes.get(i);
-            outputHandler.displayLine(String.format("%d. %s (Created: %s)",
-                    i + 1,
-                    note.getTitle(),
-                    note.getCreated().format(DISPLAY_DATE_FORMATTER)));
+        double percentage = total > 0 ? (double) completed / total * 100 : 0;
+        int progressWidth = 40;
+        int filledBars = (int) (percentage / 100 * progressWidth);
+
+        StringBuilder progressBar = new StringBuilder();
+        progressBar.append("[");
+
+        for (int i = 0; i < progressWidth; i++) {
+            progressBar.append(i < filledBars ? "█" : "░");
         }
 
+        progressBar.append("]");
+
+        outputHandler.displayLine(String.format("%s %d/%d (%.1f%%)",
+                progressBar.toString(), completed, total, percentage));
         outputHandler.displayLine("─".repeat(62));
-        outputHandler.displayLine("");
-
-        String noteChoice = inputHandler.promptWithRetry(
-                "Enter the NUMBER of the quest log you want to backup: ",
-                "Please enter a valid NUMBER from the list... not the title!");
-
-        if (noteChoice == null) {
-            outputHandler.displayLine("Backup cancelled. Your specific quest remains unprotected!");
-            return;
-        }
-
-        Note targetNote = findNoteByNumber(allNotes, noteChoice.trim());
-
-        if (targetNote == null) {
-            outputHandler.displayLine("Quest log not found! Check your number selection!");
-            outputHandler.displayLine("Backup protocol aborted!");
-            return;
-        }
-
-        String backupDirName = "single_backup_" + GameUtilities.sanitizeFileName(targetNote.getTitle()) + "_" + timestamp;
-        Path backupDir = Paths.get(NOTES_DIRECTORY, backupDirName);
-        outputHandler.displayLine("");
-
-        try {
-            Files.createDirectories(backupDir);
-
-            List<Path> noteFiles = noteStorage.getNoteFiles();
-            Path targetFile = null;
-
-            for (Path noteFile : noteFiles) {
-                Note fileNote = noteStorage.readNote(noteFile.getFileName().toString().replace(".md", ""));
-                if (fileNote != null && fileNote.getTitle().equals(targetNote.getTitle())) {
-                    targetFile = noteFile;
-                    break;
-                }
-            }
-
-            if (targetFile != null) {
-                Path backupFile = backupDir.resolve(targetFile.getFileName());
-                Files.copy(targetFile, backupFile);
-
-                outputHandler.displayLine("SPECIFIC BACKUP ACCOMPLISHED!");
-                outputHandler.displayLine("━".repeat(62));
-                outputHandler.displayLine(String.format("Quest backed up: %s", targetNote.getTitle()));
-                outputHandler.displayLine(String.format("Vault location: %s", backupDir.toString()));
-                outputHandler.displayLine(String.format("Backup completed: %s", LocalDateTime.now().format(DISPLAY_DATE_FORMATTER)));
-                outputHandler.displayLine("━".repeat(62));
-                outputHandler.displayLine("");
-                outputHandler.displayLine("Your quest log is backed up and safe...for now!");
-            } else {
-                outputHandler.displayLine("Error: Could not locate the file for this quest!");
-            }
-
-        } catch (IOException e) {
-            outputHandler.displayLine("SPECIFIC BACKUP FAILED! The digital save gods are not pleased!");
-            outputHandler.displayLine("");
-            outputHandler.displayLine("Error Log: " + e.getMessage());
-        }
-    }
-
-    private Note findNoteByNumber(List<Note> notes, String input) {
-        try {
-            int index = Integer.parseInt(input) - 1;
-            if (index >= 0 && index < notes.size()) {
-                return notes.get(index);
-            } else {
-                outputHandler.displayLine("Invalid number! Please enter a number between 1 and " + notes.size());
-                return null;
-            }
-        } catch (NumberFormatException e) {
-            outputHandler.displayLine("Please enter a valid note NUMBER from the list above!");
-            outputHandler.displayLine("Don't enter the title - just the number (1, 2, 3, etc.)");
-            return null;
-        }
     }
 
     // ----------- EASTER EGGS -----------
@@ -335,8 +287,10 @@ public class NewFeatureHandler {
 
     private String[] generateFunFacts(List<Note> notes) {
         if (notes.isEmpty()) {
-            return new String[] { "You have no quests. Time to start your adventure!" };
+            return new String[] { "You have no notes. Time to start your collection!" };
         }
+
+        List<String> validFacts = new ArrayList<>();
 
         Note longestNote = notes.stream().max(Comparator.comparing(n -> n.getContent().length())).orElse(notes.get(0));
         String mostUsedWord = GameUtilities.findMostUsedWord(notes);
@@ -351,19 +305,53 @@ public class NewFeatureHandler {
         });
         String busiestMonth = GameUtilities.findBusiestMonth(notes);
 
-        return new String[] {
-                "Your longest note '" + GameUtilities.truncate(longestNote.getTitle(), 30) + "' has "
-                        + longestNote.getContent().length() + " characters!",
-                "You've used the word '" + mostUsedWord + "' " + GameUtilities.countWordUsage(notes, mostUsedWord)
-                        + " times. You're obsessed!",
-                "If your notes were Pokemon cards, you'd have " + notes.size() + " in your legendary deck!",
-                "Your total word count (" + totalWords + " words) could fill " + (totalWords / 250)
-                        + " book pages!",
-                "You've created " + nightQuests + " notes between the hours of 10 PM and 5 AM! Do you even sleep?",
-                "Weekend activity detected: " + weekendQuests + " notes created on weekends!",
-                "Your most productive month was " + busiestMonth + " !",
-                "At your current pace, you'll reach 1000 notes in " + GameUtilities.calculateTimeToGoal(notes, 1000) + "!",
-        };
+        // Only add facts where the number is greater than 0 (or 1 for Pokemon cards)
+        if (longestNote.getContent().length() > 0) {
+            validFacts.add("Your longest note '" + GameUtilities.truncate(longestNote.getTitle(), 30) + "' has "
+                    + longestNote.getContent().length() + " characters!");
+        }
+
+        if (GameUtilities.countWordUsage(notes, mostUsedWord) > 0) {
+            validFacts.add(
+                    "You've used the word '" + mostUsedWord + "' " + GameUtilities.countWordUsage(notes, mostUsedWord)
+                            + " times. You're obsessed!");
+        }
+
+        // Keep Pokemon cards fact if there's more than 1 note
+        if (notes.size() > 1) {
+            validFacts.add("If your notes were Pokemon cards, you'd have " + notes.size() + " in your legendary deck!");
+        }
+
+        if (totalWords > 0) {
+            validFacts.add("Your total word count (" + totalWords + " words) could fill " + (totalWords / 250)
+                    + " book pages!");
+        }
+
+        if (nightQuests > 0) {
+            validFacts.add(
+                    "You've created " + nightQuests + " notes between the hours of 10 PM and 5 AM! Do you even sleep?");
+        }
+
+        if (weekendQuests > 0) {
+            validFacts.add("Weekend activity detected: " + weekendQuests + " notes created on weekends!");
+        }
+
+        if (busiestMonth != null && !busiestMonth.isEmpty()) {
+            validFacts.add("Your most productive month was " + busiestMonth + " !");
+        }
+
+        // Only show time to goal if it's reasonable and there are notes
+        String timeToGoal = GameUtilities.calculateTimeToGoal(notes, 1000);
+        if (!timeToGoal.contains("never") && notes.size() > 0) {
+            validFacts.add("At your current pace, you'll reach 1000 notes in " + timeToGoal + "!");
+        }
+
+        // Return array or fallback if no valid facts
+        if (validFacts.isEmpty()) {
+            return new String[] { "Start creating more notes to unlock insights!" };
+        }
+
+        return validFacts.toArray(new String[0]);
     }
 
     private Map<String, Boolean> checkAchievements(List<Note> notes) {
@@ -393,13 +381,15 @@ public class NewFeatureHandler {
             int hour = note.getCreated().getHour();
             return hour >= 22 || hour <= 5;
         }) >= 5);
-        achievements.put("WEEKEND WARRIOR: Write 10 notes on weekends", GameUtilities.countNotesMatching(notes, note -> {
-            int dayOfWeek = note.getCreated().getDayOfWeek().getValue();
-            return dayOfWeek == 6 || dayOfWeek == 7;
-        }) >= 10);
+        achievements.put("WEEKEND WARRIOR: Write 10 notes on weekends",
+                GameUtilities.countNotesMatching(notes, note -> {
+                    int dayOfWeek = note.getCreated().getDayOfWeek().getValue();
+                    return dayOfWeek == 6 || dayOfWeek == 7;
+                }) >= 10);
 
         // Special Achievements
-        achievements.put("DETAILED WRITER: Write a note over 1000 characters", notes.stream().anyMatch(note -> note.getContent().length() >= 1000));
+        achievements.put("DETAILED WRITER: Write a note over 1000 characters",
+                notes.stream().anyMatch(note -> note.getContent().length() >= 1000));
         achievements.put("CONSISTENCY KING: Active for 30+ days", GameUtilities.calculateDaysActive(notes) >= 30);
 
         // Easter Egg Related Achievements
@@ -409,8 +399,10 @@ public class NewFeatureHandler {
         achievements.put("MYTHICAL EXPLORER: Find 10 easter eggs", foundEggs.size() >= 10);
 
         // Advanced Achievements
-        achievements.put("DIVERSITY MASTER: Use 5+ tags in one note", notes.stream().anyMatch(note -> note.getTags().size() >= 5));
-        achievements.put("MARATHON WRITER: Write 500+ words in one note", notes.stream().anyMatch(note -> note.getContent().split("\\s+").length >= 500));
+        achievements.put("DIVERSITY MASTER: Use 5+ tags in one note",
+                notes.stream().anyMatch(note -> note.getTags().size() >= 5));
+        achievements.put("MARATHON WRITER: Write 500+ words in one note",
+                notes.stream().anyMatch(note -> note.getContent().split("\\s+").length >= 500));
         achievements.put("TIME TRAVELER: Create multiple notes in same hour", checkTimeTravel(notes));
 
         return achievements;

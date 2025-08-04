@@ -41,12 +41,28 @@ public class CLIOutputHandler implements OutputHandler {
 
     @Override
     public void displayHeader(String title) {
-        ui.displayWelcomeHeader();
         System.out.println();
         System.out.println("╭─────────────────────────────────────────────────────────────╮");
-        System.out.printf("│%63s│%n", " ");
-        System.out.printf("│%31s%32s│%n", title, " ");
-        System.out.printf("│%63s│%n", " ");
+        System.out.printf("│%61s│%n", " ");
+
+        // Truncate title if it's too long
+        String displayTitle = title;
+        if (title.length() > 59) {
+            displayTitle = title.substring(0, 56) + "...";
+        }
+
+        // Calculate padding
+        int totalWidth = 61; // Width between the │ characters
+        int titleLength = displayTitle.length();
+        int leftPadding = (totalWidth - titleLength) / 2;
+        int rightPadding = totalWidth - titleLength - leftPadding;
+
+        System.out.printf("│%s%s%s│%n",
+                " ".repeat(leftPadding),
+                displayTitle,
+                " ".repeat(rightPadding));
+
+        System.out.printf("│%61s│%n", " ");
         System.out.println("╰─────────────────────────────────────────────────────────────╯");
         System.out.println();
     }
@@ -83,7 +99,7 @@ public class CLIOutputHandler implements OutputHandler {
 
     @Override
     public void displayDeleteHeader() {
-        ui.displayDeleteHeader();  // Fixed: was printDeleteHeader()
+        ui.displayDeleteHeader(); // Fixed: was printDeleteHeader()
     }
 
     @Override
@@ -93,21 +109,21 @@ public class CLIOutputHandler implements OutputHandler {
 
     @Override
     public void displayEasterEggsHeader() {
-        ui.displayEasterEggsHeader();  // Fixed: was empty implementation
+        ui.displayEasterEggsHeader(); // Fixed: was empty implementation
     }
 
     // @Override
     // public void displayPlayerProfileHeader() {
-    //     ui.displayPlayerProfileHeader();  // Added missing method
+    // ui.displayPlayerProfileHeader(); // Added missing method
     // }
 
     // @Override
     // public void displayAchievementsHeader() {
-    //     ui.displayAchievementsHeader();  // Added missing method
+    // ui.displayAchievementsHeader(); // Added missing method
     // }
 
     // @Override
     // public void displayBackupHeader() {
-    //     ui.displayBackupHeader();  // Added missing method
+    // ui.displayBackupHeader(); // Added missing method
     // }
 }

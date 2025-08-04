@@ -15,6 +15,9 @@ public class UIRenderer {
 
     public void displayWelcomeHeader() {
         System.out.println();
+        System.out.println();
+        System.out.println("(psst... try typing 'secret' if you're feeling adventurous...)");
+        flushScreen();
         System.out.println("╔══════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                                                  ║");
         System.out.println("║ ██████╗ ██╗██╗  ██╗███████╗██╗         ██████╗  █████╗  ██████╗ ███████╗███████╗ ║");
@@ -66,13 +69,9 @@ public class UIRenderer {
         System.out.println("   6.   DELETE: Banish one of your log entries to the digital void.");
         System.out.println("   7.   PLAYER PROFILE: View your player rank and detailed statistics.");
         System.out.println("   8.   ACHIEVEMENTS: Check completed achievements & easter eggs found.");
-        System.out.println("   9.   SAVE GAME: Backup your logs before the final boss fight.");
-        System.out.println("  10.   TUTORIAL: Feeling lost? Check the game manual.");
+        System.out.println("   9.   TUTORIAL: Feeling lost? Check the game manual.");
         System.out.println();
         System.out.println("   0.   RAGE QUIT: Exits the digital realm and returns to reality.");
-        System.out.println();
-        System.out.println();
-        System.out.println("(psst... try typing 'secret' if you're feeling adventurous...)");
         System.out.println();
         System.out.println();
     }
@@ -96,7 +95,6 @@ public class UIRenderer {
         System.out.println(
                 "  ./notes stats                - Unleash the data goblins to analyze your note-taking habits.");
         System.out.println("  ./notes achievements         - View your player rank and detailed statistics.");
-        System.out.println("  ./notes backup               - Save your logs before the final boss fight.");
         System.out.println("  ./notes --help               - Summons the ancient scrolls of guidance. Use wisely!");
         System.out.println();
         System.out.println("  ./notes exit                 - Exits the digital realm and returns to reality.");
@@ -139,7 +137,7 @@ public class UIRenderer {
         System.out.println("╭─────────────────────────────────────────────────────────────╮");
         System.out.println("│                                                             │");
         System.out.println("│            YOUR NOTES ARE OUT THERE. SOMEWHERE.             │");
-        System.out.println("│                Using magnifying glass....                   │");
+        System.out.println("│              Searching your digital brain....               │");
         System.out.println("│                                                             │");
         System.out.println("╰─────────────────────────────────────────────────────────────╯");
         System.out.println();
@@ -183,7 +181,6 @@ public class UIRenderer {
         System.out.println("│                                                             │");
         System.out.println("│               RAGE QUIT SEQUENCE INITIATED...               │");
         System.out.println("│                                                             │");
-        System.out.println("│                       Just kidding.                         │");
         System.out.println("│                  Game saved successfully!                   │");
         System.out.println("│                                                             │");
         System.out.println("│           You may now return to your human life.            │");
@@ -192,14 +189,13 @@ public class UIRenderer {
         System.out.println();
         System.out.println("            Thank you for playing Pixel Pages!                 ");
         System.out.println();
-        System.out.println("            Farewell, brave digital explorer!                  ");
 
     }
 
     public void displayEasterEggsHeader() {
         System.out.println("╔══════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                              ║");
-        System.out.println("║        SECRET LEVEL UNLOCKED - EASTER EGG DISCOVERIES        ║");
+        System.out.println("║                  SECRET LEVEL UNLOCKED                       ║");
         System.out.println("║                                                              ║");
         System.out.println("║    You've uncovered hidden achievements and easter eggs!     ║");
         System.out.println("║          These secrets are known only to legends...          ║");
@@ -221,16 +217,6 @@ public class UIRenderer {
         System.out.println("╭─────────────────────────────────────────────────────────────╮");
         System.out.println("│                                                             │");
         System.out.println("│                CURRENT PLAYER ACHIEVEMENTS                  │");
-        System.out.println("│                                                             │");
-        System.out.println("╰─────────────────────────────────────────────────────────────╯");
-        System.out.println();
-    }
-
-    public void displayBackupHeader() {
-        System.out.println("╭─────────────────────────────────────────────────────────────╮");
-        System.out.println("│                                                             │");
-        System.out.println("│                GAME SAVE BACKUP PROTOCOL                    │");
-        System.out.println("│         Protecting your progress from corruption...         │");
         System.out.println("│                                                             │");
         System.out.println("╰─────────────────────────────────────────────────────────────╯");
         System.out.println();

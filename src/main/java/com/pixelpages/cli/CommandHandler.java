@@ -80,12 +80,7 @@ public class CommandHandler {
                 newFeatureHandler.handlePlayerRanking();
                 break;
             case "achievements":
-            case "rank":
                 newFeatureHandler.handleAchievements();
-                break;
-            case "backup":
-            case "save":
-                newFeatureHandler.handleBackup();
                 break;
             case "help":
             case "tutorial":
@@ -158,6 +153,7 @@ public class CommandHandler {
             outputHandler.displayLine("\nThe void stares back...nothing found.");
             return;
         } else {
+            outputHandler.displayLine("");
             outputHandler.displayLine("\n" + notesToDisplay.size() + " notes found!");
         }
 
@@ -325,34 +321,33 @@ public class CommandHandler {
     }
 
     private void displayNotesList(List<Note> notes) {
-        DisplayFormatter.displaySection(outputHandler, "QUEST LOGS", 
-            notes.stream()
-                .map(note -> String.format("#%d: %s (Created: %s)", 
-                    notes.indexOf(note) + 1,
-                    note.getTitle(), 
-                    note.getCreated().format(DISPLAY_DATE_FORMATTER)))
-                .collect(Collectors.toList()));
-        
+        DisplayFormatter.displaySection(outputHandler, "QUEST LOGS",
+                notes.stream()
+                        .map(note -> String.format("#%d: %s (Created: %s)",
+                                notes.indexOf(note) + 1,
+                                note.getTitle(),
+                                note.getCreated().format(DISPLAY_DATE_FORMATTER)))
+                        .collect(Collectors.toList()));
+
         for (int i = 0; i < notes.size(); i++) {
             Note note = notes.get(i);
-            
-            outputHandler.displayLine("═".repeat(62));
-            outputHandler.displayLine(String.format("  NOTE #%d: %s", i + 1, note.getTitle()));
-            outputHandler.displayLine("═".repeat(62));
-            
+
+            // Use displayHeader for each note title instead of manual formatting
+            outputHandler.displayHeader("NOTE #" + (i + 1) + ": " + note.getTitle());
+
             outputHandler.displayLine("Created:  " + note.getCreated().format(DISPLAY_DATE_FORMATTER));
             outputHandler.displayLine("Modified: " + note.getModified().format(DISPLAY_DATE_FORMATTER));
-            
+
             if (!note.getTags().isEmpty()) {
                 outputHandler.displayLine("Tags:     " + String.join(", ", note.getTags()));
             }
-            
+
             outputHandler.displayLine("");
             outputHandler.displayLine("PREVIEW:");
             outputHandler.displayLine("─".repeat(62));
             String preview = generatePreview(note.getContent());
             outputHandler.displayLine(preview);
-            
+
             outputHandler.displayLine("");
             outputHandler.displayLine("═".repeat(62));
             outputHandler.displayLine("");
@@ -364,38 +359,39 @@ public class CommandHandler {
         outputHandler.displayLine("  " + note.getTitle());
         outputHandler.displayLine("═".repeat(62));
         outputHandler.displayLine("");
-        
+
         outputHandler.displayLine("DETAILS:");
         outputHandler.displayLine("─".repeat(62));
         outputHandler.displayLine("Created:    " + note.getCreated().format(DISPLAY_DATE_FORMATTER));
         outputHandler.displayLine("Modified:   " + note.getModified().format(DISPLAY_DATE_FORMATTER));
-        
+
         if (!note.getTags().isEmpty()) {
             String tagStr = String.join(", ", note.getTags());
             outputHandler.displayLine("Tags:       " + tagStr);
         }
         outputHandler.displayLine("");
-        
+
         outputHandler.displayLine("CONTENT:");
         outputHandler.displayLine("─".repeat(62));
         outputHandler.displayLine("");
-        
+
         String[] lines = note.getContent().split("\n");
         for (String line : lines) {
             if (line.length() > 60) {
                 String[] words = line.split(" ");
                 StringBuilder currentLine = new StringBuilder();
-                
+
                 for (String word : words) {
                     if (currentLine.length() + word.length() + 1 > 60) {
                         outputHandler.displayLine(currentLine.toString());
                         currentLine = new StringBuilder(word);
                     } else {
-                        if (currentLine.length() > 0) currentLine.append(" ");
+                        if (currentLine.length() > 0)
+                            currentLine.append(" ");
                         currentLine.append(word);
                     }
                 }
-                
+
                 if (currentLine.length() > 0) {
                     outputHandler.displayLine(currentLine.toString());
                 }
@@ -403,14 +399,14 @@ public class CommandHandler {
                 outputHandler.displayLine(line);
             }
         }
-        
+
         outputHandler.displayLine("");
         outputHandler.displayLine("═".repeat(62));
     }
 
     private void displayDeleteWarning(Note note) {
         uiRenderer.displayDeleteHeader();
-        
+
         outputHandler.displayLine("DELETION TARGET:");
         outputHandler.displayLine("═".repeat(62));
         outputHandler.displayLine("Title:    " + note.getTitle());
@@ -434,14 +430,14 @@ public class CommandHandler {
 
     private void displaySearchResults(List<Note> results) {
         List<String> resultStrings = results.stream()
-            .map(note -> String.format("%s (Created: %s, Tags: %s)",
-                note.getTitle(),
-                note.getCreated().format(DISPLAY_DATE_FORMATTER),
-                note.getTags().isEmpty() ? "None" : String.join(", ", note.getTags())))
-            .collect(Collectors.toList());
-            
+                .map(note -> String.format("%s (Created: %s, Tags: %s)",
+                        note.getTitle(),
+                        note.getCreated().format(DISPLAY_DATE_FORMATTER),
+                        note.getTags().isEmpty() ? "None" : String.join(", ", note.getTags())))
+                .collect(Collectors.toList());
+
         DisplayFormatter.displaySection(outputHandler, "SEARCH RESULTS", resultStrings);
-        
+
         for (int i = 0; i < results.size(); i++) {
             Note note = results.get(i);
             outputHandler.displayLine((i + 1) + ". " + note.getTitle());
@@ -490,9 +486,10 @@ public class CommandHandler {
         }
 
         String cleanContent = content.replaceAll("\\s+", " ").trim();
-        int maxLength = 100;
+        int maxLength = 200; // Increased from 100 to allow for two lines
+        
         if (cleanContent.length() <= maxLength) {
-            return cleanContent;
+            return formatPreviewLines(cleanContent);
         }
 
         String truncated = cleanContent.substring(0, maxLength);
@@ -501,15 +498,44 @@ public class CommandHandler {
                 Math.max(truncated.lastIndexOf("! "), truncated.lastIndexOf("? ")));
 
         if (lastSentence > maxLength * 0.7) {
-            return cleanContent.substring(0, lastSentence + 1);
+            return formatPreviewLines(cleanContent.substring(0, lastSentence + 1));
         }
 
         int lastSpace = truncated.lastIndexOf(' ');
         if (lastSpace > 0) {
-            return cleanContent.substring(0, lastSpace) + "...";
+            return formatPreviewLines(cleanContent.substring(0, lastSpace) + "...");
         }
 
-        return truncated + "...";
+        return formatPreviewLines(truncated + "...");
+    }
+
+    private String formatPreviewLines(String content) {
+        // Split content into two lines, each max 60 characters
+        if (content.length() <= 60) {
+            return content;
+        }
+        
+        String[] words = content.split(" ");
+        StringBuilder line1 = new StringBuilder();
+        StringBuilder line2 = new StringBuilder();
+        
+        for (String word : words) {
+            if (line1.length() + word.length() + 1 <= 60) {
+                if (line1.length() > 0) line1.append(" ");
+                line1.append(word);
+            } else if (line2.length() + word.length() + 1 <= 60) {
+                if (line2.length() > 0) line2.append(" ");
+                line2.append(word);
+            } else {
+                break; // Stop if we can't fit more words
+            }
+        }
+        
+        if (line2.length() > 0) {
+            return line1.toString() + "\n" + line2.toString();
+        } else {
+            return line1.toString();
+        }
     }
 
     private static class NoteWithFilename {

@@ -26,23 +26,66 @@ public class GameUtilities {
     };
     
     // Utility Methods
-    public static String getUserRank(List<Note> notes) {
-        int totalNotes = notes.size();
-        for (int i = 0; i < RANK_THRESHOLDS.length; i++) {
-            if (totalNotes < RANK_THRESHOLDS[i]) {
-                return RANKS[i];
+    public static String getUserRank(List<Note> allNotes) {
+        // Calculate XP and level using the same logic as NewFeatureHandler
+        int totalXP = calculateTotalXP(allNotes);
+        int level = calculateLevelFromXP(totalXP);
+        
+        return getRankNameForLevel(level);
+    }
+
+    private static int calculateTotalXP(List<Note> notes) {
+        int totalXP = 0;
+        
+        for (Note note : notes) {
+            // Base XP per note
+            totalXP += 10;
+            
+            // Bonus XP for content length
+            int wordCount = note.getContent().split("\\s+").length;
+            totalXP += Math.min(wordCount / 10, 50);
+            
+            // Bonus XP for using tags
+            totalXP += note.getTags().size() * 5;
+            
+            // Bonus XP for longer titles
+            if (note.getTitle().length() > 20) {
+                totalXP += 5;
             }
         }
-        return RANKS[RANKS.length - 1];
+        
+        return totalXP;
     }
-    
-    public static String getNextGoal(List<Note> notes) {
-        int totalNotes = notes.size();
-        if (totalNotes < 5) return "Complete 5 logs to rank up to Seasoned Quester!";
-        if (totalNotes < 20) return "Create 20 logs to become a Master Chronicler!";
-        if (totalNotes < 50) return "Create 50 logs to ascend to Legendary Note Lord!";
-        if (totalNotes < 100) return "Create 100 logs to become the Ultimate Grand Master!";
-        return "You've reached maximum level! Now you just flex on everyone!";
+
+    private static int calculateLevelFromXP(int totalXP) {
+        return (int) (Math.sqrt(totalXP / 50.0)) + 1;
+    }
+
+    private static String getRankNameForLevel(int level) {
+        return switch (level) {
+            case 1 -> "Novice Scribe (Lvl 1)";
+            case 2 -> "Apprentice Writer (Lvl 2)";
+            case 3 -> "Skilled Chronicler (Lvl 3)";
+            case 4 -> "Expert Documentarian (Lvl 4)";
+            case 5 -> "Master Archivist (Lvl 5)";
+            case 6 -> "Elite Wordsmith (Lvl 6)";
+            case 7 -> "Distinguished Author (Lvl 7)";
+            case 8 -> "Legendary Scribe (Lvl 8)";
+            case 9 -> "Mythical Chronicler (Lvl 9)";
+            case 10 -> "Grandmaster of Words (Lvl 10)";
+            default -> level < 15 ? "Ascended Writer (Lvl " + level + ")" 
+                                  : "Transcendent Scribe (Lvl " + level + ")";
+        };
+    }
+
+    public static String getNextGoal(List<Note> allNotes) {
+        int totalXP = calculateTotalXP(allNotes);
+        int currentLevel = calculateLevelFromXP(totalXP);
+        int nextLevelXP = (int) (Math.pow(currentLevel, 2) * 50);
+        int xpNeeded = nextLevelXP - totalXP;
+        
+        String nextRankName = getRankNameForLevel(currentLevel + 1);
+        return "Reach " + nextRankName + " (need " + xpNeeded + " more XP)";
     }
     
     public static long calculateDaysActive(List<Note> notes) {
@@ -132,7 +175,7 @@ public class GameUtilities {
         }
 
         long daysActive = calculateDaysActive(notes);
-        if (daysActive == 0) return "Complete more quests to calculate!";
+        if (daysActive == 0) return "Complete more notes to calculate!";
 
         double questsPerDay = notes.size() / (double) daysActive;
         long daysToGoal = (long) Math.ceil((goal - notes.size()) / questsPerDay);
