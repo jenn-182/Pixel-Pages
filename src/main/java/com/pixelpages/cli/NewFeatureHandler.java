@@ -51,9 +51,9 @@ public class NewFeatureHandler {
         String rank = GameUtilities.getUserRank(allNotes);
         String nextGoal = GameUtilities.getNextGoal(allNotes);
 
-        outputHandler.displayLine("RANK: " + rank);
+        outputHandler.displayLine("CURRENT RANK: " + rank);
         outputHandler.displayLine("");
-        outputHandler.displayLine("Next Goal: " + nextGoal);
+        outputHandler.displayLine("NEXT GOAL: " + nextGoal);
         outputHandler.displayLine("─".repeat(62));
         outputHandler.displayLine("");
 
@@ -69,11 +69,11 @@ public class NewFeatureHandler {
         outputHandler.displayLine("DETAILED PLAYER STATISTICS:");
         outputHandler.displayLine("═".repeat(62));
         outputHandler.displayLine(String.format("Player Level: %d", level));
-        outputHandler.displayLine(String.format("Total Logs Completed: %d", totalNotes));
+        outputHandler.displayLine(String.format("Total Notes Completed: %d", totalNotes));
         outputHandler.displayLine(String.format("Total Words Written: %d", totalWords));
         outputHandler.displayLine(String.format("Total Characters Typed: %d", totalCharacters));
         outputHandler.displayLine(String.format("Total Tags Used: %d", totalTags));
-        outputHandler.displayLine(String.format("Days Since First Log: %d", daysActive));
+        outputHandler.displayLine(String.format("Days Active: %d", daysActive));
         outputHandler.displayLine(String.format("Average Words Per Log: %.1f", avgWordsPerNote));
         outputHandler.displayLine("═".repeat(62));
         outputHandler.displayLine("");
@@ -81,7 +81,7 @@ public class NewFeatureHandler {
         // Add Random Fun Fact Section
         if (totalNotes > 0) {
             outputHandler.displayLine("");
-            outputHandler.displayLine("RANDOM FACT ABOUT YOUR QUEST DATA:");
+            outputHandler.displayLine("INSIGHTS:");
             outputHandler.displayLine("─".repeat(62));
             String[] funFacts = generateFunFacts(allNotes);
             Random random = new Random();
@@ -124,8 +124,8 @@ public class NewFeatureHandler {
         }
 
         // Use DisplayFormatter for cleaner output
-        DisplayFormatter.displayAchievementSection(outputHandler, "ACHIEVEMENTS COMPLETED", completedAchievements, true);
-        DisplayFormatter.displayAchievementSection(outputHandler, "ACHIEVEMENTS PENDING", pendingAchievements, false);
+        DisplayFormatter.displayAchievementSection(outputHandler, "COMPLETED ACHIEVEMENTS", completedAchievements, true);
+        DisplayFormatter.displayAchievementSection(outputHandler, "PENDING ACHIEVEMENTS", pendingAchievements, false);
         DisplayFormatter.displayProgressSummary(outputHandler, completedAchievements.size(), achievements.size());
     }
 
@@ -352,17 +352,17 @@ public class NewFeatureHandler {
         String busiestMonth = GameUtilities.findBusiestMonth(notes);
 
         return new String[] {
-                "Your longest quest log '" + GameUtilities.truncate(longestNote.getTitle(), 30) + "' has "
+                "Your longest note '" + GameUtilities.truncate(longestNote.getTitle(), 30) + "' has "
                         + longestNote.getContent().length() + " characters!",
                 "You've used the word '" + mostUsedWord + "' " + GameUtilities.countWordUsage(notes, mostUsedWord)
                         + " times. You're obsessed!",
-                "If your quests were Pokemon cards, you'd have " + notes.size() + " in your legendary deck!",
+                "If your notes were Pokemon cards, you'd have " + notes.size() + " in your legendary deck!",
                 "Your total word count (" + totalWords + " words) could fill " + (totalWords / 250)
                         + " book pages!",
-                "You've completed " + nightQuests + " quests during vampire hours! Are you nocturnal?",
-                "Weekend warrior detected! " + weekendQuests + " quests completed during weekends!",
-                "Your busiest quest month was " + busiestMonth + "! Productivity level: MAXIMUM!",
-                "At your current pace, you'll reach 1000 quests in " + GameUtilities.calculateTimeToGoal(notes, 1000) + "!",
+                "You've created " + nightQuests + " notes between the hours of 10 PM and 5 AM! Do you even sleep?",
+                "Weekend activity detected: " + weekendQuests + " notes created on weekends!",
+                "Your most productive month was " + busiestMonth + " !",
+                "At your current pace, you'll reach 1000 notes in " + GameUtilities.calculateTimeToGoal(notes, 1000) + "!",
         };
     }
 
@@ -399,7 +399,7 @@ public class NewFeatureHandler {
         }) >= 10);
 
         // Special Achievements
-        achievements.put("EPIC QUEST: Write a note over 1000 characters", notes.stream().anyMatch(note -> note.getContent().length() >= 1000));
+        achievements.put("DETAILED WRITER: Write a note over 1000 characters", notes.stream().anyMatch(note -> note.getContent().length() >= 1000));
         achievements.put("CONSISTENCY KING: Active for 30+ days", GameUtilities.calculateDaysActive(notes) >= 30);
 
         // Easter Egg Related Achievements

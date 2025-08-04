@@ -467,7 +467,9 @@ public class CommandHandler {
                     return Optional.of(new NoteWithFilename(note, filename));
                 }
             } catch (IOException e) {
-                outputHandler.showWarning("Could not read " + filename + " for lookup: " + e.getMessage());
+                if (filename.equalsIgnoreCase(identifier)) {
+                    outputHandler.showWarning("Failed to read note file: " + filename);
+                }
             }
         }
         return Optional.empty();
