@@ -56,7 +56,7 @@ public class InteractiveMenu {
             case "8":
                 return handleAchievements();
             case "9":
-                return handleRefreshMenu();
+                return displayHelp();
             case "0":
                 return handleExit();
             case "secret":
@@ -67,6 +67,13 @@ public class InteractiveMenu {
                 outputHandler.showError("That's not on the menu, bud. Try again with an actual number...");
                 return false;
         }
+    }
+
+    private boolean displayHelp() throws IOException {
+        outputHandler.clear();
+        commandHandler.executeCommand("help", "");
+        inputHandler.readLine("Press Enter to return to main menu...");
+        return false;
     }
 
     // Individual handler methods for cleaner code
@@ -80,7 +87,8 @@ public class InteractiveMenu {
     private boolean handleListNotes() throws IOException {
         outputHandler.clear();
         outputHandler.displayListHeader();
-        String listQuery = inputHandler.readLine("Which log are you looking for? (Enter title or just press Enter for all): ");
+        String listQuery = inputHandler
+                .readLine("Which log are you looking for? (Enter title or just press Enter for all): ");
         commandHandler.handleList(listQuery);
         return false;
     }
@@ -91,7 +99,7 @@ public class InteractiveMenu {
         String searchQuery = inputHandler.promptWithRetry(
                 "What are you scanning for? (Enter keyword): ",
                 "Searching for nothing returned no results...");
-        
+
         if (searchQuery != null) {
             commandHandler.handleSearch(searchQuery);
         } else {
@@ -106,7 +114,7 @@ public class InteractiveMenu {
         String readId = inputHandler.promptWithRetry(
                 "Which note do you want to open? (Enter note): ",
                 "A note ID would be helpful... I'm not a mind reader!");
-        
+
         if (readId != null) {
             commandHandler.handleRead(readId);
         } else {
@@ -121,7 +129,7 @@ public class InteractiveMenu {
         String editId = inputHandler.promptWithRetry(
                 "Which log needs editing? (Enter note title): ",
                 "Which log exactly? I'm not a psychic...");
-        
+
         if (editId != null) {
             commandHandler.handleEdit(editId);
         } else {
@@ -136,7 +144,7 @@ public class InteractiveMenu {
         String deleteId = inputHandler.promptWithRetry(
                 "Which note should we banish to the void? (Enter title): ",
                 "Please specify a target for digital annihilation...");
-        
+
         if (deleteId != null) {
             commandHandler.handleDelete(deleteId);
         } else {
