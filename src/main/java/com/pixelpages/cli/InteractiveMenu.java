@@ -60,8 +60,8 @@ public class InteractiveMenu {
             case "0":
                 return handleExit();
             case "secret":
-            case "eggs":
             case "eastereggs":
+            case "pixel":
                 return handleEasterEggs();
             default:
                 outputHandler.showError("That's not on the menu, bud. Try again with an actual number...");

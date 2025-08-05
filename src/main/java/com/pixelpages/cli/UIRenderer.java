@@ -16,7 +16,7 @@ public class UIRenderer {
     public void displayWelcomeHeader() {
         System.out.println();
         System.out.println();
-        System.out.println("(psst... try typing 'secret' if you're feeling adventurous...)");
+        System.out.println("(psst... try typing 'pixel' if you're feeling curious...)");
         flushScreen();
         System.out.println("╔══════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                                                  ║");

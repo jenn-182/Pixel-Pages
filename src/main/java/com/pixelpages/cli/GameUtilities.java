@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 
 public class GameUtilities {
     // Constants
-    public static final String[] RANKS = {
-        "NOOB ADVENTURER", "SEASONED QUESTER", "MASTER CHRONICLER", 
-        "LEGENDARY NOTE LORD", "ULTIMATE GRAND MASTER"
-    };
+    // public static final String[] RANKS = {
+    //     "NOOB ADVENTURER", "SEASONED QUESTER", "MASTER CHRONICLER", 
+    //     "LEGENDARY NOTE LORD", "ULTIMATE GRAND MASTER"
+    // };
     
     public static final int[] RANK_THRESHOLDS = {5, 20, 50, 100};
     

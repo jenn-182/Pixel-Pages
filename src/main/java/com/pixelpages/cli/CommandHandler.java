@@ -5,6 +5,7 @@ import com.pixelpages.io.OutputHandler;
 import com.pixelpages.model.Note;
 import com.pixelpages.storage.NoteStorage;
 
+import java.awt.Desktop;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class CommandHandler {
     private static final String NOTES_DIRECTORY = "pixel_pages_notes";
     private static final DateTimeFormatter DISPLAY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private final TextEditorHandler textEditorHandler;
 
     private final NoteStorage noteStorage;
     private final InputHandler inputHandler;
@@ -33,6 +35,7 @@ public class CommandHandler {
         this.outputHandler = outputHandler;
         this.uiRenderer = uiRenderer;
         this.newFeatureHandler = new NewFeatureHandler(noteStorage, inputHandler, outputHandler, uiRenderer);
+        this.textEditorHandler = new TextEditorHandler(noteStorage, inputHandler, outputHandler);
     }
 
     public void executeCommand(String command, String argument) throws IOException {
@@ -62,11 +65,7 @@ public class CommandHandler {
                 break;
             case "edit":
             case "upgrade":
-                if (argument.isEmpty()) {
-                    outputHandler.showError("Please provide a filename to edit...I'm not a mind reader!");
-                } else {
-                    handleEdit(argument);
-                }
+                handleEdit(argument);
                 break;
             case "delete":
                 if (argument.isEmpty()) {
@@ -95,8 +94,8 @@ public class CommandHandler {
                 break;
             case "eastereggs":
             case "eggs":
-            case "secrets":
             case "secret":
+            case "pixel":
                 newFeatureHandler.handleEasterEggsOnly();
                 break;
             default:
@@ -107,6 +106,29 @@ public class CommandHandler {
     }
 
     public void handleCreate() throws IOException {
+        outputHandler.clear();
+        outputHandler.displayCreateHeader();
+
+        // Ask option
+        outputHandler.displayLine("\nChoose your adventure creation method:");
+        outputHandler.displayLine("\n1. Terminal Mode (type directly here)");
+        outputHandler.displayLine("\n2. Text Editor Mode (opens default editor)");
+        outputHandler.displayLine("");
+
+        String choice = inputHandler.readLine("Enter your choice (1 or 2): ");
+
+        switch (choice.trim()) {
+            case "1" -> handleTerminalCreate();
+            case "2" -> handleEditorCreate();
+            default -> {
+                outputHandler.showWarning("Invalid choice! Defaulting to terminal mode...");
+                handleTerminalCreate();
+            }
+        }
+    }
+
+    // terminal input
+    private void handleTerminalCreate() throws IOException {
         outputHandler.clear();
         outputHandler.displayCreateHeader();
 
@@ -136,6 +158,17 @@ public class CommandHandler {
         outputHandler.showSuccess("Behold! '" + title + "' now exists in digital eternity!");
     }
 
+    // editor in terminal
+    private void handleEditorCreate() throws IOException {
+        try {
+            textEditorHandler.createNoteWithEditor();
+        } catch (IOException e) {
+            outputHandler.showWarning("Text editor failed, falling back to terminal mode...");
+            outputHandler.displayLine("");
+            handleTerminalCreate();
+        }
+    }
+
     public void handleList(String query) throws IOException {
         outputHandler.clear();
         outputHandler.displayListHeader();
@@ -162,90 +195,351 @@ public class CommandHandler {
     }
 
     public void handleRead(String noteIdentifier) throws IOException {
-        outputHandler.clear();
-        outputHandler.displayReadHeader();
+        if (noteIdentifier.isEmpty()) {
+            outputHandler.showError("Please provide a filename to read...I'm not a mind reader!");
+            return;
+        }
 
-        Optional<NoteWithFilename> foundNote = findNoteByIdentifier(noteIdentifier);
+        Note noteToRead = null;
+        String searchTerm = noteIdentifier;
 
-        if (foundNote.isPresent()) {
+        // Retry loop for finding the note to read
+        while (noteToRead == null) {
             outputHandler.clear();
             outputHandler.displayReadHeader();
-            outputHandler.displayLine("\nSearching digital archives for '" + noteIdentifier + "'...");
+
+            Optional<NoteWithFilename> foundNote = findNoteByIdentifier(searchTerm);
+
+            if (foundNote.isPresent()) {
+                noteToRead = foundNote.get().note();
+
+                // Display the note content
+                outputHandler.displayLine("\nSearching digital archives for '" + searchTerm + "'...");
+                outputHandler.displayLine("");
+                displayNoteContent(noteToRead);
+                return; // Successfully found and displayed note
+            }
+
+            // Note not found - show suggestions and retry options
+            outputHandler.showError("Note '" + searchTerm + "' seems to have vanished into the digital void.");
+
+            // Get all notes for suggestions
+            List<Note> allNotes = noteStorage.listAllNotes();
+
+            // Show similar notes if any
+            List<Note> similarNotes = findSimilarNotes(allNotes, searchTerm);
+            if (!similarNotes.isEmpty()) {
+                outputHandler.displayLine("");
+                outputHandler.displayLine("Did you mean one of these?");
+                outputHandler.displayLine("─".repeat(40));
+                for (int i = 0; i < Math.min(3, similarNotes.size()); i++) {
+                    Note note = similarNotes.get(i);
+                    outputHandler.displayLine(String.format("  %s", note.getTitle()));
+                }
+                outputHandler.displayLine("─".repeat(40));
+            }
+
+            outputHandler.displayLine("");
+            outputHandler.displayLine("Options:");
+            outputHandler.displayLine("\n1. Try a different search term");
+            outputHandler.displayLine("\n2. List all notes to see what's available");
+            outputHandler.displayLine("\n3. Cancel read operation");
             outputHandler.displayLine("");
 
-            Note note = foundNote.get().note();
-            displayNoteContent(note);
-        } else {
-            outputHandler.showError("Note '" + noteIdentifier + "' seems to have vanished into the digital void.");
-            outputHandler.displayLine("(\n You can list all notes using the 'list' command)");
+            String choice = inputHandler.readLine("What would you like to do? (1/2/3): ");
+
+            switch (choice.trim()) {
+                case "1" -> {
+                    searchTerm = inputHandler.readLine("Enter new note title or number: ");
+                    if (searchTerm.trim().isEmpty()) {
+                        outputHandler.showWarning("Cancelling read operation.");
+                        return;
+                    }
+                }
+                case "2" -> {
+                    showNotesListForReading(allNotes);
+                    searchTerm = inputHandler.readLine("Enter note number or title to read: ");
+                    if (searchTerm.trim().isEmpty()) {
+                        outputHandler.showWarning("Cancelling read operation.");
+                        return;
+                    }
+                }
+                case "3" -> {
+                    outputHandler.displayLine("Read operation cancelled.");
+                    return;
+                }
+                default -> {
+                    outputHandler.showWarning("Invalid choice. Please try again.");
+                    // Continue the loop to retry
+                }
+            }
         }
     }
 
-    public void handleEdit(String noteIdentifier) throws IOException {
+    // Add this method if it doesn't exist
+    private Optional<NoteWithFilename> findNoteByIdentifier(String identifier) {
+        List<Note> allNotes = noteStorage.listAllNotes();
+
+        // Try to find by number first (1-based indexing)
+        try {
+            int noteIndex = Integer.parseInt(identifier) - 1;
+            if (noteIndex >= 0 && noteIndex < allNotes.size()) {
+                Note note = allNotes.get(noteIndex);
+                String filename = noteStorage.generateUniqueFilename(note.getTitle());
+                return Optional.of(new NoteWithFilename(note, filename));
+            }
+        } catch (NumberFormatException e) {
+            // Not a number, continue with title search
+        }
+
+        // Search by title
+        for (Note note : allNotes) {
+            if (note.getTitle().toLowerCase().contains(identifier.toLowerCase())) {
+                String filename = noteStorage.generateUniqueFilename(note.getTitle());
+                return Optional.of(new NoteWithFilename(note, filename));
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    // Helper method specifically for reading selection (similar to edit but with
+    // read context)
+    private void showNotesListForReading(List<Note> allNotes) {
+        outputHandler.displayLine("");
+        outputHandler.displayLine("Available quest logs:");
+        outputHandler.displayLine("─".repeat(60));
+
+        if (allNotes.isEmpty()) {
+            outputHandler.displayLine("No notes found in your digital archives.");
+            outputHandler.displayLine("─".repeat(60));
+            return;
+        }
+
+        for (int i = 0; i < allNotes.size(); i++) {
+            Note note = allNotes.get(i);
+            String preview = generatePreview(note.getContent());
+            if (preview.length() > 35) {
+                preview = preview.substring(0, 35) + "...";
+            }
+
+            outputHandler.displayLine(String.format("#%d: %s", i + 1, note.getTitle()));
+            outputHandler.displayLine(String.format("Created: %s",
+                    note.getCreated().format(DISPLAY_DATE_FORMATTER)));
+            outputHandler.displayLine(String.format("Preview: %s", preview));
+
+            if (!note.getTags().isEmpty()) {
+                outputHandler.displayLine(String.format("Tags: %s",
+                        String.join(", ", note.getTags())));
+            }
+            outputHandler.displayLine("");
+        }
+        outputHandler.displayLine("─".repeat(60));
+    }
+
+    public void handleEdit(String argument) throws IOException {
+        if (argument.isEmpty()) {
+            outputHandler.showError("Please specify a note to edit.");
+            outputHandler.displayLine("Usage: edit <note_title_or_number>");
+            return;
+        }
+
+        Note noteToEdit = null;
+        String filename = null;
+        String searchTerm = argument;
+
+        // Retry loop for finding the note
+        while (noteToEdit == null) {
+            List<Note> allNotes = noteStorage.listAllNotes();
+            noteToEdit = findNoteBySearchTerm(allNotes, searchTerm);
+
+            if (noteToEdit != null) {
+                filename = noteStorage.generateUniqueFilename(noteToEdit.getTitle());
+                break;
+            }
+
+            // Note not found - show suggestions and retry options
+            outputHandler.showError("Note not found: " + searchTerm);
+
+            // Show similar notes if any
+            List<Note> similarNotes = findSimilarNotes(allNotes, searchTerm);
+            if (!similarNotes.isEmpty()) {
+                outputHandler.displayLine("");
+                outputHandler.displayLine("Did you mean one of these?");
+                outputHandler.displayLine("─".repeat(40));
+                for (int i = 0; i < Math.min(3, similarNotes.size()); i++) {
+                    Note note = similarNotes.get(i);
+                    outputHandler.displayLine(String.format("  %s", note.getTitle()));
+                }
+                outputHandler.displayLine("─".repeat(40));
+            }
+
+            outputHandler.displayLine("");
+            outputHandler.displayLine("Options:");
+            outputHandler.displayLine("\n1. Try a different search term");
+            outputHandler.displayLine("\n2. List all notes");
+            outputHandler.displayLine("\n3. Cancel");
+            outputHandler.displayLine("");
+
+            String choice = inputHandler.readLine("What would you like to do? (1/2/3): ");
+
+            switch (choice.trim()) {
+                case "1" -> {
+                    searchTerm = inputHandler.readLine("Enter new search term: ");
+                    if (searchTerm.trim().isEmpty()) {
+                        outputHandler.showWarning("Cancelling edit operation.");
+                        return;
+                    }
+                }
+                case "2" -> {
+                    showNotesListForSelection(allNotes);
+                    searchTerm = inputHandler.readLine("Enter note number or title: ");
+                    if (searchTerm.trim().isEmpty()) {
+                        outputHandler.showWarning("Cancelling edit operation.");
+                        return;
+                    }
+                }
+                case "3" -> {
+                    outputHandler.displayLine("Edit operation cancelled.");
+                    return;
+                }
+                default -> outputHandler.showWarning("Invalid choice. Please try again.");
+            }
+        }
+
+        // Continue with edit logic...
+        proceedWithEdit(noteToEdit, filename);
+    }
+
+    // Helper method to find note by search term
+    private Note findNoteBySearchTerm(List<Note> allNotes, String searchTerm) {
+        // Try to find by number first
+        try {
+            int noteIndex = Integer.parseInt(searchTerm) - 1;
+            if (noteIndex >= 0 && noteIndex < allNotes.size()) {
+                return allNotes.get(noteIndex);
+            }
+        } catch (NumberFormatException e) {
+            // Try to find by title
+            for (Note note : allNotes) {
+                if (note.getTitle().toLowerCase().contains(searchTerm.toLowerCase())) {
+                    return note;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Fix your existing findSimilarNotes method (it currently returns empty list)
+    private List<Note> findSimilarNotes(List<Note> allNotes, String searchTerm) {
+        String lowerSearchTerm = searchTerm.toLowerCase();
+        return allNotes.stream()
+                .filter(note -> {
+                    String lowerTitle = note.getTitle().toLowerCase();
+                    // Find notes that contain any word from the search term
+                    String[] searchWords = lowerSearchTerm.split("\\s+");
+                    for (String word : searchWords) {
+                        if (lowerTitle.contains(word) && word.length() > 2) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
+    // Helper method to show notes list for selection
+    private void showNotesListForSelection(List<Note> allNotes) {
+        outputHandler.displayLine("");
+        outputHandler.displayLine("Available notes:");
+        outputHandler.displayLine("─".repeat(60));
+        for (int i = 0; i < allNotes.size(); i++) {
+            Note note = allNotes.get(i);
+            String preview = generatePreview(note.getContent());
+            if (preview.length() > 30) {
+                preview = preview.substring(0, 30) + "...";
+            }
+            outputHandler.displayLine(String.format("#%d: %s", i + 1, note.getTitle()));
+            outputHandler.displayLine(String.format("    %s", preview));
+            outputHandler.displayLine("");
+        }
+        outputHandler.displayLine("─".repeat(60));
+    }
+
+    // Helper method to proceed with edit once note is found
+    private void proceedWithEdit(Note noteToEdit, String filename) throws IOException {
         outputHandler.clear();
-        outputHandler.displayEditHeader();
+        outputHandler.displayLine("UPGRADING NOTE: " + noteToEdit.getTitle());
+        outputHandler.displayLine("═".repeat(50));
+        outputHandler.displayLine("\nChoose your upgrade method:");
+        outputHandler.displayLine("\n1. Terminal Mode (edit directly here)");
+        outputHandler.displayLine("\n2. Text Editor Mode (opens Mac default editor)");
+        outputHandler.displayLine("");
 
-        Optional<NoteWithFilename> foundNote = findNoteByIdentifier(noteIdentifier);
+        String choice = inputHandler.readLine("Enter your choice (1 or 2): ");
 
-        if (foundNote.isPresent()) {
-            Note originalNote = foundNote.get().note();
-            String originalFilename = foundNote.get().filename();
-
-            outputHandler.displayLine("Loading " + originalFilename + " for modification...");
-            outputHandler.displayLine("");
-            outputHandler.displayLine("Current Title: " + originalNote.getTitle());
-            outputHandler.displayLine("");
-
-            String newTitle = inputHandler.readLine("Enter new quest title (or press Enter to keep current): ");
-            if (!newTitle.isEmpty()) {
-                originalNote.setTitle(newTitle);
+        switch (choice.trim()) {
+            case "1" -> handleTerminalEdit(noteToEdit, filename);
+            case "2" -> handleEditorEdit(noteToEdit, filename);
+            default -> {
+                outputHandler.showWarning("Invalid choice! Defaulting to terminal mode...");
+                handleTerminalEdit(noteToEdit, filename);
             }
+        }
+    }
 
-            outputHandler.displayLine("\nCurrent Log Entry:");
+    // Your existing terminal edit method (rename if needed)
+    private void handleTerminalEdit(Note noteToEdit, String filename) throws IOException {
+        outputHandler.clear();
+        outputHandler.displayLine("UPGRADING NOTE: " + noteToEdit.getTitle());
+        outputHandler.displayLine("═".repeat(50));
+
+        // Show current note details
+        outputHandler.displayLine("\nCurrent Note Details:");
+        outputHandler.displayLine("Title: " + noteToEdit.getTitle());
+        outputHandler.displayLine("Content: " + noteToEdit.getContent());
+        outputHandler.displayLine(
+                "Tags: " + (noteToEdit.getTags().isEmpty() ? "None" : String.join(", ", noteToEdit.getTags())));
+        outputHandler.displayLine("");
+
+        // Get new title
+        String newTitle = inputHandler.readLine("New title (press Enter to keep current): ");
+        if (!newTitle.trim().isEmpty()) {
+            noteToEdit.setTitle(newTitle);
+        }
+
+        // Get new content
+        outputHandler
+                .displayLine("\nEnter new content (type 'END' when finished, or just 'END' to keep current content):");
+        String newContent = inputHandler.readMultilineUntil("END");
+        if (!newContent.trim().equals("END")) {
+            noteToEdit.setContent(newContent);
+        }
+
+        // Get new tags
+        String newTagsInput = inputHandler.readLine("\nNew tags (comma-separated, press Enter to keep current): ");
+        if (!newTagsInput.trim().isEmpty()) {
+            List<String> newTags = parseTags(newTagsInput);
+            noteToEdit.setTags(newTags);
+        }
+
+        // Update modification time
+        noteToEdit.setModified(java.time.LocalDateTime.now());
+
+        // Save the updated note
+        noteStorage.saveNote(noteToEdit, filename);
+        outputHandler.showSuccess("Note '" + noteToEdit.getTitle() + "' has been upgraded!");
+    }
+
+    // New method for text editor edit
+    private void handleEditorEdit(Note noteToEdit, String filename) throws IOException {
+        try {
+            textEditorHandler.editNoteWithEditor(noteToEdit, filename);
+        } catch (IOException e) {
+            outputHandler.showWarning("Text editor failed, falling back to terminal mode...");
             outputHandler.displayLine("");
-            outputHandler.displayLine(originalNote.getContent());
-            outputHandler.displayLine(
-                    "\nRewrite your adventure! (type 'END' on a new line to finish, or press enter to keep current):");
-            outputHandler.displayLine("");
-
-            String newContent = inputHandler.readMultilineUntil("END");
-            if (newContent != null && !newContent.trim().isEmpty()) {
-                originalNote.setContent(newContent);
-                outputHandler.displayLine("");
-                outputHandler.displayLine("Quest log updated! Your legend grows stronger.");
-            } else {
-                outputHandler.displayLine("");
-                outputHandler.displayLine("Content unchanged. Your original adventure remains!");
-            }
-
-            outputHandler.displayLine("\nCurrent tags: " +
-                    (originalNote.getTags().isEmpty() ? "None" : String.join(", ", originalNote.getTags())));
-
-            outputHandler.displayLine("");
-            String newTagsInput = inputHandler
-                    .readLine("Update your tags (comma-separated, or Enter to keep current): ");
-            if (!newTagsInput.isEmpty()) {
-                originalNote.setTags(parseTags(newTagsInput));
-            }
-
-            String filenameToSave = originalFilename;
-            if (!newTitle.isEmpty() && !newTitle.equals(originalNote.getTitle())) {
-                filenameToSave = noteStorage.generateUniqueFilename(originalNote.getTitle());
-                Files.deleteIfExists(Paths.get(NOTES_DIRECTORY, originalFilename));
-                outputHandler.displayLine("");
-                outputHandler.displayLine("Log renamed from '" + originalFilename + "' to '" + filenameToSave + "'");
-            }
-
-            originalNote.updateModifiedTimestamp();
-            noteStorage.saveNote(originalNote, filenameToSave);
-            outputHandler.displayLine("");
-            outputHandler
-                    .showSuccess("Log '" + originalNote.getTitle() + "' has been saved as " + filenameToSave + ".");
-            outputHandler.displayLine("");
-            outputHandler.displayLine("ACHIEVEMENT UNLOCKED: Master Editor!");
-
-        } else {
-            outputHandler.showError("ERROR 404: Note '" + noteIdentifier + "' not found for editing.");
+            handleTerminalEdit(noteToEdit, filename);
         }
     }
 
@@ -452,90 +746,52 @@ public class CommandHandler {
         }
     }
 
-    private Optional<NoteWithFilename> findNoteByIdentifier(String identifier) {
-        List<Path> allNoteFiles = noteStorage.getNoteFiles();
-        for (Path filePath : allNoteFiles) {
-            String filename = filePath.getFileName().toString();
-            try {
-                Note note = noteStorage.readNote(filename);
-                if (filename.equalsIgnoreCase(identifier)
-                        || note.getTitle().toLowerCase().contains(identifier.toLowerCase())) {
-                    return Optional.of(new NoteWithFilename(note, filename));
-                }
-            } catch (IOException e) {
-                if (filename.equalsIgnoreCase(identifier)) {
-                    outputHandler.showWarning("Failed to read note file: " + filename);
-                }
-            }
+    // Add the generatePreview method used in showNotesListForSelection
+    private String generatePreview(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return "No content";
         }
-        return Optional.empty();
+
+        // Remove extra whitespace and newlines for preview
+        String cleaned = content.replaceAll("\\s+", " ").trim();
+
+        // Return first 50 characters or until first sentence
+        int maxLength = Math.min(50, cleaned.length());
+        String preview = cleaned.substring(0, maxLength);
+
+        // Try to end at a word boundary
+        int lastSpace = preview.lastIndexOf(' ');
+        if (lastSpace > 20 && lastSpace < maxLength) {
+            preview = preview.substring(0, lastSpace);
+        }
+
+        return preview;
     }
 
     private List<Note> simpleSearch(List<Note> notes, String query) {
-        String lowerQuery = query.toLowerCase();
+        if (query == null || query.trim().isEmpty()) {
+            return notes;
+        }
+
+        String lowerQuery = query.toLowerCase().trim();
+
         return notes.stream()
-                .filter(note -> note.getTitle().toLowerCase().contains(lowerQuery) ||
-                        note.getContent().toLowerCase().contains(lowerQuery) ||
-                        note.getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(lowerQuery)))
+                .filter(note -> {
+                    // Search in title
+                    if (note.getTitle().toLowerCase().contains(lowerQuery)) {
+                        return true;
+                    }
+
+                    // Search in content
+                    if (note.getContent().toLowerCase().contains(lowerQuery)) {
+                        return true;
+                    }
+
+                    // Search in tags
+                    return note.getTags().stream()
+                            .anyMatch(tag -> tag.toLowerCase().contains(lowerQuery));
+                })
                 .collect(Collectors.toList());
-    }
-
-    private String generatePreview(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return "(empty note)";
-        }
-
-        String cleanContent = content.replaceAll("\\s+", " ").trim();
-        int maxLength = 200; // Increased from 100 to allow for two lines
-        
-        if (cleanContent.length() <= maxLength) {
-            return formatPreviewLines(cleanContent);
-        }
-
-        String truncated = cleanContent.substring(0, maxLength);
-        int lastSentence = Math.max(
-                truncated.lastIndexOf(". "),
-                Math.max(truncated.lastIndexOf("! "), truncated.lastIndexOf("? ")));
-
-        if (lastSentence > maxLength * 0.7) {
-            return formatPreviewLines(cleanContent.substring(0, lastSentence + 1));
-        }
-
-        int lastSpace = truncated.lastIndexOf(' ');
-        if (lastSpace > 0) {
-            return formatPreviewLines(cleanContent.substring(0, lastSpace) + "...");
-        }
-
-        return formatPreviewLines(truncated + "...");
-    }
-
-    private String formatPreviewLines(String content) {
-        // Split content into two lines, each max 60 characters
-        if (content.length() <= 60) {
-            return content;
-        }
-        
-        String[] words = content.split(" ");
-        StringBuilder line1 = new StringBuilder();
-        StringBuilder line2 = new StringBuilder();
-        
-        for (String word : words) {
-            if (line1.length() + word.length() + 1 <= 60) {
-                if (line1.length() > 0) line1.append(" ");
-                line1.append(word);
-            } else if (line2.length() + word.length() + 1 <= 60) {
-                if (line2.length() > 0) line2.append(" ");
-                line2.append(word);
-            } else {
-                break; // Stop if we can't fit more words
-            }
-        }
-        
-        if (line2.length() > 0) {
-            return line1.toString() + "\n" + line2.toString();
-        } else {
-            return line1.toString();
-        }
     }
 
     private static class NoteWithFilename {

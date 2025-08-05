@@ -40,6 +40,8 @@ public class EasterEggDetector {
         addUniqueEggs(eggs, foundNames, findBehaviorPatterns(notes));
         addUniqueEggs(eggs, foundNames, findProgrammingReferences(notes));
         addUniqueEggs(eggs, foundNames, findSequentialPatterns(notes));
+        addUniqueEggs(eggs, foundNames, findEpicPatterns(notes));
+        addUniqueEggs(eggs, foundNames, findLegendaryPatterns(notes));
 
         return eggs;
     }
@@ -73,7 +75,7 @@ public class EasterEggDetector {
             return dayOfWeek == 6 || dayOfWeek == 7;
         });
 
-        if (weekendNotes >= 10) {
+        if (weekendNotes >= 20) {
             eggs.add(new EasterEgg("WEEKEND WRITER",
                     "You've completed " + weekendNotes
                             + " notes created on weekends! You're productive even on your off days.",
@@ -85,7 +87,7 @@ public class EasterEggDetector {
             return hour >= 5 && hour <= 7;
         });
 
-        if (earlyNotes >= 5) {
+        if (earlyNotes >= 15) {
             eggs.add(new EasterEgg("EARLY RISER",
                     earlyNotes + " notes created before 8 AM. You start your day with purpose.", "UNCOMMON"));
         }
@@ -101,7 +103,7 @@ public class EasterEggDetector {
                 .collect(Collectors.groupingBy(
                         note -> note.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH"))));
 
-        boolean foundTimeTravel = timeGroups.values().stream().anyMatch(group -> group.size() >= 3);
+        boolean foundTimeTravel = timeGroups.values().stream().anyMatch(group -> group.size() >= 5);
         if (foundTimeTravel) {
             eggs.add(new EasterEgg("RAPID CREATOR",
                     "You created multiple quests in the same hour! High-speed documentation detected.",
@@ -177,7 +179,7 @@ public class EasterEggDetector {
                         .collect(Collectors.joining()).toLowerCase();
 
                 if (firstLetters.contains("help") || firstLetters.contains("secret") ||
-                        firstLetters.contains("hidden") || firstLetters.contains("pixelpages")) {
+                        firstLetters.contains("hidden") || firstLetters.contains("pages")) {
                     foundAcrostic = true;
                     acrosticExample = note.getTitle();
                 }
@@ -271,6 +273,99 @@ public class EasterEggDetector {
             eggs.add(new EasterEgg("CODE FORMATTER",
                     structuredNotes + " notes contain code-like formatting. Developer habits detected.",
                     "RARE"));
+        }
+
+        return eggs;
+    }
+
+    private static List<EasterEgg> findEpicPatterns(List<Note> notes) {
+        List<EasterEgg> eggs = new ArrayList<>();
+
+        // FIBONACCI WRITER - Check for Fibonacci word counts
+        int[] fibonacci = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233};
+        List<Integer> userWordCounts = notes.stream()
+                .map(note -> note.getContent().split("\\s+").length)
+                .collect(Collectors.toList());
+
+        int fibMatches = 0;
+        List<Integer> matchedFibs = new ArrayList<>();
+        for (int fib : fibonacci) {
+            if (userWordCounts.contains(fib)) {
+                fibMatches++;
+                matchedFibs.add(fib);
+            }
+        }
+
+        if (fibMatches >= 4) {
+            eggs.add(new EasterEgg("FIBONACCI WRITER",
+                    "Your notes follow the golden ratio! " + fibMatches + " notes match Fibonacci sequence (" +
+                            matchedFibs.stream().map(String::valueOf).collect(Collectors.joining(", ")) + " words).",
+                    "EPIC"));
+        }
+
+        // WORD WIZARD - Uses every letter of the alphabet
+        String allContent = notes.stream()
+                .map(note -> note.getTitle() + " " + note.getContent())
+                .collect(Collectors.joining()).toLowerCase();
+
+        Set<Character> uniqueLetters = allContent.chars()
+                .filter(Character::isLetter)
+                .mapToObj(c -> (char) c)
+                .collect(Collectors.toSet());
+
+        if (uniqueLetters.size() == 26) {
+            eggs.add(new EasterEgg("WORD WIZARD",
+                    "You've used every letter of the alphabet across all notes! Complete vocabulary mastery achieved.",
+                    "EPIC"));
+        }
+
+        return eggs;
+    }
+
+    private static List<EasterEgg> findLegendaryPatterns(List<Note> notes) {
+        List<EasterEgg> eggs = new ArrayList<>();
+
+        // THE MATRIX - Exactly 101 notes
+        if (notes.size() == 101) {
+            eggs.add(new EasterEgg("THE MATRIX",
+                    "Exactly 101 notes created. You've seen through the digital veil. Welcome to the real world.",
+                    "LEGENDARY"));
+        }
+
+        // BINARY PROPHET - Notes with binary content
+        boolean foundBinary = false;
+        String binaryExample = "";
+
+        for (Note note : notes) {
+            // Check title for binary pattern (only 1s, 0s, and spaces, minimum 8 characters)
+            String cleanTitle = note.getTitle().replaceAll("[^10]", "");
+            String titleWithSpaces = note.getTitle().replaceAll("[^10\\s]", "");
+
+            // Check content for binary pattern (only 1s, 0s, and spaces, minimum 16 characters)
+            String cleanContent = note.getContent().replaceAll("[^10]", "");
+            String contentWithSpaces = note.getContent().replaceAll("[^10\\s]", "");
+
+            // Binary title: at least 8 binary digits, and title is mostly binary
+            boolean binaryTitle = cleanTitle.length() >= 8 &&
+                    titleWithSpaces.equals(note.getTitle()) &&
+                    note.getTitle().trim().length() > 0;
+
+            // Binary content: at least 16 binary digits, and content is mostly binary
+            boolean binaryContent = cleanContent.length() >= 16 &&
+                    contentWithSpaces.equals(note.getContent()) &&
+                    note.getContent().trim().length() > 0;
+
+            if (binaryTitle || binaryContent) {
+                foundBinary = true;
+                binaryExample = note.getTitle();
+                break;
+            }
+        }
+
+        if (foundBinary) {
+            eggs.add(new EasterEgg("BINARY PROPHET",
+                    "Pure binary communication detected in note '" + binaryExample + "'! You speak the language of machines.",
+                    "LEGENDARY"));
         }
 
         return eggs;

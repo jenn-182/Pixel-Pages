@@ -1,12 +1,84 @@
-public static void createNote() 
-public static void listNotes() 
-public static void readNote(String noteId) 
-public static void editNote(String noteId) 
-public static void deleteNote(String noteId) 
-public static void searchNotes(String query) 
-public static void printHelp() 
-public static Path getNoteFilePath(String noteId) 
-public static void openFileInEditor(Path filePath) throws IOException, InterruptedException
+
+#### FEATURES:
+——————————————————————————————————————————————————————————————————————————————————————
+*Works in Terminal (./notes) or Interactive Mode 
+*Show Current Rank
+
+1. *Craft* -> Create note (Either in Terminal or TextEditor) (prompty with retry, if wrong again, new random generated message each time) 
+2. *Inventory* -> List Notes (View All or Search Title)
+3. *Search* -> Search keywords/tags to find notes
+4. *Open Log* -> Open Notes, Search Title (If not found, prompt retry, list or close)
+5. *Upgrade* -> Edit Notes, Search Title (If not found, prompt retry, list or close)
+6. *Delete* -> Enter title (Ask yes or no, ask are you sure)
+7. *Player Profile* -> Show Current Rank, Notes Statistics, Progress Bar, XP Breakdown and Insight (show new randomly generated insight aslong as greater than 1)
+8. *Acheivements* -> View Completed Achievements, Pending Achievements, Summary with Completion Rate and Progress Bar
+9. *Tutorial* -> Help Screen
+0. *Rage Quit* -> Exit Application
+
+**Pixel** -> Secret Phrase, Unlocks Easter Egg Achievements 
 
 
-what if i want. connections to allow me to list all of the connections individually and then you can select the connection and see which words are connected and then get the option to open each
+#### XP BREAKDOWN:
+——————————————————————————————————————————————————————————————————————————————————————
+* You get 10 XP just for making a note
+* Every 10 words = 1 XP, max 50 XP per note
+* Each tag = 5 XP
+* 5 XP if title is longer than 20 characters
+
+
+#### ACHIEVEMENTS: (23)
+——————————————————————————————————————————————————————————————————————————————————————
+*FIRST QUEST*: Complete your first note 
+*SPEEDRUN CHAMPION*:Create 3+ notes on same day
+*PROLIFIC WRITER*: Create 10+ notes
+*WORDSMITH*: Write 1000+ total words 
+*DETAILED WRITER*: Write a note over 1000 characters
+*ORGANIZER*: Use 10 different tags
+*DIVERSITY MASTER*: Use 5+ tags in one note
+*TIME TRAVELER*: Create 3+ notes in same hour
+*MARATHON WRITER*: Write 500+ words in one note 
+*NIGHT OWL*: Write 5+ notes between 10 PM - 5 AM
+*WEEKEND WARRIOR*: Write 10+ notes on Saturday/Sunday
+*SECRET HUNTER*: Find your first easter egg 
+*MASTER CHRONICLER*: Complete 50+ notes
+*TAG MASTER*: Use 50+ different tags
+*NOVELIST*: Write 10,000 total words
+*LEGENDARY SCRIBE*: Complete 100+ notes
+*CONSISTENCY KING*: Notes spanning 30+ different days
+*ARCHIVE MASTER*: Create notes in 12 different months
+*TAG TORNADO*: Use 100+ tags across all notes
+*ENCYLCOPEDIA EDITOR*: Create 200+ notes 
+*VOCABULARY VIRTUOSO*: Use 1000+ unique words accross all notes
+*LEGEND SEEKER*: Find 5 easter eggs 
+*MYTHICAL EXPLORER*: Find 10 easter eggs
+
+
+#### EASTER EGGS: (18)
+——————————————————————————————————————————————————————————————————————————————————————
+**Common (2):** 
+*Night Owl*- Write 5+ notes between 10 PM and 5 AM
+Tag Collector- Average 3+ tags per note across all notes
+
+**Uncommon (5):**
+*Weekend Writer*- Create 20+ notes on weekends
+*Early Riser*- Create 15+ notes before 8 AM (5-7 AM)
+*Minimalist Master*- 80%+ of your notes are under 50 characters
+*Technical Mindset*- Include programming terms in your notes (hello world, debug, compile, etc)
+*Revisions Master*- Edit 50%+ of your notes after creation
+
+**Rare (5):**
+*Rapid Creator*- Create 5+ notes in the same hour
+*Routine Master*- Write 5+ notes at the same hour of day consistently 
+*Novel Writer*- 70%+ of your notes exceed 1000 characters
+*Code Formatter*- Include code-like formatting (```, //, function, method, class, import) in 2+ notes
+*Inception Mode*- Write a note where the content mentions its own title
+
+**Epic (3):**
+*Hidden Messenger-* Create a note with the first letter of each line spells out a word or message when read vertically. (first letters spell "help", "secret", "hidden", or "pages")
+*Word Wizard*- Use every letter of the alphabet across all notes
+*Fibonacci Writer*- Notes with word counts that follow Fibonacci sequence (1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89...)
+
+**Legendary (3):**
+*Mirror Master*- Create a note with a palindromic title
+*Binary Prophet-* Create notes with titles/content that contain only 1s and 0s
+*The Matrix-* Create exactly 101 notes

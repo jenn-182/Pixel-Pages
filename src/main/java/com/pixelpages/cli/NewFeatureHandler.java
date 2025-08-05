@@ -44,13 +44,13 @@ public class NewFeatureHandler {
 
     private void displayPlayerProfileWithRanking(List<Note> allNotes) {
         int totalNotes = allNotes.size();
-        
+
         // XP System Calculations (do this first)
         int totalXP = calculateXP(allNotes);
         int currentLevel = calculateLevel(totalXP);
         int currentLevelXP = getCurrentLevelXP(totalXP, currentLevel);
         int xpNeededForLevel = getXPNeededForCurrentLevel(currentLevel);
-        
+
         // Get rank based on XP level
         String rank = GameUtilities.getUserRank(allNotes);
         String nextGoal = GameUtilities.getNextGoal(allNotes);
@@ -84,14 +84,14 @@ public class NewFeatureHandler {
         // XP Progress Bar
         outputHandler.displayLine("RANK PROGRESSION:");
         outputHandler.displayLine("─".repeat(62));
-        
+
         displayXPBar(currentLevelXP, xpNeededForLevel);
 
         outputHandler.displayLine("");
-        
+
         // XP Breakdown Section
         displayXPBreakdown(allNotes, totalXP);
-        
+
         outputHandler.displayLine("─".repeat(62));
         outputHandler.displayLine("");
 
@@ -404,6 +404,24 @@ public class NewFeatureHandler {
         achievements.put("MARATHON WRITER: Write 500+ words in one note",
                 notes.stream().anyMatch(note -> note.getContent().split("\\s+").length >= 500));
         achievements.put("TIME TRAVELER: Create multiple notes in same hour", checkTimeTravel(notes));
+
+        Set<Integer> uniqueMonths = notes.stream()
+                .map(note -> note.getCreated().getMonthValue())
+                .collect(Collectors
+                        .toSet());
+        achievements.put("ARCHIVE MASTER: Create notes in 12 different months", uniqueMonths.size() >= 12);
+
+        long totalTagInstances = notes.stream().mapToLong(note -> note.getTags().size()).sum();
+        achievements.put("TAG TORNADO: Use 100+ total tags across all notes", totalTagInstances >= 100);
+
+        achievements.put("ENCYCLOPEDIA EDITOR: Create 200+ notes", notes.size() >= 200);
+
+        Set<String> allUniqueWords = notes.stream()
+                .flatMap(note -> Arrays.stream((note.getTitle() + " " + note.getContent()).toLowerCase()
+                        .replaceAll("[^a-zA-Z\\s]", "").split("\\s+")))
+                .filter(word -> !word.trim().isEmpty())
+                .collect(Collectors.toSet());
+        achievements.put("VOCABULARY VIRTUOSO: Use 1000+ unique words across all notes", allUniqueWords.size() >= 1000);
 
         return achievements;
     }

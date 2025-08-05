@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class Note {
@@ -19,9 +20,17 @@ public class Note {
 
     //----------- Constructors -----------
 
+    public Note(String title, String content) {
+        this.title = Objects.requireNonNull(title, "Title cannot be null");
+        this.content = Objects.requireNonNull(content, "Content cannot be null");
+        this.created = LocalDateTime.now();
+        this.modified = LocalDateTime.now();
+        this.tags = new ArrayList<>();
+    }
+
     public Note(String title, String content, List<String> tags) {
-        this.title = title;
-        this.content = content;
+        this.title = Objects.requireNonNull(title, "Title cannot be null");
+        this.content = Objects.requireNonNull(content, "Content cannot be null");
         this.created = LocalDateTime.now(); //set created time to now
         this.modified=this.created; //set modified time to now
 
@@ -31,10 +40,10 @@ public class Note {
 
     //Constructor for reading notes with existing metadata
     public Note(String title, String content, LocalDateTime created, LocalDateTime modified, List<String> tags) {
-        this.title = title;
-        this.content = content;
-        this.created = created;
-        this.modified = modified;
+        this.title = Objects.requireNonNull(title, "Title cannot be null");
+        this.content = Objects.requireNonNull(content, "Content cannot be null");
+        this.created = Objects.requireNonNull(created, "Created date cannot be null");
+        this.modified = Objects.requireNonNull(modified, "Modified date cannot be null");
         this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
     }
 
