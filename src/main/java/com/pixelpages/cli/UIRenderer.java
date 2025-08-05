@@ -68,7 +68,7 @@ public class UIRenderer {
         System.out.println("   5.   UPGRADE: Summon a sacred quil to edit notes and rewrite destiny.");
         System.out.println("   6.   DELETE: Banish one of your log entries to the digital void.");
         System.out.println("   7.   PLAYER PROFILE: View your player rank and detailed statistics.");
-        System.out.println("   8.   ACHIEVEMENTS: Check completed achievements & easter eggs found.");
+        System.out.println("   8.   ACHIEVEMENTS: Check completed and pending achievements for the player.");
         System.out.println("   9.   TUTORIAL: Feeling lost? Check the game manual.");
         System.out.println();
         System.out.println("   0.   RAGE QUIT: Exits the digital realm and returns to reality.");
