@@ -1,0 +1,22 @@
+---
+title: Casino Project
+created: 2025-08-04T23:03:07.454311
+modified: 2025-08-04T23:03:07.46311
+tags: [class, project]
+---
+
+Java Casino Project Policies:
+Stand up meetings will be held at the beginning of each work session
+Danish will act as the gatekeeper for the project
+Kanban board will be shared and updated regularly
+Team members will communicate regularly and assist each other without judgment
+Team members will check in and communicate through Slack group chat
+Infrastructure and interface: Jenn and Josiah
+Non Gambling games: Frank and Josiah
+Gambling games: Anthony, Younis, Danish
+Team will meet in person or over zoom over the weekend to accommodate everyones schedules
+
+-Fork & Clone from Danish
+
+-Come up with infrastructure design
+-Figure out common classes

@@ -40,7 +40,7 @@ public class EasterEggDetector {
         addUniqueEggs(eggs, foundNames, findBehaviorPatterns(notes));
         addUniqueEggs(eggs, foundNames, findProgrammingReferences(notes));
         addUniqueEggs(eggs, foundNames, findSequentialPatterns(notes));
-        addUniqueEggs(eggs, foundNames, findEpicPatterns(notes));
+        addUniqueEggs(eggs, foundNames, findPatterns(notes));
         addUniqueEggs(eggs, foundNames, findLegendaryPatterns(notes));
 
         return eggs;
@@ -196,7 +196,7 @@ public class EasterEggDetector {
         if (foundAcrostic) {
             eggs.add(new EasterEgg("HIDDEN MESSENGER",
                     "Note '" + acrosticExample + "' contains a hidden message in its first letters!",
-                    "EPIC"));
+                    "LEGENDARY"));
         }
 
         return eggs;
@@ -278,7 +278,7 @@ public class EasterEggDetector {
         return eggs;
     }
 
-    private static List<EasterEgg> findEpicPatterns(List<Note> notes) {
+    private static List<EasterEgg> findPatterns(List<Note> notes) {
         List<EasterEgg> eggs = new ArrayList<>();
 
         // FIBONACCI WRITER - Check for Fibonacci word counts
@@ -300,7 +300,7 @@ public class EasterEggDetector {
             eggs.add(new EasterEgg("FIBONACCI WRITER",
                     "Your notes follow the golden ratio! " + fibMatches + " notes match Fibonacci sequence (" +
                             matchedFibs.stream().map(String::valueOf).collect(Collectors.joining(", ")) + " words).",
-                    "EPIC"));
+                    "LEGENDARY"));
         }
 
         // WORD WIZARD - Uses every letter of the alphabet
@@ -316,7 +316,7 @@ public class EasterEggDetector {
         if (uniqueLetters.size() == 26) {
             eggs.add(new EasterEgg("WORD WIZARD",
                     "You've used every letter of the alphabet across all notes! Complete vocabulary mastery achieved.",
-                    "EPIC"));
+                    "UNCOMMON"));
         }
 
         return eggs;

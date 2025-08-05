@@ -17,7 +17,7 @@ public class GameUtilities {
     public static final int[] RANK_THRESHOLDS = {5, 20, 50, 100};
     
     public static final String[] RARITY_ORDER = {
-        "LEGENDARY", "EPIC", "RARE", "UNCOMMON", "COMMON"
+        "LEGENDARY", "RARE", "UNCOMMON", "COMMON"
     };
     
     public static final String[] PROGRAMMING_TERMS = {

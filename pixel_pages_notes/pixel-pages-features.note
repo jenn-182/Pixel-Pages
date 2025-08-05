@@ -1,6 +1,9 @@
-# PIXEL PAGES NOTES APPLICATION
+---
+title: Pixel Pages Features
+created: 2025-08-04T22:50:50.326558
+modified: 2025-08-04T22:50:50.331401
+---
 
-#### FEATURES:
 ——————————————————————————————————————————————————————————————————————————————————————
 *Works in Terminal (./notes) or Interactive Mode 
 *Show Current Rank
@@ -12,14 +15,13 @@
 5. *Upgrade* -> Edit Notes, Search Title (If not found, prompt retry, list or close)
 6. *Delete* -> Enter title (Ask yes or no, ask are you sure)
 7. *Player Profile* -> Show Current Rank, Notes Statistics, Progress Bar, XP Breakdown and Insight (show new randomly generated insight aslong as greater than 1)
-8. *Acheivements* -> View Completed Achievements, Pending Achievements, Summary with Completion Rate and Progress Bar
+8. *Achievements* -> View Completed Achievements, Pending Achievements, Summary with Completion Rate and Progress Bar
 9. *Tutorial* -> Help Screen
 0. *Rage Quit* -> Exit Application
 
 **Pixel** -> Secret Phrase, Unlocks Easter Egg Achievements 
 
 
-#### XP BREAKDOWN:
 ——————————————————————————————————————————————————————————————————————————————————————
 * You get 10 XP just for making a note
 * Every 10 words = 1 XP, max 50 XP per note
@@ -27,7 +29,6 @@
 * 5 XP if title is longer than 20 characters
 
 
-#### ACHIEVEMENTS: (23)
 ——————————————————————————————————————————————————————————————————————————————————————
 *FIRST QUEST*: Complete your first note 
 *SPEEDRUN CHAMPION*:Create 3+ notes on same day
@@ -48,17 +49,16 @@
 *CONSISTENCY KING*: Notes spanning 30+ different days
 *ARCHIVE MASTER*: Create notes in 12 different months
 *TAG TORNADO*: Use 100+ tags across all notes
-*ENCYLCOPEDIA EDITOR*: Create 200+ notes 
-*VOCABULARY VIRTUOSO*: Use 1000+ unique words accross all notes
+*ENCYCLOPEDIA EDITOR*: Create 200+ notes 
+*VOCABULARY VIRTUOSO*: Use 1000+ unique words across all notes
 *LEGEND SEEKER*: Find 5 easter eggs 
 *MYTHICAL EXPLORER*: Find 10 easter eggs
 
 
-#### EASTER EGGS: (18)
 ——————————————————————————————————————————————————————————————————————————————————————
 **Common (2):** 
 *Night Owl*- Write 5+ notes between 10 PM and 5 AM
-*Tag Collector*- Average 3+ tags per note across all notes
+Tag Collector- Average 3+ tags per note across all notes
 
 **Uncommon (5):**
 *Weekend Writer*- Create 20+ notes on weekends
@@ -66,7 +66,6 @@
 *Minimalist Master*- 80%+ of your notes are under 50 characters
 *Technical Mindset*- Include programming terms in your notes (hello world, debug, compile, etc)
 *Revisions Master*- Edit 50%+ of your notes after creation
-*Word Wizard*- Use every letter of the alphabet across all notes
 
 **Rare (5):**
 *Rapid Creator*- Create 5+ notes in the same hour
@@ -75,10 +74,12 @@
 *Code Formatter*- Include code-like formatting (```, //, function, method, class, import) in 2+ notes
 *Inception Mode*- Write a note where the content mentions its own title
 
+**Epic (3):**
+*Hidden Messenger-* Create a note with the first letter of each line spells out a word or message when read vertically. (first letters spell "help", "secret", "hidden", or "pages")
+*Word Wizard*- Use every letter of the alphabet across all notes
+*Fibonacci Writer*- Notes with word counts that follow Fibonacci sequence (1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89...)
 
 **Legendary (3):**
 *Mirror Master*- Create a note with a palindromic title
 *Binary Prophet-* Create notes with titles/content that contain only 1s and 0s
 *The Matrix-* Create exactly 101 notes
-*Fibonacci Writer*- Notes with word counts that follow Fibonacci sequence (1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89...)
-*Hidden Messenger-* Create a note with the first letter of each line spells out a word or message when read vertically. (first letters spell "help", "secret", "hidden", or "pages")

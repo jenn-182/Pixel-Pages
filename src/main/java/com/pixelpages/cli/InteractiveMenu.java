@@ -18,7 +18,7 @@ public class InteractiveMenu {
     public void start() throws IOException {
         while (true) {
             displayMainMenu();
-            String choice = inputHandler.readLine("Choose your adventure! (Enter a number 0-10): ");
+            String choice = inputHandler.readLine("Choose your adventure! (Enter a number 0-9): ");
 
             try {
                 if (handleMenuChoice(choice)) {

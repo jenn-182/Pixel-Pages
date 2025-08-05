@@ -1,0 +1,156 @@
+---
+title: HTML Notes
+created: 2025-08-04T22:54:03.503483
+modified: 2025-08-04T22:54:03.506713
+---
+
+* HTML is the skeleton of all web pages
+* HTML provides structure to the content appearing on a website, such as images, text or videos
+* Right-click on any page on the internet, choose “Inspect,” and you’ll see HTML in a panel of your screen
+* ==HyperText Markup Language== ->  HTML for short
+* A _markup_ language is a computer language that defines the structure and presentation of raw text
+* In HTML, the computer can interpret _raw text_ that is wrapped in HTML elements
+* _HyperText_ is text displayed on a computer or device that provides access to other text through *links*, also known as *hyperlinks* 
+* You can layer HTML with CSS and JavaScript to create visually compelling and dynamic websites
+
+
+* HTML is composed of **elements**
+* ==Elements== -  structure the webpage and define its content
+* 
+
+* paragraph element is made up of:
+	- An _opening tag_ (`<p>`)
+	- The content (“Hello World!” text)
+	- A _closing tag_ (`</p>`)
+* A _tag_ and the _content_ between it is called an HTML element
+- There are many tags that we can use to organize and display text and other types of content, like images
+- Each part of the element:
+	- **HTML element (or simply, element)** — a unit of content in an HTML document formed by HTML tags and the text or media it contains
+	- **HTML Tag** — the element name, surrounded by an opening (`<`) and closing (`>`) angle bracket
+	- **Opening Tag** — the first HTML tag used to start an HTML element. The tag type is surrounded by opening and closing angle brackets
+	- **Content** — The information (text or other elements) contained between the opening and closing tags of an HTML element
+	- **Closing tag** — the second HTML tag used to end an HTML element. Closing tags have a forward slash (`/`) inside of them, directly after the left angle bracket
+
+
+* Only content inside the opening and closing body tags an be displayed to the screen
+* Once the file has a body, many different types of content – including text, images, and buttons can be added to the body
+* EX:  `<body>  
+		 `<p>What's up, doc?</p>  `
+	 `</body>`
+
+
+
+* HTML is organized as a collection of family tree relationships
+* When an element is contained inside another element, it is considered the _child_ of that element
+* The child element is said to be _nested_ inside of the _parent_ element
+* The relationship between elements and their ancestor and descendent elements is known as _hierarchy_
+* Understanding HTML hierarchy is important because child elements can inherit behavior and styling from their parent element
+
+
+* Used to capture attention or describe content 
+* 6 different types of heading elements: (All subsequent decrease in size)
+1. `<h1>` -> Used for main headings (all others are subheadings)
+2. `<h2>`
+3. `<h3>`
+4. `<h4>`
+5. `<h5>`
+6. `<h6>`
+
+
+ **-> Container that divide the page into sections** 
+* Allow us to group HTML elements to apply the same styles for all HTML elements inside
+* Can contain any text or other HTML elements, such as links, images, or videos
+* Remember to always add two spaces of indentation when you nest elements inside of `<div>`s for better readability
+
+
+==Attributes-== content added to the opening tag of an element and can provide information and change styling 
+* Made up of two parts:
+1. The *name* of the attribute 
+2. The *value* of the attribute 
+**Identify Attribute** -> `id` -> used to specify different content and is helpful when using an element more than once
+
+
+* If you want to display text in HTML, you can use a _paragraph_ or _span_
+**Paragraphs** -> `<p>` -> contain a block of plain text
+**Span** -> `<span>` -> contains short pieces of text or other HTML
+* Used to separate small pieces of content that are on the same line as other content 
+* It’s best to use a `<span>` element when you want to target a specific piece of content that is _inline_, or on the same line as other text.=
+* If you want to divide your content into _blocks_, it’s better to use a `<div>`
+
+
+-**Italicized:** `<em>` -> used to emphasize text
+    - ==Em element==
+    - Uses closing tag
+**Bold:**  `<strong>` -> used to define text as important
+    - Uses closing
+
+
+* The spacing between code in an HTML file doesn’t affect the positioning of elements in the browser
+* To modify the spacing in the browser, we can use HTMLs line break element
+**Line Break**: `<br>` -> used to separate lines
+    - ==Empty Tag== : _no_ closing tag and no content
+    - Also called self-closing tags
+    - Only composed of a starting tag
+
+
+-> used to create a list of items in no particular order 
+* An element
+* An unordered list outlines individual _list items_ with a bullet point
+* Should not hold raw text and wont automatically format raw text into an unordered list of items
+List Item Tag -> `<li>` -> Individual list items 
+* Used to describe an item in a list
+
+
+Ordered Lists: `<ol>`
+->
+
+
+
+
+- HTML code `<button>Like</button>` -> you can create a button with the label "Like"
+- Use < for opening tag
+- Use </ for closing tag
+- The text between the opening and closing tags of a button becomes the button's label
+- Button labels within <> can include spaces
+- With buttons, programs change webpages based on user behavior. For example, clicking _Next_ can run code that cycles through characters
+- Buttons display next to each other even if they're on separate lines of code (use `<br>` to stack buttons on top of each other)
+
+
+- **Line Break**: `<br>` -> used to separate lines
+    - ==Empty Tag== : _no_ closing tag and no content
+    - Also called self-closing tags
+- **Italicized:** `<em>` -> used to emphasize text
+    - ==Em element==
+    - Uses closing tag
+- **Bold:**  `<strong>` -> used to define text as important
+    - Uses closing
+- You can combine tags to add multiple elements to a button
+    - _EX_: `**continue anyway**'
+- **Paragraph:** `<p>` -> used to separate different paragraphs on the page
+    - Uses closing
+- **Headers:** -> used for different sized headers
+    - `<h1> </h1>; <h2> </h2>; <h3> </h3>;`
+    - h1 is the largest size, and increments smaller
+
+
+- To start **creating a link**, we add the text in between the `<a>` and `</a>` tags. This won't highlight the text yet
+- ==Anchor Tag==: -> `<a>`
+- To link the text to a webpage, we add `href=""`along with a **Uniform Resource Locator (URL).**
+- ==Hypertext Reference==: -> `href`
+- _EX_: `<a href = " https://mimo.org " >Learn to Code </a>`
+- ==Attribute:== all attributes have two things in common: they provide extra information and they go inside the opening tag
+    - Attributes are added after the name of the tag, and before the `>` closing sign
+    - `href` is an attribute
+- We link to a webpage by adding `=` after the attribute and a URL as a value in between quotes.
+
+
+- To **add images** to a webpage, we start with the `<img>` tag.
+    - Example of an empty tag (_no_ closing tag)
+- To display an image, an image tag needs the `src` **attribute**. 
+    - `src` -> stands for **source**.
+- We set the image we want to display with an `=` sign and the image's address between double quotes.
+- We can use attributes to change the size of images:
+    - *`width` and `height` attributes use pixels as the default unit of measurement
+    - to set the width of an image -> set as 100px, code `width = "100"`.
+- _EX_: `< img src="https://mimo.app/i/dog.png" width="100" height="100" >`
+- *EX*: `<pa> <a href= "https://mimo.org/coding" > <em> Link </em> </a> </p>`
