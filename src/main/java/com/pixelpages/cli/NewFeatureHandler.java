@@ -296,11 +296,11 @@ public class NewFeatureHandler {
         String mostUsedWord = GameUtilities.findMostUsedWord(notes);
         int totalWords = notes.stream().mapToInt(n -> n.getContent().split("\\s+").length).sum();
         long nightQuests = GameUtilities.countNotesMatching(notes, note -> {
-            int hour = note.getCreated().getHour();
+            int hour = note.getCreatedAt().getHour();
             return hour >= 22 || hour <= 5;
         });
         long weekendQuests = GameUtilities.countNotesMatching(notes, note -> {
-            int dayOfWeek = note.getCreated().getDayOfWeek().getValue();
+            int dayOfWeek = note.getCreatedAt().getDayOfWeek().getValue();
             return dayOfWeek == 6 || dayOfWeek == 7;
         });
         String busiestMonth = GameUtilities.findBusiestMonth(notes);
@@ -378,12 +378,12 @@ public class NewFeatureHandler {
         // Time-based Achievements
         achievements.put("SPEEDRUN CHAMPION: Create 3 notes in one day", checkSpeedrun(notes));
         achievements.put("NIGHT OWL: Write 5 notes after 10 PM", GameUtilities.countNotesMatching(notes, note -> {
-            int hour = note.getCreated().getHour();
+            int hour = note.getCreatedAt().getHour();
             return hour >= 22 || hour <= 5;
         }) >= 5);
         achievements.put("WEEKEND WARRIOR: Write 10 notes on weekends",
                 GameUtilities.countNotesMatching(notes, note -> {
-                    int dayOfWeek = note.getCreated().getDayOfWeek().getValue();
+                    int dayOfWeek = note.getCreatedAt().getDayOfWeek().getValue();
                     return dayOfWeek == 6 || dayOfWeek == 7;
                 }) >= 10);
 
@@ -406,7 +406,7 @@ public class NewFeatureHandler {
         achievements.put("TIME TRAVELER: Create multiple notes in same hour", checkTimeTravel(notes));
 
         Set<Integer> uniqueMonths = notes.stream()
-                .map(note -> note.getCreated().getMonthValue())
+                .map(note -> note.getCreatedAt().getMonthValue())
                 .collect(Collectors
                         .toSet());
         achievements.put("ARCHIVE MASTER: Create notes in 12 different months", uniqueMonths.size() >= 12);
@@ -429,7 +429,7 @@ public class NewFeatureHandler {
     private boolean checkSpeedrun(List<Note> notes) {
         Map<String, Long> dailyCounts = notes.stream()
                 .collect(Collectors.groupingBy(
-                        note -> note.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        note -> note.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                         Collectors.counting()));
         return dailyCounts.values().stream().anyMatch(count -> count >= 3);
     }
@@ -437,13 +437,19 @@ public class NewFeatureHandler {
     private boolean checkTimeTravel(List<Note> notes) {
         Map<String, Long> hourGroups = notes.stream()
                 .collect(Collectors.groupingBy(
-                        note -> note.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
+                        note -> note.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
                         Collectors.counting()));
         return hourGroups.values().stream().anyMatch(count -> count >= 3);
     }
 
     public String getUserRank() {
-        List<Note> allNotes = noteStorage.listAllNotes();
-        return GameUtilities.getUserRank(allNotes);
+        try {
+            List<Note> allNotes = noteStorage.listAllNotes();
+            return GameUtilities.getUserRank(allNotes);
+        } catch (IOException e) {
+            // Log the error for debugging
+            System.err.println("Error accessing notes for rank calculation: " + e.getMessage());
+            return "UNKNOWN RANK"; // Return a safe default
+        }
     }
 }

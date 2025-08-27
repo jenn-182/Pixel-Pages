@@ -276,31 +276,35 @@ public class CommandHandler {
         }
     }
 
-    // Add this method if it doesn't exist
     private Optional<NoteWithFilename> findNoteByIdentifier(String identifier) {
-        List<Note> allNotes = noteStorage.listAllNotes();
-
-        // Try to find by number first (1-based indexing)
         try {
-            int noteIndex = Integer.parseInt(identifier) - 1;
-            if (noteIndex >= 0 && noteIndex < allNotes.size()) {
-                Note note = allNotes.get(noteIndex);
-                String filename = noteStorage.generateUniqueFilename(note.getTitle());
-                return Optional.of(new NoteWithFilename(note, filename));
-            }
-        } catch (NumberFormatException e) {
-            // Not a number, continue with title search
-        }
+            List<Note> allNotes = noteStorage.listAllNotes(); 
 
-        // Search by title
-        for (Note note : allNotes) {
-            if (note.getTitle().toLowerCase().contains(identifier.toLowerCase())) {
-                String filename = noteStorage.generateUniqueFilename(note.getTitle());
-                return Optional.of(new NoteWithFilename(note, filename));
+            // Try to find by number first (1-based indexing)
+            try {
+                int noteIndex = Integer.parseInt(identifier) - 1;
+                if (noteIndex >= 0 && noteIndex < allNotes.size()) {
+                    Note note = allNotes.get(noteIndex);
+                    String filename = noteStorage.generateUniqueFilename(note.getTitle());
+                    return Optional.of(new NoteWithFilename(note, filename));
+                }
+            } catch (NumberFormatException e) {
             }
-        }
 
-        return Optional.empty();
+            // Search by title
+            for (Note note : allNotes) {
+                if (note.getTitle().toLowerCase().contains(identifier.toLowerCase())) {
+                    String filename = noteStorage.generateUniqueFilename(note.getTitle());
+                    return Optional.of(new NoteWithFilename(note, filename));
+                }
+            }
+
+            return Optional.empty();
+        } catch (IOException e) {
+            // Handle the IOException
+            System.err.println("Error accessing notes: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
     // Helper method specifically for reading selection (similar to edit but with
@@ -325,7 +329,7 @@ public class CommandHandler {
 
             outputHandler.displayLine(String.format("#%d: %s", i + 1, note.getTitle()));
             outputHandler.displayLine(String.format("Created: %s",
-                    note.getCreated().format(DISPLAY_DATE_FORMATTER)));
+                    note.getCreatedAt().format(DISPLAY_DATE_FORMATTER)));
             outputHandler.displayLine(String.format("Preview: %s", preview));
 
             if (!note.getTags().isEmpty()) {
@@ -525,7 +529,7 @@ public class CommandHandler {
         }
 
         // Update modification time
-        noteToEdit.setModified(java.time.LocalDateTime.now());
+        noteToEdit.setUpdatedAt(java.time.LocalDateTime.now());
 
         // Save the updated note
         noteStorage.saveNote(noteToEdit, filename);
@@ -620,7 +624,7 @@ public class CommandHandler {
                         .map(note -> String.format("#%d: %s (Created: %s)",
                                 notes.indexOf(note) + 1,
                                 note.getTitle(),
-                                note.getCreated().format(DISPLAY_DATE_FORMATTER)))
+                                note.getCreatedAt().format(DISPLAY_DATE_FORMATTER)))
                         .collect(Collectors.toList()));
 
         for (int i = 0; i < notes.size(); i++) {
@@ -629,8 +633,8 @@ public class CommandHandler {
             // Use displayHeader for each note title instead of manual formatting
             outputHandler.displayHeader("NOTE #" + (i + 1) + ": " + note.getTitle());
 
-            outputHandler.displayLine("Created:  " + note.getCreated().format(DISPLAY_DATE_FORMATTER));
-            outputHandler.displayLine("Modified: " + note.getModified().format(DISPLAY_DATE_FORMATTER));
+            outputHandler.displayLine("Created:  " + note.getCreatedAt().format(DISPLAY_DATE_FORMATTER));
+            outputHandler.displayLine("Modified: " + note.getUpdatedAt().format(DISPLAY_DATE_FORMATTER));
 
             if (!note.getTags().isEmpty()) {
                 outputHandler.displayLine("Tags:     " + String.join(", ", note.getTags()));
@@ -656,8 +660,8 @@ public class CommandHandler {
 
         outputHandler.displayLine("DETAILS:");
         outputHandler.displayLine("─".repeat(62));
-        outputHandler.displayLine("Created:    " + note.getCreated().format(DISPLAY_DATE_FORMATTER));
-        outputHandler.displayLine("Modified:   " + note.getModified().format(DISPLAY_DATE_FORMATTER));
+        outputHandler.displayLine("Created:    " + note.getCreatedAt().format(DISPLAY_DATE_FORMATTER));
+        outputHandler.displayLine("Modified:   " + note.getUpdatedAt().format(DISPLAY_DATE_FORMATTER));
 
         if (!note.getTags().isEmpty()) {
             String tagStr = String.join(", ", note.getTags());
@@ -704,7 +708,7 @@ public class CommandHandler {
         outputHandler.displayLine("DELETION TARGET:");
         outputHandler.displayLine("═".repeat(62));
         outputHandler.displayLine("Title:    " + note.getTitle());
-        outputHandler.displayLine("Created:  " + note.getCreated().format(DISPLAY_DATE_FORMATTER));
+        outputHandler.displayLine("Created:  " + note.getCreatedAt().format(DISPLAY_DATE_FORMATTER));
         outputHandler.displayLine("Status:   Marked for digital obliteration");
         outputHandler.displayLine("═".repeat(62));
         outputHandler.displayLine("");
@@ -726,7 +730,7 @@ public class CommandHandler {
         List<String> resultStrings = results.stream()
                 .map(note -> String.format("%s (Created: %s, Tags: %s)",
                         note.getTitle(),
-                        note.getCreated().format(DISPLAY_DATE_FORMATTER),
+                        note.getCreatedAt().format(DISPLAY_DATE_FORMATTER),
                         note.getTags().isEmpty() ? "None" : String.join(", ", note.getTags())))
                 .collect(Collectors.toList());
 
@@ -735,8 +739,8 @@ public class CommandHandler {
         for (int i = 0; i < results.size(); i++) {
             Note note = results.get(i);
             outputHandler.displayLine((i + 1) + ". " + note.getTitle());
-            outputHandler.displayLine("   Created: " + note.getCreated().format(DISPLAY_DATE_FORMATTER));
-            outputHandler.displayLine("   Last Saved: " + note.getModified().format(DISPLAY_DATE_FORMATTER));
+            outputHandler.displayLine("   Created: " + note.getCreatedAt().format(DISPLAY_DATE_FORMATTER));
+            outputHandler.displayLine("   Last Saved: " + note.getUpdatedAt().format(DISPLAY_DATE_FORMATTER));
             if (!note.getTags().isEmpty()) {
                 outputHandler.displayLine("   Tags: " + String.join(", ", note.getTags()));
             }

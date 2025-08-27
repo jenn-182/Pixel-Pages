@@ -91,7 +91,7 @@ public class GameUtilities {
     public static long calculateDaysActive(List<Note> notes) {
         if (notes.isEmpty()) return 0;
         LocalDateTime firstNote = notes.stream()
-            .map(Note::getCreated)
+            .map(Note::getCreatedAt)
             .min(LocalDateTime::compareTo)
             .orElse(LocalDateTime.now());
         return ChronoUnit.DAYS.between(firstNote, LocalDateTime.now());
@@ -160,7 +160,7 @@ public class GameUtilities {
     public static String findBusiestMonth(List<Note> notes) {
         Map<String, Long> monthCounts = notes.stream()
                 .collect(Collectors.groupingBy(
-                        note -> note.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                        note -> note.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM")),
                         Collectors.counting()));
 
         return monthCounts.entrySet().stream()

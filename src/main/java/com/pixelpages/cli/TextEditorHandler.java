@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -294,7 +296,7 @@ CONTENT:
         // Update the existing note
         existingNote.setTitle(title);
         existingNote.setContent(content.toString().trim());
-        existingNote.setModified(java.time.LocalDateTime.now());
+        existingNote.setUpdatedAt(LocalDateTime.now()); // Fixed method name
         
         // Update tags if provided
         if (!tags.isEmpty() && !tags.equals("work, personal, important")) {
@@ -310,8 +312,8 @@ CONTENT:
         if (!existingNote.getTags().isEmpty()) {
             outputHandler.displayLine(" Tags: " + String.join(", ", existingNote.getTags()));
         }
-        outputHandler.displayLine(" Last modified: " + existingNote.getModified().format(
-            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        outputHandler.displayLine(" Last modified: " + existingNote.getUpdatedAt().format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))); // Fixed method name
         
         return true;
     }

@@ -1,218 +1,175 @@
 package com.pixelpages.storage;
 
 import com.pixelpages.model.Note;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-//import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 public class NoteStorage {
-
-    private String notesDirectory;
-    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private final String notesDirectory;
+    private final ObjectMapper objectMapper;
 
     public NoteStorage(String notesDirectory) {
-        
         this.notesDirectory = notesDirectory;
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
         
-        //ensure the notes directory exists
+        // Ensure directory exists
         try {
             Files.createDirectories(Paths.get(notesDirectory));
         } catch (IOException e) {
-            System.err.println("Failed to create notes directory: " + e.getMessage());
+            throw new RuntimeException("Failed to create notes directory", e);
         }
     }
-
 
     public void saveNote(Note note, String filename) throws IOException {
+        Objects.requireNonNull(note, "Note cannot be null");
+        Objects.requireNonNull(filename, "Filename cannot be null");
         
-        // Generate the full path for the note file
-        Path filePath = Paths.get(notesDirectory, filename);
-
-        //always update modified timestamp when saving 
-        note.updateModifiedTimestamp();
-
-        //Build Yammal Header
-        StringBuilder yamlHeader = new StringBuilder();
-        yamlHeader.append("---\n");
-        yamlHeader.append("title: ").append(note.getTitle()).append("\n");
-        yamlHeader.append("created: ").append(note.getCreated().format(ISO_FORMATTER)).append("\n");
-        yamlHeader.append("modified: ").append(note.getModified().format(ISO_FORMATTER)).append("\n");
-        if (!note.getTags().isEmpty()) {
-            yamlHeader.append("tags: [").append(String.join(", ", note.getTags())).append("]\n");
+        // Ensure filename has .note extension
+        String normalizedFilename = filename.endsWith(".note") ? filename : filename + ".note";
+        
+        // Set the filename on the note
+        note.setFilename(normalizedFilename);
+        
+        // Update the updatedAt timestamp
+        note.setUpdatedAt(LocalDateTime.now());
+        
+        Path notePath = Paths.get(notesDirectory, normalizedFilename);
+        
+        try {
+            objectMapper.writeValue(notePath.toFile(), note);
+        } catch (IOException e) {
+            throw new IOException("Failed to save note: " + normalizedFilename, e);
         }
-        // Add more fields here if needed 
-        yamlHeader.append("---\n\n");
-
-        // Write the YAML header and content to the file
-        // Use Files.writeString to write the content to the file
-        // This will overwrite the file if it already exists
-        String fileContent = yamlHeader.toString() + note.getContent();
-        Files.writeString(filePath, fileContent);
-
     }
-
 
     public Note readNote(String filename) throws IOException {
+        Objects.requireNonNull(filename, "Filename cannot be null");
         
-        // Check if the file exists
-        Path filePath = Paths.get(notesDirectory, filename);
+        String normalizedFilename = filename.endsWith(".note") ? filename : filename + ".note";
+        Path notePath = Paths.get(notesDirectory, normalizedFilename);
         
-        // If the file does not exist, throw an exception
-        if (!Files.exists(filePath)) {
-            throw new IOException("Note file does not exist: " + filename);
+        if (!Files.exists(notePath)) {
+            throw new IOException("Note file not found: " + normalizedFilename);
         }
         
-        String fullContent = Files.readString(filePath);
-
-        // Check for YAML header delimiter
-        if (fullContent.startsWith("---")) {
-            int firstDelimiterEnd = fullContent.indexOf("\n---", 3); // Find the second "---"
-            if (firstDelimiterEnd != -1) {
-                String yamlSection = fullContent.substring(3, firstDelimiterEnd).trim(); // Content between "---" and "---"
-                String noteContent = fullContent.substring(firstDelimiterEnd + 4).trim(); // Content after the second "---"
-
-                // Simple YAML parsing
-                String title = "";
-                LocalDateTime created = LocalDateTime.MIN; // Default value
-                LocalDateTime modified = LocalDateTime.MIN; // Default value
-                List<String> tags = new ArrayList<>();
-
-                // Split the YAML section into lines and parse key-value pairs
-                String[] yamlLines = yamlSection.split("\n");
-                for (String line : yamlLines) {
-                    line = line.trim();
-
-                    // Parse each line based on the expected format
-                    if (line.startsWith("title:")) {
-                        title = line.substring("title:".length()).trim();
-                    } else if (line.startsWith("created:")) {
-                        try {
-                            created = LocalDateTime.parse(line.substring("created:".length()).trim(), ISO_FORMATTER);
-                        } catch (java.time.format.DateTimeParseException e) {
-                            System.err.println("Warning: Could not parse created timestamp in " + filename + ": " + e.getMessage());
-                        }
-                    } else if (line.startsWith("modified:")) {
-                        try {
-                            modified = LocalDateTime.parse(line.substring("modified:".length()).trim(), ISO_FORMATTER);
-                        } catch (java.time.format.DateTimeParseException e) {
-                            System.err.println("Warning: Could not parse modified timestamp in " + filename + ": " + e.getMessage());
-                        }
-                    } else if (line.startsWith("tags:")) {
-                        String tagsString = line.substring("tags:".length()).trim();
-                        if (tagsString.startsWith("[") && tagsString.endsWith("]")) {
-                            tagsString = tagsString.substring(1, tagsString.length() - 1);
-                            tags = Arrays.stream(tagsString.split(","))
-                                         .map(String::trim)
-                                         .filter(s -> !s.isEmpty())
-                                         .collect(Collectors.toList());
-                        }
-                    }
-                }
-
-                // Create and return the Note object with parsed metadata
-                return new Note(title, noteContent, created, modified, tags);
-
-            } else {
-                // If no closing delimiter, treat as legacy format
-                System.err.println("Warning: Missing closing YAML delimiter in " + filename + ". Treating as legacy format.");
-                return readLegacyNote(fullContent);
+        try {
+            Note note = objectMapper.readValue(notePath.toFile(), Note.class);
+            // Ensure filename is set
+            if (note.getFilename() == null) {
+                note.setFilename(normalizedFilename);
             }
-        } else {
-            // Legacy format
-            return readLegacyNote(fullContent);
+            return note;
+        } catch (IOException e) {
+            throw new IOException("Failed to read note: " + normalizedFilename, e);
         }
     }
 
-    // Reads a note in legacy format (without YAML header)
-    // This method assumes the first line is the title and the rest is the content
-    private Note readLegacyNote(String content) {
-        List<String> lines = content.lines().collect(Collectors.toList());
-        if (lines.isEmpty()) {
-            return new Note("Untitled (Legacy)", "",new ArrayList<>()); // Return a default note if empty
+    public List<Note> listAllNotes() throws IOException {
+        List<Note> notes = new ArrayList<>();
+        Path dirPath = Paths.get(notesDirectory);
+        
+        if (!Files.exists(dirPath)) {
+            return notes;
         }
-        // The first line is the title, the rest is the content
-        String title = lines.get(0).trim();
-        String noteContent = lines.stream()
-                .skip(3) // Skip title and separator lines
-                .collect(Collectors.joining("\n"));
-        return new Note(title, noteContent, new ArrayList<>()); // No tags or timestamps for legacy
+        
+        try {
+            Files.list(dirPath)
+                    .filter(path -> path.toString().endsWith(".note"))
+                    .forEach(path -> {
+                        try {
+                            Note note = objectMapper.readValue(path.toFile(), Note.class);
+                            // Ensure filename is set
+                            if (note.getFilename() == null) {
+                                note.setFilename(path.getFileName().toString());
+                            }
+                            notes.add(note);
+                        } catch (IOException e) {
+                            System.err.println("Failed to read note file: " + path.getFileName());
+                        }
+                    });
+        } catch (IOException e) {
+            throw new IOException("Failed to list notes", e);
+        }
+        
+        return notes;
+    }
+
+    // Add the missing deleteNote method
+    public void deleteNote(String filename) throws IOException {
+        Objects.requireNonNull(filename, "Filename cannot be null");
+        
+        String normalizedFilename = filename.trim();
+        if (normalizedFilename.isEmpty()) {
+            throw new IllegalArgumentException("Filename cannot be empty");
+        }
+        
+        // Add .note extension if missing
+        if (!normalizedFilename.endsWith(".note")) {
+            normalizedFilename += ".note";
+        }
+        
+        Path notePath = Paths.get(notesDirectory, normalizedFilename);
+        
+        // Check if file exists
+        if (!Files.exists(notePath)) {
+            throw new IOException("Note file does not exist: " + normalizedFilename);
+        }
+        
+        // Check if it's actually a file (not a directory)
+        if (!Files.isRegularFile(notePath)) {
+            throw new IOException("Path is not a regular file: " + normalizedFilename);
+        }
+        
+        // Attempt deletion
+        try {
+            Files.delete(notePath);
+        } catch (IOException e) {
+            throw new IOException("Failed to delete note file: " + normalizedFilename, e);
+        }
     }
 
     public String generateUniqueFilename(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            title = "untitled";
+        }
         
-        // Generate a base name from the title, replacing spaces and special characters
-        String baseName = title.toLowerCase().replaceAll("[^a-z0-9]", "-"); // Simple slugify
-        if (baseName.isEmpty()) {
-            baseName = "untitled";
+        // Clean the title for use as filename
+        String baseFilename = title.trim()
+                .replaceAll("[^a-zA-Z0-9\\s-_]", "") // Remove special characters
+                .replaceAll("\\s+", "_") // Replace spaces with underscores
+                .toLowerCase();
+        
+        if (baseFilename.isEmpty()) {
+            baseFilename = "note";
         }
-
-        // Ensure the base name is unique by appending a counter if necessary
-        String filename = baseName + ".note";
-        int counter = 0;
-        Path filePath = Paths.get(notesDirectory, filename);
-
-        // Check if the file already exists and increment the counter
-        while (Files.exists(filePath)) {
+        
+        String filename = baseFilename + ".note";
+        Path path = Paths.get(notesDirectory, filename);
+        
+        int counter = 1;
+        while (Files.exists(path)) {
+            filename = baseFilename + "_" + counter + ".note";
+            path = Paths.get(notesDirectory, filename);
             counter++;
-            filename = baseName + "-" + counter + ".note";
-            filePath = Paths.get(notesDirectory, filename);
         }
-
-        // Return the unique filename
+        
         return filename;
     }
 
-    public List<Note> listAllNotes()  {
-        
-        // Get all note files in the directory
-        // Use Files.walk to traverse the directory and filter for .note files
-        // Return a list of Note objects created from the files
-        try (Stream<Path> paths = Files.walk(Paths.get(notesDirectory))) {
-            return paths
-                .filter(Files::isRegularFile)
-                .filter(p -> p.toString().endsWith(".note") || p.toString().endsWith(".txt"))
-                .map(p -> {
-                    try {
-                       // Read the note from the file
-                        return readNote(p.getFileName().toString());
-                    } catch (IOException e) {
-                        System.err.println("Warning: Could not read " + p.getFileName() + ": " + e.getMessage());
-                        return null; // Return null for unreadable files
-                    }
-                })
-                .filter(note -> note != null) // Remove nulls from the list
-                .collect(Collectors.toList());
-        } catch (IOException e) {
-            System.err.println("Error listing notes: " + e.getMessage());
-            return Collections.emptyList(); // Return an empty list on error
-        }
-    }
-
-    //Helper method to get the actual filename of a note
-    public String getFilenameForNote(Note note) {
-        return generateUniqueFilename(note.getTitle());
-    }
-
-    public List<Path> getNoteFiles() {
-        try (Stream<Path> paths = Files.walk(Paths.get(notesDirectory))) {
-            return paths
-                .filter(Files::isRegularFile)
-                .filter(p -> p.toString().endsWith(".note") || p.toString().endsWith(".txt"))
-                .collect(Collectors.toList());
-        } catch (IOException e) {
-            System.err.println("Error retrieving note files: " + e.getMessage());
-            return Collections.emptyList(); // Return an empty list on error
-        }
+    public boolean noteExists(String filename) {
+        String normalizedFilename = filename.endsWith(".note") ? filename : filename + ".note";
+        Path notePath = Paths.get(notesDirectory, normalizedFilename);
+        return Files.exists(notePath);
     }
 }

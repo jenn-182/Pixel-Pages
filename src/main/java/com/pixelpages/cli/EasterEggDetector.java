@@ -60,7 +60,7 @@ public class EasterEggDetector {
 
         // Night owl detection
         long nightNotes = GameUtilities.countNotesMatching(notes, note -> {
-            int hour = note.getCreated().getHour();
+            int hour = note.getCreatedAt().getHour();
             return hour >= 22 || hour <= 5;
         });
 
@@ -71,7 +71,7 @@ public class EasterEggDetector {
 
         // Weekend warrior detection
         long weekendNotes = GameUtilities.countNotesMatching(notes, note -> {
-            int dayOfWeek = note.getCreated().getDayOfWeek().getValue();
+            int dayOfWeek = note.getCreatedAt().getDayOfWeek().getValue();
             return dayOfWeek == 6 || dayOfWeek == 7;
         });
 
@@ -83,7 +83,7 @@ public class EasterEggDetector {
         }
 
         long earlyNotes = GameUtilities.countNotesMatching(notes, note -> {
-            int hour = note.getCreated().getHour();
+            int hour = note.getCreatedAt().getHour();
             return hour >= 5 && hour <= 7;
         });
 
@@ -101,7 +101,7 @@ public class EasterEggDetector {
         // Time traveler detection
         Map<String, List<Note>> timeGroups = notes.stream()
                 .collect(Collectors.groupingBy(
-                        note -> note.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH"))));
+                        note -> note.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH"))));
 
         boolean foundTimeTravel = timeGroups.values().stream().anyMatch(group -> group.size() >= 5);
         if (foundTimeTravel) {
@@ -131,7 +131,7 @@ public class EasterEggDetector {
 
         Map<Integer, Long> hourCounts = notes.stream()
                 .collect(Collectors.groupingBy(
-                        note -> note.getCreated().getHour(),
+                        note -> note.getCreatedAt().getHour(),
                         Collectors.counting()));
 
         Optional<Map.Entry<Integer, Long>> mostActiveHour = hourCounts.entrySet().stream()
@@ -225,7 +225,7 @@ public class EasterEggDetector {
         }
 
         long editedNotes = notes.stream()
-                .filter(note -> !note.getCreated().equals(note.getModified()))
+                .filter(note -> !note.getCreatedAt().equals(note.getUpdatedAt()))
                 .count();
 
         if (editedNotes > notes.size() * 0.5) {
