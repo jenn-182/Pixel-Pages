@@ -43,23 +43,26 @@ class ApiService {
   }
 
   async createNote(note) {
-    return this.request('/api/notes', {
+    const response = await this.request('/api/notes', {
       method: 'POST',
       body: JSON.stringify(note),
     });
+    return response.data || response; // Extract note from gaming response
   }
 
-  async updateNote(filename, note) {
-    return this.request(`/api/notes/${encodeURIComponent(filename)}`, {
+  async updateNote(id, note) {
+    const response = await this.request(`/api/notes/${id}`, {
       method: 'PUT',
       body: JSON.stringify(note),
     });
+    return response.data || response;
   }
 
-  async deleteNote(filename) {
-    return this.request(`/api/notes/${encodeURIComponent(filename)}`, {
+  async deleteNote(id) {
+    const response = await this.request(`/api/notes/${id}`, {
       method: 'DELETE',
     });
+    return response.data || response;
   }
 
   async searchNotes(query) {
@@ -71,8 +74,18 @@ class ApiService {
     return this.request('/api/stats'); // Changed from /api/player/stats
   }
 
+  // Achievement operations
   async getAchievements() {
-    return this.request('/api/achievements'); // Changed from /api/player/achievements
+    const response = await this.request('/api/achievements');
+    return response.data ? response : { data: response }; // Handle gaming response format
+  }
+
+  async getAchievementsByCategory(category) {
+    return this.request(`/api/achievements/category/${category}`);
+  }
+
+  async getAchievementsByRarity(rarity) {
+    return this.request(`/api/achievements/rarity/${rarity}`);
   }
 }
 

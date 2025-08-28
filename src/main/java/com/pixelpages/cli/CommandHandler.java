@@ -150,9 +150,11 @@ public class CommandHandler {
         outputHandler.displayLine("");
         String content = inputHandler.readMultilineUntil("END");
 
-        Note newNote = new Note(title, content, tags);
+        Note note = new Note(title, content);
+        note.setTags(tags);
+
         String filename = noteStorage.generateUniqueFilename(title);
-        noteStorage.saveNote(newNote, filename);
+        noteStorage.saveNote(note, filename);
 
         outputHandler.displayLine("");
         outputHandler.showSuccess("Behold! '" + title + "' now exists in digital eternity!");

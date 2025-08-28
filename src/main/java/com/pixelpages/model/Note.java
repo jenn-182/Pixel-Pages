@@ -1,23 +1,59 @@
 package com.pixelpages.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.List;
+import jakarta.persistence.PrePersist;
 
+@Entity
+@Table(name = "notes")
 public class Note {
-    private String filename;
+    @Id
+    private Long id;
+
+    @PrePersist
+    public void prePersist() {
+        // Generate ID if not already set
+        if (this.id == null) {
+            this.id = System.currentTimeMillis();
+        }
+        
+        // Keep any existing code for dates, etc.
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+        if (this.updatedAt == null) {
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
-    private List<String> tags;
-    private String color;
+
+    @Column(name = "tags")
+    private String tagsString;
+
+    @Column(name = "color")
+    private String color = "#FFD700";
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "username", nullable = false)
+    private String username; // Link to player by username
+
+    @Column(name = "filename")
+    private String filename;
 
     // Constructors
     public Note() {
-        this.tags = new ArrayList<>();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -29,28 +65,58 @@ public class Note {
     }
 
     public Note(String title, String content, List<String> tags) {
-        this.title = Objects.requireNonNull(title, "Title cannot be null");
-        this.content = Objects.requireNonNull(content, "Content cannot be null");
-        this.createdAt = LocalDateTime.now();
+        this();
+        this.title = title;
+        this.content = content;
+        this.setTags(tags);
+    }
+
+    public Note(String title, String content, List<String> tags, String username) {
+        this();
+        this.title = title;
+        this.content = content;
+        this.setTags(tags);
+        this.username = username;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-        this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
     }
 
-    public Note(String title, String content, LocalDateTime created, LocalDateTime modified, List<String> tags) {
-        this.title = Objects.requireNonNull(title, "Title cannot be null");
-        this.content = Objects.requireNonNull(content, "Content cannot be null");
-        this.createdAt = Objects.requireNonNull(created, "Created date cannot be null");
-        this.updatedAt = Objects.requireNonNull(modified, "Modified date cannot be null");
-        this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
+    // Helper methods for tags
+    @Transient
+    public List<String> getTags() {
+        if (tagsString == null || tagsString.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return List.of(tagsString.split(","));
     }
 
-    // Getters and Setters
-    public String getFilename() {
-        return filename;
+    public void setTags(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            this.tagsString = "";
+        } else {
+            this.tagsString = String.join(",", tags);
+        }
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    // Calculate word count for XP
+    @Transient
+    public int getWordCount() {
+        if (content == null || content.trim().isEmpty()) {
+            return 0;
+        }
+        return content.trim().split("\\s+").length;
+    }
+
+    // All getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -69,12 +135,12 @@ public class Note {
         this.content = content;
     }
 
-    public List<String> getTags() {
-        return new ArrayList<>(tags);
+    public String getTagsString() {
+        return tagsString;
     }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
+    public void setTagsString(String tagsString) {
+        this.tagsString = tagsString;
     }
 
     public String getColor() {
@@ -101,16 +167,20 @@ public class Note {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public String toString() {
-        return "Note{" +
-                "filename='" + filename + '\'' +
-                ", title='" + title + '\'' +
-                ", content='" + content + '\'' +
-                ", tags=" + tags +
-                ", color='" + color + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+    public String getUsername() {
+        return username;
     }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
 }

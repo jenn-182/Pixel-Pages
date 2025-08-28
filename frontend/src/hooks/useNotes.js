@@ -23,7 +23,9 @@ export const useNotes = () => {
 
   const createNote = useCallback(async (noteData) => {
     try {
-      const newNote = await apiService.createNote(noteData);
+      const response = await apiService.createNote(noteData);
+      // Handle gaming response format
+      const newNote = response.data || response;
       setNotes(prevNotes => [newNote, ...prevNotes]);
       return newNote;
     } catch (err) {
@@ -32,12 +34,14 @@ export const useNotes = () => {
     }
   }, []);
 
-  const updateNote = useCallback(async (filename, noteData) => {
+  const updateNote = useCallback(async (id, noteData) => {
     try {
-      const updatedNote = await apiService.updateNote(filename, noteData);
+      const response = await apiService.updateNote(id, noteData);
+      // Handle gaming response format
+      const updatedNote = response.data || response;
       setNotes(prevNotes => 
         prevNotes.map(note => 
-          note.filename === filename ? updatedNote : note
+          note.id === id ? updatedNote : note
         )
       );
       return updatedNote;
@@ -47,11 +51,11 @@ export const useNotes = () => {
     }
   }, []);
 
-  const deleteNote = useCallback(async (filename) => {
+  const deleteNote = useCallback(async (id) => {
     try {
-      await apiService.deleteNote(filename);
+      await apiService.deleteNote(id);
       setNotes(prevNotes => 
-        prevNotes.filter(note => note.filename !== filename)
+        prevNotes.filter(note => note.id !== id)
       );
     } catch (err) {
       setError('Failed to delete note');
