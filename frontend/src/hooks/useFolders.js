@@ -51,10 +51,37 @@ const useFolders = () => {
     }
   };
 
+  // UPDATE FOLDER
+  const updateFolder = async (id, folderData) => {
+    try {
+      const response = await fetch(`/api/folders/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(folderData)
+      });
+
+      if (response.ok) {
+        const updatedFolder = await response.json();
+        setFolders(prevFolders => 
+          prevFolders.map(folder => folder.id === id ? updatedFolder : folder)
+        );
+        return updatedFolder;
+      } else {
+        throw new Error(`Failed to update folder: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error updating folder:', error);
+      throw error;
+    }
+  };
+
   return {
     folders,
     loading,
-    createFolder
+    createFolder,
+    updateFolder
   };
 };
 

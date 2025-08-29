@@ -1,268 +1,330 @@
 package com.pixelpages.controller;
 
 import com.pixelpages.model.Note;
-import com.pixelpages.model.Player;
 import com.pixelpages.service.NoteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api/notes")
 public class NoteController {
-    
+
     private final NoteService noteService;
-    
+
     public NoteController(NoteService noteService) {
         this.noteService = noteService;
     }
-    
-    // Get all notes
-    @GetMapping("/notes")
-    public List<Note> getAllNotes(@RequestParam(defaultValue = "PixelAdventurer") String username) {
+
+    // Get all notes for user
+    @GetMapping
+    public List<Note> getAllNotes(@RequestParam(defaultValue = "user") String username) {
         return noteService.getAllNotes(username);
     }
-    
-    // Get specific note
-    @GetMapping("/notes/{id}")
-    public ResponseEntity<Note> getNote(@PathVariable Long id) {
-        return noteService.getNoteById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+
+    // Get note by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Note> getNoteById(@PathVariable Long id) {
+        Optional<Note> note = noteService.getNoteById(id);
+        return note.map(ResponseEntity::ok)
+                  .orElse(ResponseEntity.notFound().build());
     }
-    
-    // Create note
-    @PostMapping("/notes")
-    public ResponseEntity<Map<String, Object>> createNote(
-            @RequestBody Map<String, Object> request,
-            @RequestParam(defaultValue = "PixelAdventurer") String username) {
-        
-        String title = (String) request.get("title");
-        String content = (String) request.get("content");
-        
-        Note note = noteService.createNote(title, content, username);
-        
-        // Handle tags if provided
-        if (request.containsKey("tags")) {
-            @SuppressWarnings("unchecked")
-            List<String> tags = (List<String>) request.get("tags");
-            note = noteService.updateNoteWithTags(note.getId(), note.getTitle(), note.getContent(), tags);
-        }
-        
-        String message = "Quest scroll '" + title + "' has been inscribed in the digital archives! +" + 
-                        note.getWordCount() + " XP earned!";
-        
-        return ResponseEntity.ok(createGamingResponse("CREATE_NOTE", note, message));
-    }
-    
-    // UPDATE: Fixed update method with gaming response
-    @PutMapping("/notes/{id}")
-    public ResponseEntity<Map<String, Object>> updateNote(
-            @PathVariable Long id,
-            @RequestBody Map<String, Object> request) {
+
+    // CREATE NOTE - This matches your NoteService method
+    @PostMapping("/create")
+    public ResponseEntity<?> createNote(@RequestBody CreateNoteRequest request) {
         try {
-            String title = (String) request.get("title");
-            String content = (String) request.get("content");
+            System.out.println("=== CREATE NOTE DEBUG ===");
+            System.out.println("Request: " + request.toString());
             
-            Note updated;
+            Note note = noteService.createNote(
+                request.getTitle(),
+                request.getContent(),
+                request.getColor(),
+                request.getTags(),
+                request.getUsername() != null ? request.getUsername() : "user",
+                request.getFolderId(),
+                request.getNotebookId()
+            );
             
-            // Handle tags if provided
-            if (request.containsKey("tags")) {
-                @SuppressWarnings("unchecked")
-                List<String> tags = (List<String>) request.get("tags");
-                updated = noteService.updateNoteWithTags(id, title, content, tags);
-            } else {
-                updated = noteService.updateNote(id, title, content);
-            }
+            System.out.println("Note created successfully: " + note.getId());
+            System.out.println("=== END DEBUG ===");
+            return ResponseEntity.ok(note);
+        } catch (Exception e) {
+            System.err.println("=== ERROR CREATING NOTE ===");
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("=== END ERROR ===");
             
-            String message = "Quest scroll '" + updated.getTitle() + "' has been updated! Wisdom preserved!";
-            return ResponseEntity.ok(createGamingResponse("UPDATE_NOTE", updated, message));
-            
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                .body(createGamingResponse("UPDATE_ERROR", null, "Quest scroll not found in the archives!"));
+            // Return error details to frontend
+            return ResponseEntity.status(400).body(
+                "Error creating note: " + e.getMessage()
+            );
         }
     }
-    
-    // UPDATE: Fixed delete method with gaming response
-    @DeleteMapping("/notes/{id}")
-    public ResponseEntity<Map<String, Object>> deleteNote(@PathVariable Long id) {
+
+    // UPDATE NOTE
+    @PutMapping("/{id}")
+    public ResponseEntity<Note> updateNote(@PathVariable Long id, @RequestBody UpdateNoteRequest request) {
+        try {
+            System.out.println("=== UPDATE NOTE DEBUG ===");
+            System.out.println("Note ID: " + id);
+            System.out.println("Request: " + request.toString());
+            
+            Note note = noteService.updateNote(
+                id,
+                request.getTitle(),
+                request.getContent(),
+                request.getTags(),
+                request.getColor(),
+                request.getFolderId(),
+                request.getNotebookId()
+            );
+            
+            System.out.println("Controller: Note updated successfully: " + note.getId());
+            System.out.println("=== END UPDATE DEBUG ===");
+            return ResponseEntity.ok(note);
+        } catch (Exception e) {
+            System.err.println("=== UPDATE ERROR ===");
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("=== END UPDATE ERROR ===");
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    // DELETE NOTE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNote(@PathVariable Long id) {
         try {
             noteService.deleteNote(id);
-            String message = "Quest scroll has been banished to the void! Archives updated.";
-            return ResponseEntity.ok(createGamingResponse("DELETE_NOTE", null, message));
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                .body(createGamingResponse("DELETE_ERROR", null, "Quest scroll not found for banishment!"));
+            return ResponseEntity.badRequest().build();
         }
     }
-    
-    // UPDATE: Fixed search with gaming response and dual parameter support
-    @GetMapping("/notes/search")
-    public ResponseEntity<Map<String, Object>> searchNotes(
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String query,
-            @RequestParam(defaultValue = "PixelAdventurer") String username) {
-        
-        String searchTerm = q != null ? q : query;
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(createGamingResponse("SEARCH_ERROR", null, "Quest search requires a keyword!"));
-        }
-        
-        List<Note> results = noteService.searchNotes(username, searchTerm);
-        String message = "Quest search discovered " + results.size() + " scrolls containing '" + searchTerm + "'!";
-        
-        return ResponseEntity.ok(createGamingResponse("SEARCH_NOTES", results, message));
+
+    // SEARCH NOTES
+    @GetMapping("/search")
+    public List<Note> searchNotes(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "user") String username) {
+        return noteService.searchNotes(username, query);
     }
-    
-    // Get player
-    @GetMapping("/player")
-    public Player getPlayer(@RequestParam(defaultValue = "PixelAdventurer") String username) {
-        return noteService.getOrCreatePlayer(username);
-    }
-    
-    // Get player stats
-    @GetMapping("/stats")
-    public Map<String, Object> getStats(@RequestParam(defaultValue = "PixelAdventurer") String username) {
-        return noteService.getPlayerStats(username);
-    }
-    
-    // Get all tags with counts
-    @GetMapping("/tags")
-    public ResponseEntity<Map<String, Object>> getAllTags(@RequestParam(defaultValue = "PixelAdventurer") String username) {
-        List<Note> notes = noteService.getAllNotes(username);
-        Set<String> allTags = notes.stream()
-            .flatMap(note -> note.getTags().stream())
-            .collect(Collectors.toSet());
-        
-        Map<String, Long> tagCounts = notes.stream()
-            .flatMap(note -> note.getTags().stream())
-            .collect(Collectors.groupingBy(
-                tag -> tag,
-                Collectors.counting()
-            ));
-        
-        String message = "Discovered " + allTags.size() + " unique quest markers in your archives!";
-        
-        Map<String, Object> tagData = Map.of(
-            "tags", allTags,
-            "tagCounts", tagCounts,
-            "totalUniqueTags", allTags.size()
-        );
-        
-        return ResponseEntity.ok(createGamingResponse("GET_TAGS", tagData, message));
-    }
-    
-    // Get notes by tag
-    @GetMapping("/notes/by-tag/{tag}")
-    public ResponseEntity<Map<String, Object>> getNotesByTag(
-            @PathVariable String tag,
-            @RequestParam(defaultValue = "PixelAdventurer") String username) {
-        
-        List<Note> notes = noteService.getAllNotes(username);
-        List<Note> taggedNotes = notes.stream()
-            .filter(note -> note.getTags().contains(tag))
-            .collect(Collectors.toList());
-        
-        String message = "Found " + taggedNotes.size() + " quest scrolls marked with '" + tag + "'!";
-        
-        return ResponseEntity.ok(createGamingResponse("FILTER_BY_TAG", taggedNotes, message));
-    }
-    
-    // Get notes in a specific folder
+
+    // Get notes in folder
     @GetMapping("/folder/{folderId}")
-    public ResponseEntity<List<Note>> getNotesInFolder(@PathVariable Long folderId, 
-                                                  @RequestParam String username) {
-        try {
-            List<Note> notes = noteService.getNotesInFolder(folderId, username);
-            return ResponseEntity.ok(notes);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public List<Note> getNotesInFolder(@PathVariable Long folderId, 
+                                      @RequestParam(defaultValue = "user") String username) {
+        return noteService.getNotesInFolder(folderId, username);
     }
 
-    // Get notes not in any folder or notebook (loose notes)
-    @GetMapping("/no-container")
-    public ResponseEntity<List<Note>> getNotesWithoutContainer(@RequestParam String username) {
-        try {
-            List<Note> notes = noteService.getNotesInFolder(null, username);
-            return ResponseEntity.ok(notes);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    // Get notes in a specific notebook
+    // Get notes in notebook
     @GetMapping("/notebook/{notebookId}")
-    public ResponseEntity<List<Note>> getNotesInNotebook(@PathVariable Long notebookId, 
-                                                    @RequestParam String username) {
-        try {
-            List<Note> notes = noteService.getNotesInNotebook(notebookId, username);
-            return ResponseEntity.ok(notes);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public List<Note> getNotesInNotebook(@PathVariable Long notebookId,
+                                        @RequestParam(defaultValue = "user") String username) {
+        return noteService.getNotesInNotebook(notebookId, username);
     }
 
-    // Move note to folder
-    @PutMapping("/{id}/move-to-folder")
-    public ResponseEntity<Note> moveNoteToFolder(@PathVariable Long id, 
-                                           @RequestBody Map<String, Object> moveData) {
+    // EXPORT SINGLE NOTE
+    @GetMapping("/{id}/export")
+    public ResponseEntity<String> exportNote(@PathVariable Long id) {
         try {
-            String username = (String) moveData.get("username");
-            Long folderId = moveData.get("folderId") != null ? 
-                           Long.valueOf(moveData.get("folderId").toString()) : null;
-
-            if (username == null) {
-                return ResponseEntity.badRequest().build();
+            System.out.println("=== EXPORT NOTE DEBUG ===");
+            System.out.println("Exporting note ID: " + id);
+            
+            Optional<Note> noteOpt = noteService.getNoteById(id);
+            if (noteOpt.isPresent()) {
+                Note note = noteOpt.get();
+                
+                // Create markdown content
+                StringBuilder markdown = new StringBuilder();
+                markdown.append("# ").append(note.getTitle()).append("\n\n");
+                markdown.append("**Created:** ").append(note.getCreatedAt()).append("\n");
+                markdown.append("**Updated:** ").append(note.getUpdatedAt()).append("\n");
+                
+                if (note.getTagsString() != null && !note.getTagsString().isEmpty()) {
+                    markdown.append("**Tags:** ").append(note.getTagsString()).append("\n");
+                }
+                
+                if (note.getColor() != null) {
+                    markdown.append("**Color:** ").append(note.getColor()).append("\n");
+                }
+                
+                markdown.append("\n---\n\n");
+                markdown.append(note.getContent());
+                
+                // Create safe filename
+                String filename = note.getTitle()
+                    .replaceAll("[^a-zA-Z0-9\\s]", "")
+                    .replaceAll("\\s+", "_")
+                    .toLowerCase() + ".md";
+                
+                System.out.println("Export successful: " + filename);
+                System.out.println("=== END EXPORT DEBUG ===");
+                
+                return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                    .header("Content-Type", "text/markdown; charset=utf-8")
+                    .body(markdown.toString());
+            } else {
+                System.err.println("Note not found for export: " + id);
+                return ResponseEntity.notFound().build();
             }
-
-            Note movedNote = noteService.moveNoteToFolder(id, folderId, username);
-            return ResponseEntity.ok(movedNote);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            System.err.println("=== EXPORT ERROR ===");
+            System.err.println("Export error: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("=== END EXPORT ERROR ===");
+            return ResponseEntity.status(500).body("Export failed: " + e.getMessage());
         }
     }
 
-    // Move note to notebook
-    @PutMapping("/{id}/move-to-notebook")
-    public ResponseEntity<Note> moveNoteToNotebook(@PathVariable Long id, 
-                                             @RequestBody Map<String, Object> moveData) {
+    // EXPORT ALL NOTES FOR USER
+    @GetMapping("/export/all")
+    public ResponseEntity<String> exportAllNotes(@RequestParam(defaultValue = "user") String username) {
         try {
-            String username = (String) moveData.get("username");
-            Long notebookId = moveData.get("notebookId") != null ? 
-                             Long.valueOf(moveData.get("notebookId").toString()) : null;
-
-            if (username == null) {
-                return ResponseEntity.badRequest().build();
+            System.out.println("=== EXPORT ALL NOTES DEBUG ===");
+            System.out.println("Exporting all notes for user: " + username);
+            
+            List<Note> notes = noteService.getAllNotes(username);
+            
+            if (notes.isEmpty()) {
+                return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"no_notes.md\"")
+                    .header("Content-Type", "text/markdown; charset=utf-8")
+                    .body("# No Notes Found\n\nYou don't have any notes to export yet.");
             }
-
-            Note movedNote = noteService.moveNoteToNotebook(id, notebookId, username);
-            return ResponseEntity.ok(movedNote);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            
+            StringBuilder allNotes = new StringBuilder();
+            allNotes.append("# All Notes Export\n\n");
+            allNotes.append("**Export Date:** ").append(java.time.LocalDateTime.now()).append("\n");
+            allNotes.append("**Total Notes:** ").append(notes.size()).append("\n\n");
+            allNotes.append("---\n\n");
+            
+            for (Note note : notes) {
+                allNotes.append("## ").append(note.getTitle()).append("\n\n");
+                allNotes.append("**Created:** ").append(note.getCreatedAt()).append("\n");
+                allNotes.append("**Updated:** ").append(note.getUpdatedAt()).append("\n");
+                
+                if (note.getTagsString() != null && !note.getTagsString().isEmpty()) {
+                    allNotes.append("**Tags:** ").append(note.getTagsString()).append("\n");
+                }
+                
+                if (note.getColor() != null) {
+                    allNotes.append("**Color:** ").append(note.getColor()).append("\n");
+                }
+                
+                allNotes.append("\n").append(note.getContent()).append("\n\n");
+                allNotes.append("---\n\n");
+            }
+            
+            String filename = "all_notes_" + username + "_" + 
+                java.time.LocalDateTime.now().toString().replaceAll("[^a-zA-Z0-9]", "_") + ".md";
+            
+            System.out.println("Export all successful: " + notes.size() + " notes exported");
+            System.out.println("=== END EXPORT ALL DEBUG ===");
+            
+            return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                .header("Content-Type", "text/markdown; charset=utf-8")
+                .body(allNotes.toString());
+                
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            System.err.println("=== EXPORT ALL ERROR ===");
+            System.err.println("Export all error: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("=== END EXPORT ALL ERROR ===");
+            return ResponseEntity.status(500).body("Export failed: " + e.getMessage());
         }
     }
-    
-    // Helper method for gaming responses
-    private Map<String, Object> createGamingResponse(String action, Object data, String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("action", action);
-        response.put("data", data);
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now());
-        return response;
+
+    // Request DTOs
+    public static class CreateNoteRequest {
+        private String title;
+        private String content;
+        private String color;
+        private List<String> tags; // Array from frontend
+        private String username;
+        private Long folderId;
+        private Long notebookId;
+
+        // Getters and setters
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
+
+        public String getContent() { return content; }
+        public void setContent(String content) { this.content = content; }
+
+        public String getColor() { return color; }
+        public void setColor(String color) { this.color = color; }
+
+        public List<String> getTags() { return tags; }
+        public void setTags(List<String> tags) { this.tags = tags; }
+
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+
+        public Long getFolderId() { return folderId; }
+        public void setFolderId(Long folderId) { this.folderId = folderId; }
+
+        public Long getNotebookId() { return notebookId; }
+        public void setNotebookId(Long notebookId) { this.notebookId = notebookId; }
+
+        @Override
+        public String toString() {
+            return "CreateNoteRequest{" +
+                    "title='" + title + '\'' +
+                    ", content='" + (content != null ? content.substring(0, Math.min(50, content.length())) + "..." : null) + '\'' +
+                    ", tags=" + tags +
+                    ", color='" + color + '\'' +
+                    ", username='" + username + '\'' +
+                    ", folderId=" + folderId +
+                    ", notebookId=" + notebookId +
+                    '}';
+        }
+    }
+
+    public static class UpdateNoteRequest {
+        private String title;
+        private String content;
+        private String tags; // String, not List<String> - matches your service method
+        private String color;
+        private Long folderId;
+        private Long notebookId;
+
+        // Getters and setters
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
+
+        public String getContent() { return content; }
+        public void setContent(String content) { this.content = content; }
+
+        public String getTags() { return tags; }
+        public void setTags(String tags) { this.tags = tags; }
+
+        public String getColor() { return color; }
+        public void setColor(String color) { this.color = color; }
+
+        public Long getFolderId() { return folderId; }
+        public void setFolderId(Long folderId) { this.folderId = folderId; }
+
+        public Long getNotebookId() { return notebookId; }
+        public void setNotebookId(Long notebookId) { this.notebookId = notebookId; }
+
+        // Add toString for debugging
+        @Override
+        public String toString() {
+            return "UpdateNoteRequest{" +
+                    "title='" + title + '\'' +
+                    ", content='" + (content != null ? content.substring(0, Math.min(50, content.length())) + "..." : null) + '\'' +
+                    ", tags='" + tags + '\'' +
+                    ", color='" + color + '\'' +
+                    ", folderId=" + folderId +
+                    ", notebookId=" + notebookId +
+                    '}';
+        }
     }
 }

@@ -2,12 +2,15 @@
 import React from 'react';
 import PixelPages from './components/PixelPages';
 import './index.css';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 function App() {
   return (
-    <div className="App">
-      <PixelPages />
-    </div>
+    <NotificationProvider>
+      <div className="App">
+        <PixelPages />
+      </div>
+    </NotificationProvider>
   );
 }
 

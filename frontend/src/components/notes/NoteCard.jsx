@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Hash, FileText, Edit3, Trash2 } from 'lucide-react';
+import { Calendar, Hash, FileText, Edit3, Trash2, Download } from 'lucide-react';
 
 const NoteCard = ({ note, onEdit, onDelete, onView }) => {
   const formatDate = (dateString) => {
@@ -72,6 +72,40 @@ const NoteCard = ({ note, onEdit, onDelete, onView }) => {
           <FileText size={12} />
           {note.wordCount || 0} words
         </div>
+      </div>
+
+      <div className="note-card-actions flex gap-2 mt-3">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit && onEdit(note);
+          }}
+          className="p-1 hover:bg-black hover:bg-opacity-10 rounded"
+          title="Edit Note"
+        >
+          <Edit3 size={16} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete && onDelete(note);
+          }}
+          className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded"
+          title="Delete Note"
+        >
+          <Trash2 size={16} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent opening the note
+            console.log('Exporting note:', note.id);
+            window.open(`/api/notes/${note.id}/export`);
+          }}
+          className="p-1 text-gray-400 hover:text-blue-400 transition-colors"
+          title="Export Note"
+        >
+          <Download size={14} />
+        </button>
       </div>
     </motion.div>
   );

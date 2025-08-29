@@ -56,10 +56,37 @@ const useNotebooks = () => {
     }
   };
 
+  // UPDATE NOTEBOOK - Add this method
+  const updateNotebook = async (id, notebookData) => {
+    try {
+      const response = await fetch(`/api/notebooks/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(notebookData)
+      });
+
+      if (response.ok) {
+        const updatedNotebook = await response.json();
+        setNotebooks(prevNotebooks => 
+          prevNotebooks.map(notebook => notebook.id === id ? updatedNotebook : notebook)
+        );
+        return updatedNotebook;
+      } else {
+        throw new Error(`Failed to update notebook: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error updating notebook:', error);
+      throw error;
+    }
+  };
+
   return {
     notebooks,
     loading,
     createNotebook,
+    updateNotebook,  // Add this line
     refreshNotebooks: fetchNotebooks
   };
 };

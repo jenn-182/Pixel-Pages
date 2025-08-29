@@ -5,7 +5,7 @@ import PixelButton from '../PixelButton';
 import HiddenButton from '../easter-eggs/HiddenButton';
 import { usePlayer } from '../../hooks/usePlayer';
 import { useAchievements } from '../../hooks/useAchievements';
-import { useNotes } from '../../hooks/useNotes';
+import useNotes from '../../hooks/useNotes';
 
 const ProfileTab = () => {
   const { playerStats, loading: playerLoading } = usePlayer();

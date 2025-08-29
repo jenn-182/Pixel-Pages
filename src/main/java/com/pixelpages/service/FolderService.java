@@ -56,6 +56,22 @@ public class FolderService {
         }
     }
 
+    // Update folder with tags
+    public Folder updateFolder(Long id, String name, String description, String colorCode, String tags) {
+        Optional<Folder> optionalFolder = folderRepository.findById(id);
+        if (optionalFolder.isPresent()) {
+            Folder folder = optionalFolder.get();
+            if (name != null) folder.setName(name);
+            if (description != null) folder.setDescription(description);
+            if (colorCode != null) folder.setColorCode(colorCode);
+            // Note: You'll need to add tags field to Folder model
+            folder.setUpdatedAt(java.time.LocalDateTime.now().toString());
+            return folderRepository.save(folder);
+        } else {
+            throw new RuntimeException("Folder not found with ID: " + id);
+        }
+    }
+
     // Delete folder (simplified for SQLite)
     public void deleteFolder(Long id, boolean moveContentsToParent) {
         Optional<Folder> optionalFolder = folderRepository.findById(id);

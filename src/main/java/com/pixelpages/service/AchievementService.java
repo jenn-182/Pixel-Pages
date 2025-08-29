@@ -25,16 +25,21 @@ public class AchievementService {
                              PlayerAchievementRepository playerAchievementRepository) {
         this.achievementRepository = achievementRepository;
         this.playerAchievementRepository = playerAchievementRepository;
-        initializeDefaultAchievements();
+        // initializeDefaultAchievements(); // TEMPORARILY DISABLED
+        System.out.println("AchievementService initialized (database operations temporarily disabled)");
     }
     
     // Get all available achievements
     public List<Achievement> getAllAchievements() {
-        return achievementRepository.findAll();
+        // return achievementRepository.findAll(); // TEMPORARILY DISABLED
+        System.out.println("getAllAchievements called (temporarily returning empty list)");
+        return new ArrayList<>(); // Return empty list for now
     }
     
     // Get player's achievement progress
     public List<Map<String, Object>> getPlayerAchievements(String username) {
+        /*
+        // TEMPORARILY DISABLED - DATABASE OPERATIONS
         List<Achievement> allAchievements = getAllAchievements();
         List<PlayerAchievement> playerProgress = playerAchievementRepository.findByUsername(username);
         
@@ -55,11 +60,19 @@ public class AchievementService {
             
             return achievementData;
         }).collect(Collectors.toList());
+        */
+        
+        System.out.println("getPlayerAchievements called for: " + username + " (temporarily returning empty list)");
+        return new ArrayList<>(); // Return empty list for now
     }
     
     // Update player progress for an achievement
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateProgress(String username, String achievementId, int currentProgress) {
+        // ALL DATABASE OPERATIONS TEMPORARILY DISABLED
+        System.out.println("updateProgress called: " + username + " -> " + achievementId + " (progress: " + currentProgress + ") - TEMPORARILY DISABLED");
+        
+        /*
         try {
             // Check if record exists
             Optional<PlayerAchievement> existingOpt = playerAchievementRepository
@@ -102,54 +115,111 @@ public class AchievementService {
             System.err.println("Achievement update failed for " + achievementId + ": " + e.getMessage());
             // Don't rethrow - we want note creation to succeed even if achievements fail
         }
+        */
     }
     
-    // Check and unlock achievements based on player actions
+    // Check and unlock achievements based on player actions (KEEP ALL LOGIC, DISABLE DATABASE)
     public List<Achievement> checkAndUnlockAchievements(String username, List<Note> notes, Player player) {
-        List<Achievement> newlyUnlocked = new ArrayList<>();
-        
-        // Calculate current stats
-        int noteCount = notes.size();
-        int totalWords = notes.stream().mapToInt(Note::getWordCount).sum();
-        Set<String> uniqueTags = notes.stream()
-            .flatMap(note -> note.getTags().stream())
-            .collect(Collectors.toSet());
-        
-        // Update progress for note count achievements
-        updateProgress(username, "first_note", noteCount);
-        updateProgress(username, "note_collector_5", noteCount);
-        updateProgress(username, "note_collector_10", noteCount);
-        updateProgress(username, "note_collector_25", noteCount);
-        updateProgress(username, "note_collector_50", noteCount);
-        
-        // Update progress for word count achievements
-        updateProgress(username, "word_warrior_100", totalWords);
-        updateProgress(username, "word_warrior_500", totalWords);
-        updateProgress(username, "word_warrior_1000", totalWords);
-        
-        // Update progress for tag achievements
-        updateProgress(username, "tag_master_5", uniqueTags.size());
-        updateProgress(username, "tag_master_10", uniqueTags.size());
-        updateProgress(username, "tag_master_20", uniqueTags.size());
-        
-        // Check special achievements
-        if (checkNightOwlAchievement(notes)) {
-            updateProgress(username, "night_owl", 1);
+        try {
+            System.out.println("=== ACHIEVEMENT SERVICE DEBUG ===");
+            System.out.println("Checking achievements for user: " + username);
+            System.out.println("Player level: " + player.getLevel());
+            System.out.println("Player XP: " + player.getExperience());
+            System.out.println("Total notes: " + notes.size());
+            
+            // Calculate current stats (KEEP ALL YOUR LOGIC!)
+            int noteCount = notes.size();
+            int totalWords = notes.stream().mapToInt(Note::getWordCount).sum();
+            Set<String> uniqueTags = notes.stream()
+                .flatMap(note -> note.getTags().stream())
+                .collect(Collectors.toSet());
+            
+            System.out.println("Stats calculated:");
+            System.out.println("- Note count: " + noteCount);
+            System.out.println("- Total words: " + totalWords);
+            System.out.println("- Unique tags: " + uniqueTags.size());
+            
+            // TEST NOTE COUNT ACHIEVEMENTS (temporarily disabled database calls)
+            if (noteCount >= 1) {
+                System.out.println("✅ 'First Steps' achievement would be unlocked");
+                // updateProgress(username, "first_note", noteCount); // TEMPORARILY DISABLED
+            }
+            if (noteCount >= 5) {
+                System.out.println("✅ 'Apprentice Scribe' achievement would be unlocked");
+                // updateProgress(username, "note_collector_5", noteCount); // TEMPORARILY DISABLED
+            }
+            if (noteCount >= 10) {
+                System.out.println("✅ 'Journeyman Writer' achievement would be unlocked");
+                // updateProgress(username, "note_collector_10", noteCount); // TEMPORARILY DISABLED
+            }
+            if (noteCount >= 25) {
+                System.out.println("✅ 'Master Chronicler' achievement would be unlocked");
+                // updateProgress(username, "note_collector_25", noteCount); // TEMPORARILY DISABLED
+            }
+            if (noteCount >= 50) {
+                System.out.println("✅ 'Legendary Archivist' achievement would be unlocked");
+                // updateProgress(username, "note_collector_50", noteCount); // TEMPORARILY DISABLED
+            }
+            
+            // TEST WORD COUNT ACHIEVEMENTS (temporarily disabled database calls)
+            if (totalWords >= 100) {
+                System.out.println("✅ 'Word Warrior' achievement would be unlocked");
+                // updateProgress(username, "word_warrior_100", totalWords); // TEMPORARILY DISABLED
+            }
+            if (totalWords >= 500) {
+                System.out.println("✅ 'Verbose Victor' achievement would be unlocked");
+                // updateProgress(username, "word_warrior_500", totalWords); // TEMPORARILY DISABLED
+            }
+            if (totalWords >= 1000) {
+                System.out.println("✅ 'Wordsmith Supreme' achievement would be unlocked");
+                // updateProgress(username, "word_warrior_1000", totalWords); // TEMPORARILY DISABLED
+            }
+            
+            // TEST TAG ACHIEVEMENTS (temporarily disabled database calls)
+            if (uniqueTags.size() >= 5) {
+                System.out.println("✅ 'Tag Apprentice' achievement would be unlocked");
+                // updateProgress(username, "tag_master_5", uniqueTags.size()); // TEMPORARILY DISABLED
+            }
+            if (uniqueTags.size() >= 10) {
+                System.out.println("✅ 'Tag Master' achievement would be unlocked");
+                // updateProgress(username, "tag_master_10", uniqueTags.size()); // TEMPORARILY DISABLED
+            }
+            if (uniqueTags.size() >= 20) {
+                System.out.println("✅ 'Tag Grandmaster' achievement would be unlocked");
+                // updateProgress(username, "tag_master_20", uniqueTags.size()); // TEMPORARILY DISABLED
+            }
+            
+            // TEST SPECIAL ACHIEVEMENTS (keep your logic, disable database calls)
+            if (checkNightOwlAchievement(notes)) {
+                System.out.println("✅ 'Night Owl' achievement would be unlocked");
+                // updateProgress(username, "night_owl", 1); // TEMPORARILY DISABLED
+            }
+            if (checkEarlyBirdAchievement(notes)) {
+                System.out.println("✅ 'Early Bird' achievement would be unlocked");
+                // updateProgress(username, "early_bird", 1); // TEMPORARILY DISABLED
+            }
+            if (checkConsistentWriterAchievement(notes)) {
+                System.out.println("✅ 'Consistent Writer' achievement would be unlocked");
+                // updateProgress(username, "consistent_writer", 1); // TEMPORARILY DISABLED
+            }
+            if (checkEpicNovelistAchievement(notes)) {
+                System.out.println("✅ 'Epic Novelist' achievement would be unlocked");
+                // updateProgress(username, "epic_novelist", 1); // TEMPORARILY DISABLED
+            }
+            
+            System.out.println("Achievement check completed successfully (database operations disabled)");
+            System.out.println("=== END ACHIEVEMENT SERVICE DEBUG ===");
+            
+            return new ArrayList<>(); // Return empty list for now
+            
+        } catch (Exception e) {
+            System.err.println("Achievement service error: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        if (checkEarlyBirdAchievement(notes)) {
-            updateProgress(username, "early_bird", 1);
-        }
-        if (checkConsistentWriterAchievement(notes)) {
-            updateProgress(username, "consistent_writer", 1);
-        }
-        if (checkEpicNovelistAchievement(notes)) {
-            updateProgress(username, "epic_novelist", 1);
-        }
-        
-        return newlyUnlocked;
     }
     
-    // Helper methods for complex achievement checks
+    // Helper methods for complex achievement checks (KEEP ALL YOUR LOGIC!)
     private boolean checkNightOwlAchievement(List<Note> notes) {
         return notes.stream().anyMatch(note -> {
             LocalTime time = note.getCreatedAt().toLocalTime();
@@ -176,7 +246,7 @@ public class AchievementService {
         return notes.stream().anyMatch(note -> note.getWordCount() >= 1000);
     }
     
-    // Get max progress for achievement (used for progress bars)
+    // Get max progress for achievement (used for progress bars) - KEEP THIS
     private int getMaxProgressForAchievement(String achievementId) {
         switch (achievementId) {
             case "first_note": return 1;
@@ -198,8 +268,12 @@ public class AchievementService {
         }
     }
     
-    // Initialize default achievements on startup
+    // Initialize default achievements on startup - TEMPORARILY DISABLED
     private void initializeDefaultAchievements() {
+        System.out.println("initializeDefaultAchievements called (temporarily disabled)");
+        
+        /*
+        // TEMPORARILY DISABLED - DATABASE OPERATIONS
         if (achievementRepository.count() == 0) {
             List<Achievement> defaultAchievements = Arrays.asList(
                 // Writing Achievements
@@ -228,5 +302,6 @@ public class AchievementService {
             achievementRepository.saveAll(defaultAchievements);
             System.out.println("Default achievements initialized!");
         }
+        */
     }
 }

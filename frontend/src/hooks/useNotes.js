@@ -1,190 +1,140 @@
 // src/hooks/useNotes.js
-import { useState, useEffect, useCallback } from 'react';
-import apiService from '../services/api';
+import { useState, useEffect } from 'react';
 
-export const useNotes = () => {
+const useNotes = () => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchNotes = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await apiService.fetchNotes();
-      setNotes(data);
-    } catch (err) {
-      setError('Failed to fetch notes');
-      console.error('Error fetching notes:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const createNote = useCallback(async (noteData) => {
-    try {
-      setError(null);
-      const response = await apiService.createNote(noteData);
-      // Handle gaming response format from your backend
-      const newNote = response.data || response;
-      setNotes(prevNotes => [newNote, ...prevNotes]);
-      return newNote;
-    } catch (err) {
-      setError('Failed to create note');
-      throw err;
-    }
-  }, []);
-
-  const updateNote = useCallback(async (id, noteData) => {
-    try {
-      setError(null);
-      const response = await apiService.updateNote(id, noteData);
-      // Handle gaming response format from your backend
-      const updatedNote = response.data || response;
-      setNotes(prevNotes => 
-        prevNotes.map(note => 
-          note.id === id ? updatedNote : note
-        )
-      );
-      return updatedNote;
-    } catch (err) {
-      setError('Failed to update note');
-      throw err;
-    }
-  }, []);
-
-  const deleteNote = useCallback(async (id) => {
-    try {
-      setError(null);
-      await apiService.deleteNote(id);
-      setNotes(prevNotes => 
-        prevNotes.filter(note => note.id !== id)
-      );
-    } catch (err) {
-      setError('Failed to delete note');
-      throw err;
-    }
-  }, []);
-
-  const searchNotes = useCallback(async (query) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const results = await apiService.searchNotes(query);
-      setNotes(results);
-    } catch (err) {
-      setError('Failed to search notes');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Get notes in a specific folder
-  const getNotesInFolder = async (folderId, username = 'player1') => {
-    try {
-      const url = folderId 
-        ? `http://localhost:8080/api/notes/folder/${folderId}?username=${username}`
-        : `http://localhost:8080/api/notes/no-container?username=${username}`;
-      
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch notes in folder');
-      }
-      return await response.json();
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  // Get notes in a specific notebook
-  const getNotesInNotebook = async (notebookId, username = 'player1') => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/notes/notebook/${notebookId}?username=${username}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch notes in notebook');
-      }
-      return await response.json();
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  // Move note to folder
-  const moveNoteToFolder = async (noteId, folderId, username = 'player1') => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/notes/${noteId}/move-to-folder`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ folderId, username }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to move note to folder');
-      }
-
-      const movedNote = await response.json();
-      
-      // Update local state
-      setNotes(prev => 
-        prev.map(note => note.id === noteId ? movedNote : note)
-      );
-      
-      return movedNote;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  // Move note to notebook
-  const moveNoteToNotebook = async (noteId, notebookId, username = 'player1') => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/notes/${noteId}/move-to-notebook`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ notebookId, username }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to move note to notebook');
-      }
-
-      const movedNote = await response.json();
-      
-      // Update local state
-      setNotes(prev => 
-        prev.map(note => note.id === noteId ? movedNote : note)
-      );
-      
-      return movedNote;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
-  };
 
   useEffect(() => {
     fetchNotes();
-  }, [fetchNotes]);
+  }, []);
+
+  const fetchNotes = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/notes');
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data);
+      } else {
+        console.error('Failed to fetch notes:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createNote = async (noteData) => {
+    try {
+      console.log('useNotes: Creating note with data:', noteData); // Debug log
+      
+      // Convert tags string to array for the backend
+      const dataToSend = {
+        ...noteData,
+        tags: noteData.tags ? noteData.tags.split(',').map(tag => tag.trim()) : [],
+        username: 'user' // Add default username
+      };
+      
+      console.log('useNotes: Data being sent to backend:', dataToSend); // Debug log
+
+      const response = await fetch('/api/notes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dataToSend)
+      });
+
+      console.log('useNotes: Response status:', response.status); // Debug log
+
+      if (response.ok) {
+        const newNote = await response.json();
+        console.log('useNotes: Note created successfully:', newNote); // Debug log
+        setNotes(prevNotes => [newNote, ...prevNotes]);
+        return newNote;
+      } else {
+        const errorText = await response.text();
+        console.error('useNotes: Backend error:', errorText); // Debug log
+        throw new Error(`Failed to create note: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      console.error('useNotes: Error creating note:', error);
+      throw error;
+    }
+  };
+
+  const updateNote = async (id, noteData) => {
+    try {
+      console.log('Original noteData:', noteData); // Debug log
+      
+      // Convert tags array to string if needed
+      const dataToSend = {
+        ...noteData,
+        tags: Array.isArray(noteData.tags) 
+          ? noteData.tags.join(',') 
+          : noteData.tags
+      };
+
+      console.log('Data being sent to backend:', dataToSend); // Debug log
+      console.log('Updating note with ID:', id); // Debug log
+
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dataToSend)
+      });
+
+      console.log('Response status:', response.status); // Debug log
+      console.log('Response ok:', response.ok); // Debug log
+
+      if (response.ok) {
+        const updatedNote = await response.json();
+        console.log('Updated note received:', updatedNote); // Debug log
+        
+        setNotes(prevNotes => 
+          prevNotes.map(note => note.id === id ? updatedNote : note)
+        );
+        return updatedNote;
+      } else {
+        const errorText = await response.text();
+        console.error('Backend error response:', errorText); // Debug log
+        throw new Error(`Failed to update note: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error updating note:', error);
+      throw error;
+    }
+  };
+
+  const deleteNote = async (id) => {
+    try {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
+      } else {
+        throw new Error(`Failed to delete note: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      throw error;
+    }
+  };
 
   return {
     notes,
     loading,
-    error,
     createNote,
     updateNote,
     deleteNote,
-    searchNotes,
-    refreshNotes: fetchNotes,
-    getNotesInFolder,
-    getNotesInNotebook,
-    moveNoteToFolder,
-    moveNoteToNotebook,
+    refreshNotes: fetchNotes
   };
 };
+
+export default useNotes;

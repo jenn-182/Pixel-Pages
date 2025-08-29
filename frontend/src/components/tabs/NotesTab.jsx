@@ -4,14 +4,20 @@ import { Plus, Search } from 'lucide-react';
 import PixelButton from '../PixelButton';
 import PixelInput from '../PixelInput';
 import NoteCard from '../notes/NoteCard';
-import { useNotes } from '../../hooks/useNotes';
+import NoteModal from '../notes/NoteModal';
+import useNotes from '../../hooks/useNotes';
+import useFolders from '../../hooks/useFolders';
+import useNotebooks from '../../hooks/useNotebooks';
 
 const NotesTab = () => {
-  const { notes, loading, error, deleteNote } = useNotes();
+  const { notes, loading, error, deleteNote, createNote, updateNote } = useNotes();
+  const { folders } = useFolders();
+  const { notebooks } = useNotebooks();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [activeNote, setActiveNote] = useState(null);
+  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
 
   // Filter notes based on search
   const filteredNotes = searchTerm
@@ -34,6 +40,44 @@ const NotesTab = () => {
     }
   };
 
+  const handleCreateNote = () => {
+    setIsCreateNoteModalOpen(true);
+  };
+
+  const handleCreateNoteSubmit = async (noteData) => {
+    try {
+      console.log('NotesTab: Creating note:', noteData); // Debug log
+      await createNote(noteData);
+      setIsCreateNoteModalOpen(false);
+      console.log('Note created successfully from NotesTab!');
+    } catch (error) {
+      console.error('Failed to create note:', error);
+      alert('Failed to create note: ' + error.message);
+    }
+  };
+
+  const handleSaveNote = async (noteData) => {
+    try {
+      console.log('NotesTab: Saving note data:', noteData); // Debug log
+      
+      if (activeNote && activeNote.id) {
+        console.log('NotesTab: Updating existing note:', activeNote.id); // Debug log
+        await updateNote(activeNote.id, noteData);
+      } else {
+        console.log('NotesTab: Creating new note'); // Debug log
+        await createNote(noteData);
+      }
+      
+      setIsEditing(false);
+      setActiveNote(null);
+      
+      console.log('NotesTab: Note saved successfully'); // Debug log
+    } catch (error) {
+      console.error('NotesTab: Failed to save note:', error);
+      alert('Failed to save note: ' + error.message);
+    }
+  };
+
   return (
     <div className="notes-tab-container p-6">
       {/* Header */}
@@ -47,7 +91,7 @@ const NotesTab = () => {
         
         <div className="flex gap-3">
           <PixelButton
-            onClick={() => setIsCreating(true)}
+            onClick={handleCreateNote}
             color="bg-green-400"
             hoverColor="hover:bg-green-500"
             icon={<Plus size={18} />}
@@ -115,7 +159,7 @@ const NotesTab = () => {
                   Clear Search
                 </PixelButton>
                 <PixelButton
-                  onClick={() => setIsCreating(true)}
+                  onClick={handleCreateNote}
                   color="bg-green-400"
                   hoverColor="hover:bg-green-500"
                   icon={<Plus size={18} />}
@@ -129,7 +173,7 @@ const NotesTab = () => {
               <h3 className="font-mono text-lg font-bold mb-2 text-white">No notes yet</h3>
               <p className="text-gray-400 mb-4">Create your first note to get started on your digital adventure!</p>
               <PixelButton
-                onClick={() => setIsCreating(true)}
+                onClick={handleCreateNote}
                 color="bg-green-400"
                 hoverColor="hover:bg-green-500"
                 icon={<Plus size={18} />}
@@ -141,7 +185,26 @@ const NotesTab = () => {
         </div>
       )}
 
-      {/* TODO: Add modals for create/edit/view here or pass state up to PixelPages */}
+      {/* Modals */}
+      <NoteModal
+        isOpen={isCreateNoteModalOpen}
+        onClose={() => setIsCreateNoteModalOpen(false)}
+        onSave={handleCreateNoteSubmit}  
+        folders={folders}
+        notebooks={notebooks}
+        existingNote={null}
+      />
+      <NoteModal
+        isOpen={isEditing}
+        onClose={() => {
+          setIsEditing(false);
+          setActiveNote(null);
+        }}
+        onSave={handleSaveNote}  
+        folders={folders}
+        notebooks={notebooks}
+        existingNote={activeNote}
+      />
     </div>
   );
 };

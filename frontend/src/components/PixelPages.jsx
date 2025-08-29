@@ -6,7 +6,7 @@ import PixelButton from './PixelButton';
 import PixelInput, { PixelTextarea } from './PixelInput';
 import NoteCard from './notes/NoteCard';
 import AchievementCard from './AchievementCard';
-import { useNotes } from '../hooks/useNotes';
+import useNotes from '../hooks/useNotes';
 import { usePlayer } from '../hooks/usePlayer';
 import { useAchievements } from '../hooks/useAchievements';
 import TabNavigation from './navigation/TabNavigation';

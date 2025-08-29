@@ -67,91 +67,175 @@ public class NoteService {
         return String.join(",", tags);
     }
     
-    // Create note with XP gain
+    // =============================================================================
+    // CREATE METHODS
+    // =============================================================================
+    
+    // Simple create note (for legacy compatibility)
     public Note createNote(String title, String content, String username) {
-        Note note = new Note();
-        note.setTitle(title);
-        note.setContent(content);
-        note.setUsername(username);
-        
-        Note savedNote = noteRepository.save(note);
-        
-        // ADD FILE EXPORT
-        fileExportService.exportNote(savedNote);
-        
-        // Award XP for creating note
-        awardExperienceForNote(savedNote, username, true);
-        
-        // Get the player before passing to achievement service
-        Player player = getOrCreatePlayer(username);
-        
-        // Check for new achievements
-        List<Note> allNotes = getAllNotes(username);
-        achievementService.checkAndUnlockAchievements(username, allNotes, player);
-        
-        return savedNote;
+        return createNote(title, content, "#4ADE80", null, username, null, null);
     }
     
-    // Update note with XP gain
-    public Note updateNote(Long id, String title, String content) {
-        Note note = noteRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Note not found"));
-        
-        int oldWordCount = calculateWordCount(note.getContent());
-        note.setTitle(title);
-        note.setContent(content);
-        int newWordCount = calculateWordCount(content);
-        
-        Note updatedNote = noteRepository.save(note);
-        
-        // ADD FILE EXPORT FOR UPDATES
-        fileExportService.exportNote(updatedNote);
-        
-        // Award XP for additional words (not for editing existing content)
-        if (newWordCount > oldWordCount) {
-            awardExperienceForWordIncrease(newWordCount - oldWordCount, note.getUsername());
+    // Main create note method (with all parameters)
+    @Transactional
+    public Note createNote(String title, String content, String color, List<String> tags, 
+                          String username, Long folderId, Long notebookId) {
+        try {
+            Note note = new Note();
+            note.setTitle(title);
+            note.setContent(content);
+            note.setUsername(username);
+            note.setColor(color != null ? color : "#4ADE80");
+            
+            // Convert tags list to string
+            if (tags != null && !tags.isEmpty()) {
+                note.setTagsString(String.join(",", tags));
+            }
+            
+            note.setFolderId(folderId);
+            note.setNotebookId(notebookId);
+            
+            // Generate filename from title
+            if (title != null) {
+                String filename = title.replaceAll("[^a-zA-Z0-9\\s]", "")
+                                  .replaceAll("\\s+", "_")
+                                  .toLowerCase() + ".md";
+                note.setFilename(filename);
+            }
+            
+            Note savedNote = noteRepository.save(note);
+            System.out.println("Note saved successfully: " + savedNote.getId());
+            
+            // File export (safe with try-catch)
+            try {
+                if (fileExportService != null) {
+                    fileExportService.exportNote(savedNote);
+                }
+            } catch (Exception e) {
+                System.err.println("File export failed (but note saved): " + e.getMessage());
+            }
+            
+            // XP system (safe with try-catch)
+            try {
+                awardExperienceForNote(savedNote, username, true);
+            } catch (Exception e) {
+                System.err.println("XP award failed (but note saved): " + e.getMessage());
+            }
+            
+            // TEST ACHIEVEMENT SYSTEM - Let's debug this step by step
+            System.out.println("=== TESTING ACHIEVEMENT SYSTEM ===");
+            try {
+                System.out.println("Step 1: Getting player for username: " + username);
+                Player player = getOrCreatePlayer(username);
+                System.out.println("Step 1 SUCCESS: Player found/created: " + player.getUsername());
+                
+                System.out.println("Step 2: Getting all notes for user: " + username);
+                List<Note> allNotes = getAllNotes(username);
+                System.out.println("Step 2 SUCCESS: Found " + allNotes.size() + " notes");
+                
+                System.out.println("Step 3: Checking achievements...");
+                if (achievementService != null) {
+                    achievementService.checkAndUnlockAchievements(username, allNotes, player);
+                    System.out.println("Step 3 SUCCESS: Achievement check completed");
+                } else {
+                    System.out.println("Step 3 SKIPPED: AchievementService is null");
+                }
+                
+                System.out.println("=== ACHIEVEMENT SYSTEM TEST COMPLETED ===");
+                
+            } catch (Exception e) {
+                System.err.println("=== ACHIEVEMENT SYSTEM ERROR ===");
+                System.err.println("Error at step: " + e.getMessage());
+                System.err.println("Stack trace:");
+                e.printStackTrace();
+                System.err.println("=== END ACHIEVEMENT ERROR ===");
+                
+                // Don't throw - let the note creation succeed
+                System.out.println("Achievement system failed, but note was saved successfully");
+            }
+            
+            return savedNote;
+            
+        } catch (Exception e) {
+            System.err.println("Note creation failed: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        
-        return updatedNote;
     }
     
-    // Update note with tags
+    // =============================================================================
+    // UPDATE METHODS (CONSOLIDATED)
+    // =============================================================================
+    
+    // Main update method (matches your controller's UpdateNoteRequest)
+    @Transactional
+    public Note updateNote(Long id, String title, String content, String tags, String color, Long folderId, Long notebookId) {
+        try {
+            Optional<Note> optionalNote = noteRepository.findById(id);
+            if (optionalNote.isPresent()) {
+                Note note = optionalNote.get();
+                
+                // Track old word count for XP calculation
+                int oldWordCount = calculateWordCount(note.getContent());
+                
+                // Update all fields
+                if (title != null) note.setTitle(title);
+                if (content != null) note.setContent(content);
+                if (tags != null) note.setTagsString(tags); // Use setTagsString for String input
+                if (color != null) note.setColor(color);
+                note.setFolderId(folderId); // Allow null to remove from folder
+                note.setNotebookId(notebookId); // Allow null to remove from notebook
+                
+                // Update timestamp
+                note.setUpdatedAt(java.time.LocalDateTime.now());
+                
+                // Save the note
+                Note updatedNote = noteRepository.save(note);
+                System.out.println("Note updated successfully: " + updatedNote.getId());
+                
+                // File export (safe with try-catch)
+                try {
+                    if (fileExportService != null) {
+                        fileExportService.exportNote(updatedNote);
+                    }
+                } catch (Exception e) {
+                    System.err.println("File export failed (but note updated): " + e.getMessage());
+                }
+                
+                // Award XP for additional words (safe with try-catch)
+                try {
+                    int newWordCount = calculateWordCount(content != null ? content : note.getContent());
+                    if (newWordCount > oldWordCount) {
+                        awardExperienceForWordIncrease(newWordCount - oldWordCount, note.getUsername());
+                    }
+                } catch (Exception e) {
+                    System.err.println("XP award failed (but note updated): " + e.getMessage());
+                }
+                
+                return updatedNote;
+            } else {
+                throw new RuntimeException("Note not found with ID: " + id);
+            }
+        } catch (Exception e) {
+            System.err.println("Note update failed: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    // Update with List<String> tags (for backward compatibility)
     public Note updateNoteWithTags(Long id, String title, String content, List<String> tags) {
-        Note note = noteRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Note not found"));
-        
-        int oldWordCount = calculateWordCount(note.getContent());
-        note.setTitle(title);
-        note.setContent(content);
-        note.setTagsString(joinTags(tags)); // Use tagsString field
-        int newWordCount = calculateWordCount(content);
-        
-        Note updatedNote = noteRepository.save(note);
-        
-        // ADD FILE EXPORT FOR TAG UPDATES
-        fileExportService.exportNote(updatedNote);
-        
-        // Award XP for additional words
-        if (newWordCount > oldWordCount) {
-            awardExperienceForWordIncrease(newWordCount - oldWordCount, note.getUsername());
-        }
-        
-        return updatedNote;
+        return updateNote(id, title, content, joinTags(tags), null, null, null);
     }
     
-    // Delete note
-    public void deleteNote(Long id) {
-        Optional<Note> noteOpt = noteRepository.findById(id);
-        if (noteOpt.isPresent()) {
-            Note note = noteOpt.get();
-            
-            // DELETE FILE FIRST
-            fileExportService.deleteNoteFile(note);
-            
-            // THEN DELETE FROM DATABASE
-            noteRepository.deleteById(id);
-        }
+    // Simple update (for legacy compatibility)
+    public Note updateNote(Long id, String title, String content) {
+        return updateNote(id, title, content, null, null, null, null);
     }
+    
+    // =============================================================================
+    // READ METHODS
+    // =============================================================================
     
     // Get all notes for user
     public List<Note> getAllNotes(String username) {
@@ -167,6 +251,80 @@ public class NoteService {
     public List<Note> searchNotes(String username, String searchTerm) {
         return noteRepository.searchByUsernameAndKeyword(username, searchTerm);
     }
+    
+    // Get notes in a specific folder
+    public List<Note> getNotesInFolder(Long folderId, String username) {
+        if (folderId == null) {
+            return noteRepository.findByUsernameAndFolderIdIsNullAndNotebookIdIsNull(username);
+        }
+        return noteRepository.findByUsernameAndFolderId(username, folderId);
+    }
+
+    // Get notes in a specific notebook
+    public List<Note> getNotesInNotebook(Long notebookId, String username) {
+        return noteRepository.findByUsernameAndNotebookId(username, notebookId);
+    }
+    
+    // =============================================================================
+    // DELETE METHODS
+    // =============================================================================
+    
+    // Delete note
+    public void deleteNote(Long id) {
+        Optional<Note> noteOpt = noteRepository.findById(id);
+        if (noteOpt.isPresent()) {
+            Note note = noteOpt.get();
+            
+            // Delete file first
+            if (fileExportService != null) {
+                fileExportService.deleteNoteFile(note);
+            }
+            
+            // Then delete from database
+            noteRepository.deleteById(id);
+        }
+    }
+    
+    // =============================================================================
+    // ORGANIZATION METHODS
+    // =============================================================================
+    
+    // Move note to folder
+    public Note moveNoteToFolder(Long noteId, Long folderId, String username) {
+        Optional<Note> optionalNote = noteRepository.findByIdAndUsername(noteId, username);
+        if (optionalNote.isPresent()) {
+            Note note = optionalNote.get();
+            note.setFolderId(folderId);
+            note.setNotebookId(null); // Remove from notebook
+            
+            return noteRepository.save(note);
+        }
+        throw new RuntimeException("Note not found");
+    }
+
+    // Move note to notebook
+    public Note moveNoteToNotebook(Long noteId, Long notebookId, String username) {
+        Optional<Note> optionalNote = noteRepository.findByIdAndUsername(noteId, username);
+        if (optionalNote.isPresent()) {
+            Note note = optionalNote.get();
+            note.setNotebookId(notebookId);
+            
+            // Get the notebook's folder and inherit it
+            if (notebookId != null) {
+                Optional<Notebook> notebook = notebookRepository.findById(notebookId);
+                if (notebook.isPresent()) {
+                    note.setFolderId(notebook.get().getFolderId());
+                }
+            }
+            
+            return noteRepository.save(note);
+        }
+        throw new RuntimeException("Note not found");
+    }
+    
+    // =============================================================================
+    // PLAYER & XP METHODS
+    // =============================================================================
     
     // Get or create player
     public Player getOrCreatePlayer(String username) {
@@ -238,51 +396,5 @@ public class NoteService {
             
             System.out.println("Awarded " + xpGain + " XP for additional content to " + username);
         }
-    }
-    
-    // Move note to folder
-    public Note moveNoteToFolder(Long noteId, Long folderId, String username) {
-        Optional<Note> optionalNote = noteRepository.findByIdAndUsername(noteId, username);
-        if (optionalNote.isPresent()) {
-            Note note = optionalNote.get();
-            note.setFolderId(folderId); // Use Long instead of entity
-            note.setNotebookId(null); // Remove from notebook
-            
-            return noteRepository.save(note);
-        }
-        throw new RuntimeException("Note not found");
-    }
-
-    // Move note to notebook
-    public Note moveNoteToNotebook(Long noteId, Long notebookId, String username) {
-        Optional<Note> optionalNote = noteRepository.findByIdAndUsername(noteId, username);
-        if (optionalNote.isPresent()) {
-            Note note = optionalNote.get();
-            note.setNotebookId(notebookId); // Use Long instead of entity
-            
-            // Get the notebook's folder and inherit it
-            if (notebookId != null) {
-                Optional<Notebook> notebook = notebookRepository.findById(notebookId);
-                if (notebook.isPresent()) {
-                    note.setFolderId(notebook.get().getFolderId());
-                }
-            }
-            
-            return noteRepository.save(note);
-        }
-        throw new RuntimeException("Note not found");
-    }
-
-    // Get notes in a specific folder
-    public List<Note> getNotesInFolder(Long folderId, String username) {
-        if (folderId == null) {
-            return noteRepository.findByUsernameAndFolderIdIsNullAndNotebookIdIsNull(username);
-        }
-        return noteRepository.findByUsernameAndFolderId(username, folderId);
-    }
-
-    // Get notes in a specific notebook
-    public List<Note> getNotesInNotebook(Long notebookId, String username) {
-        return noteRepository.findByUsernameAndNotebookId(username, notebookId);
     }
 }
