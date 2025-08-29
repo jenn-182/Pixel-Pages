@@ -4,22 +4,23 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "notes")
 public class Note {
     @Id
+    // @GeneratedValue(strategy = GenerationType.IDENTITY) // Changed from manual ID
+    // generation
     private Long id;
 
     @PrePersist
     public void prePersist() {
-        // Generate ID if not already set
+        // ADD manual ID generation:
         if (this.id == null) {
-            this.id = System.currentTimeMillis();
+            this.id = System.currentTimeMillis() + (long) (Math.random() * 1000); // Avoid collisions
         }
-        
-        // Keep any existing code for dates, etc.
+
+        // Keep the existing date logic:
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
         }
@@ -47,10 +48,21 @@ public class Note {
     private LocalDateTime updatedAt;
 
     @Column(name = "username", nullable = false)
-    private String username; // Link to player by username
+    private String username;
 
     @Column(name = "filename")
     private String filename;
+
+    // SQLite-compatible organization fields (Long IDs only - no entity
+    // relationships)
+    @Column(name = "folder_id")
+    private Long folderId;
+
+    @Column(name = "notebook_id")
+    private Long notebookId;
+
+    // REMOVED: @ManyToOne relationships to avoid duplicate column mapping
+    // We're using Long IDs instead for SQLite compatibility
 
     // Constructors
     public Note() {
@@ -183,4 +195,20 @@ public class Note {
         this.filename = filename;
     }
 
+    // Organization fields (Long IDs only)
+    public Long getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(Long folderId) {
+        this.folderId = folderId;
+    }
+
+    public Long getNotebookId() {
+        return notebookId;
+    }
+
+    public void setNotebookId(Long notebookId) {
+        this.notebookId = notebookId;
+    }
 }

@@ -13,6 +13,9 @@ import TabNavigation from './navigation/TabNavigation';
 import { useTabs } from '../hooks/useTabs';
 import '../styles/tabs.css'; // Import the tab styles
 import NotesTab from './tabs/NotesTab';
+import ProfileTab from './tabs/ProfileTab';
+import LibraryTab from './tabs/LibraryTab';
+import AchievementsTab from './tabs/AchievementsTab';
 
 const PixelPages = () => {
   // Add tab functionality
@@ -159,26 +162,11 @@ const PixelPages = () => {
       case 'notes':
         return <NotesTab />;
       case 'library':
-        return (
-          <div style={{ padding: '20px', color: 'white' }}>
-            <h2>Library Tab</h2>
-            <p>Folders and notebooks will go here</p>
-          </div>
-        );
+        return <LibraryTab />;
       case 'achievements':
-        return (
-          <div style={{ padding: '20px', color: 'white' }}>
-            <h2>Achievements Tab</h2>
-            <p>Player achievements will go here</p>
-          </div>
-        );
+        return <AchievementsTab />;
       case 'profile':
-        return (
-          <div style={{ padding: '20px', color: 'white' }}>
-            <h2>Player Profile</h2>
-            <p>Player stats and hidden easter egg button will go here</p>
-          </div>
-        );
+        return <ProfileTab />;
       default:
         return <div>Tab not found</div>;
     }
@@ -205,7 +193,7 @@ const PixelPages = () => {
         {renderTabContent()}
       </main>
       
-      {/* ONLY keep the modals - remove the old notes display */}
+      {/* Keep only the necessary modals */}
       <AnimatePresence mode="wait">
         {/* Create Note Modal */}
         {isCreating && (
@@ -460,103 +448,7 @@ const PixelPages = () => {
           </motion.div>
         )}
 
-        {/* Profile View Modal */}
-        {showProfile && (
-          <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white p-6 w-full max-w-2xl"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="font-mono text-xl font-bold">User Profile</h2>
-                <PixelButton
-                  icon={<X size={18} />}
-                  onClick={() => setShowProfile(false)}
-                  color="bg-red-400"
-                  hoverColor="hover:bg-red-500"
-                />
-              </div>
-
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex flex-col items-center">
-                  <div className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-32 h-32 overflow-hidden">
-                    <div className="w-full h-full bg-yellow-400 flex items-center justify-center">
-                      <span className="text-4xl font-mono font-bold">PP</span>
-                    </div>
-                  </div>
-                  <h3 className="font-mono text-lg font-bold mt-3">{playerStats?.username || 'PixelAdventurer'}</h3>
-                  <div className="border-2 border-black bg-yellow-100 px-3 py-1 mt-2">
-                    Level {playerStats?.level || 1}
-                  </div>
-                </div>
-
-                <div className="flex-1">
-                  <div className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-gray-50 p-4 mb-4">
-                    <h4 className="font-mono font-bold mb-2">Stats</h4>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between">
-                          <span>Experience</span>
-                          <span>{playerStats?.experience || 0} / {playerStats?.experienceToNext || 100}</span>
-                        </div>
-                        <div className="border-2 border-black bg-gray-200 h-4 mt-1">
-                          <div
-                            className="bg-blue-500 h-full transition-all duration-500"
-                            style={{
-                              width: `${((playerStats?.experience || 0) / (playerStats?.experienceToNext || 100)) * 100}%`
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between">
-                        <span>Notes Created</span>
-                        <span>{playerStats?.totalNotes || notes.length}</span>
-                      </div>
-
-                      <div className="flex justify-between">
-                        <span>Total Words</span>
-                        <span>{playerStats?.totalWords || 0}</span>
-                      </div>
-
-                      <div className="flex justify-between">
-                        <span>Unique Tags</span>
-                        <span>{playerStats?.uniqueTags || 0}</span>
-                      </div>
-
-                      <div className="flex justify-between">
-                        <span>Achievements Unlocked</span>
-                        <span>{summary?.completed || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <PixelButton
-                    onClick={() => {
-                      setShowAchievements(true);
-                      setShowProfile(false);
-                    }}
-                    color="bg-purple-400"
-                    hoverColor="hover:bg-purple-500"
-                    icon={<Trophy size={18} />}
-                    className="w-full"
-                  >
-                    View Achievements
-                  </PixelButton>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {/* Achievements View Modal */}
+        {/* Achievements Modal - keep this for now */}
         {showAchievements && (
           <motion.div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 p-4"

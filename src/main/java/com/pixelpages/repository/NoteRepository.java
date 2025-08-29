@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Long> {
@@ -20,4 +21,16 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
            "LOWER(n.content) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(n.tagsString) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<Note> searchByUsernameAndKeyword(@Param("username") String username, @Param("search") String search);
+
+    // Find notes by folder
+    List<Note> findByUsernameAndFolderId(String username, Long folderId);
+
+    // Find notes not in any folder or notebook (loose notes)
+    List<Note> findByUsernameAndFolderIdIsNullAndNotebookIdIsNull(String username);
+
+    // Find notes in a specific notebook
+    List<Note> findByUsernameAndNotebookId(String username, Long notebookId);
+
+    // Find note by ID and username (for security)
+    Optional<Note> findByIdAndUsername(Long id, String username);
 }

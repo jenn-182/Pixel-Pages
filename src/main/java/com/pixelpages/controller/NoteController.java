@@ -177,6 +177,85 @@ public class NoteController {
         return ResponseEntity.ok(createGamingResponse("FILTER_BY_TAG", taggedNotes, message));
     }
     
+    // Get notes in a specific folder
+    @GetMapping("/folder/{folderId}")
+    public ResponseEntity<List<Note>> getNotesInFolder(@PathVariable Long folderId, 
+                                                  @RequestParam String username) {
+        try {
+            List<Note> notes = noteService.getNotesInFolder(folderId, username);
+            return ResponseEntity.ok(notes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Get notes not in any folder or notebook (loose notes)
+    @GetMapping("/no-container")
+    public ResponseEntity<List<Note>> getNotesWithoutContainer(@RequestParam String username) {
+        try {
+            List<Note> notes = noteService.getNotesInFolder(null, username);
+            return ResponseEntity.ok(notes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Get notes in a specific notebook
+    @GetMapping("/notebook/{notebookId}")
+    public ResponseEntity<List<Note>> getNotesInNotebook(@PathVariable Long notebookId, 
+                                                    @RequestParam String username) {
+        try {
+            List<Note> notes = noteService.getNotesInNotebook(notebookId, username);
+            return ResponseEntity.ok(notes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Move note to folder
+    @PutMapping("/{id}/move-to-folder")
+    public ResponseEntity<Note> moveNoteToFolder(@PathVariable Long id, 
+                                           @RequestBody Map<String, Object> moveData) {
+        try {
+            String username = (String) moveData.get("username");
+            Long folderId = moveData.get("folderId") != null ? 
+                           Long.valueOf(moveData.get("folderId").toString()) : null;
+
+            if (username == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Note movedNote = noteService.moveNoteToFolder(id, folderId, username);
+            return ResponseEntity.ok(movedNote);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Move note to notebook
+    @PutMapping("/{id}/move-to-notebook")
+    public ResponseEntity<Note> moveNoteToNotebook(@PathVariable Long id, 
+                                             @RequestBody Map<String, Object> moveData) {
+        try {
+            String username = (String) moveData.get("username");
+            Long notebookId = moveData.get("notebookId") != null ? 
+                             Long.valueOf(moveData.get("notebookId").toString()) : null;
+
+            if (username == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Note movedNote = noteService.moveNoteToNotebook(id, notebookId, username);
+            return ResponseEntity.ok(movedNote);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
     // Helper method for gaming responses
     private Map<String, Object> createGamingResponse(String action, Object data, String message) {
         Map<String, Object> response = new HashMap<>();

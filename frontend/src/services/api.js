@@ -1,92 +1,63 @@
 // src/services/api.js
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE = 'http://localhost:8080/api';
 
-class ApiService {
-  async request(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    console.log('Making request to:', url); // Debug log
-    
-    const config = {
+const apiService = {
+  // Notes API calls
+  async fetchNotes() {
+    const response = await fetch(`${API_BASE}/notes`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
+
+  async createNote(noteData) {
+    const response = await fetch(`${API_BASE}/notes`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
       },
-      ...options,
-    };
-
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      }
-      
-      return response;
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+      body: JSON.stringify(noteData),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  }
+    return await response.json();
+  },
 
-  // Note operations
-  async getAllNotes() {
-    return this.request('/api/notes');
-  }
-
-  async getNoteById(filename) {
-    return this.request(`/api/notes/${encodeURIComponent(filename)}`);
-  }
-
-  async createNote(note) {
-    const response = await this.request('/api/notes', {
-      method: 'POST',
-      body: JSON.stringify(note),
-    });
-    return response.data || response; // Extract note from gaming response
-  }
-
-  async updateNote(id, note) {
-    const response = await this.request(`/api/notes/${id}`, {
+  async updateNote(id, noteData) {
+    const response = await fetch(`${API_BASE}/notes/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(note),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(noteData),
     });
-    return response.data || response;
-  }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
 
   async deleteNote(id) {
-    const response = await this.request(`/api/notes/${id}`, {
+    const response = await fetch(`${API_BASE}/notes/${id}`, {
       method: 'DELETE',
     });
-    return response.data || response;
-  }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  },
 
   async searchNotes(query) {
-    return this.request(`/api/notes/search?query=${encodeURIComponent(query)}`);
-  }
+    const response = await fetch(
+      `${API_BASE}/notes/search?query=${encodeURIComponent(query)}`
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
+};
 
-  // Player operations - Fix the endpoint paths
-  async getPlayerStats() {
-    return this.request('/api/stats'); // Changed from /api/player/stats
-  }
-
-  // Achievement operations
-  async getAchievements() {
-    const response = await this.request('/api/achievements');
-    return response.data ? response : { data: response }; // Handle gaming response format
-  }
-
-  async getAchievementsByCategory(category) {
-    return this.request(`/api/achievements/category/${category}`);
-  }
-
-  async getAchievementsByRarity(rarity) {
-    return this.request(`/api/achievements/rarity/${rarity}`);
-  }
-}
-
-export const apiService = new ApiService();
+export default apiService;
