@@ -201,272 +201,235 @@ const LibraryTab = () => {
 
   return (
     <div className="library-tab-container p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h1 className="font-mono text-2xl font-bold text-white mb-2">Storage</h1>
-          <p className="text-gray-400 font-mono text-sm">
-            Organize your notes with folders and notebooks
-          </p>
-        </div>
+      {/* Header - Updated to match HeroCard style */}
+      <div className="mb-8">
+        <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
+          <div className="w-6 h-6 bg-purple-400 border border-gray-600" />
+          STORAGE TERMINAL
+        </h1>
+        <p className="text-gray-400 font-mono text-sm">
+          Access your digital archives and data repositories
+        </p>
+      </div>
+      
+      {/* Action Bar - Enhanced Futuristic style */}
+      <div className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative"
+           style={{
+             boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+           }}>
+        <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
         
-        <div className="flex items-center gap-3 mb-6">
-          {/* Your existing Create Note button */}
-          <PixelButton
-            onClick={() => setIsCreateNoteModalOpen(true)}
-            color="bg-green-400"
-            hoverColor="hover:bg-green-500"
-            icon={<Plus size={18} />}
-          >
-            Create Note
-          </PixelButton>
+        {/* Terminal Header - Much Larger */}
+        <div className="flex items-center mb-6">
+          <div className="w-6 h-6 bg-cyan-400 mr-3" />
+          <span className="font-mono font-bold text-white text-2xl">COMMAND INTERFACE</span>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start justify-between h-32">
+          {/* Command Buttons Section - Smaller width */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-end h-full">
+            {/* Description Text - Above buttons with space - Larger */}
+            <p className="font-mono text-sm text-gray-300 mb-4 font-semibold">
+              Initialize new data structures or export existing archives
+            </p>
+            
+            {/* Command Buttons - At Bottom */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
+              {/* Create Data Entry */}
+              <button
+                onClick={() => setIsCreateNoteModalOpen(true)}
+                className="bg-gray-900 border-2 border-green-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-green-300 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)] font-mono font-bold text-green-400 h-full"
+                style={{
+                  boxShadow: '0 0 5px rgba(34, 197, 94, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                }}
+              >
+                <div className="flex items-center justify-center gap-1 h-full">
+                  <Plus size={10} />
+                  <FileText size={12} />
+                  <span className="text-xs">ENTRY</span>
+                </div>
+                <div className="absolute inset-0 bg-green-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              </button>
+
+              {/* Create Data Collection */}
+              <button
+                onClick={() => setIsNotebookModalOpen(true)}
+                className="bg-gray-900 border-2 border-blue-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-blue-300 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] font-mono font-bold text-blue-400 h-full"
+                style={{
+                  boxShadow: '0 0 5px rgba(59, 130, 246, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                }}
+              >
+                <div className="flex items-center justify-center gap-1 h-full">
+                  <Plus size={10} />
+                  <BookOpen size={12} />
+                  <span className="text-xs">COLLECTION</span>
+                </div>
+                <div className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              </button>
+
+              {/* Create Folder System */}
+              <button
+                onClick={() => setIsFolderModalOpen(true)}
+                className="bg-gray-900 border-2 border-yellow-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-yellow-300 hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] font-mono font-bold text-yellow-400 h-full"
+                style={{
+                  boxShadow: '0 0 5px rgba(251, 191, 36, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                }}
+              >
+                <div className="flex items-center justify-center gap-1 h-full">
+                  <Plus size={10} />
+                  <Folder size={12} />
+                  <span className="text-xs">FOLDER</span>
+                </div>
+                <div className="absolute inset-0 bg-yellow-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              </button>
+
+              {/* Export All */}
+              <button
+                onClick={async () => {
+                  try {
+                    console.log('Exporting all notes from LibraryTab');
+                    
+                    const response = await fetch(`/api/notes/export/all?username=user`);
+                    
+                    if (response.ok) {
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `all_notes_${new Date().toISOString().slice(0, 10)}.md`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+                      
+                      showNotification('All notes exported successfully! Check your Downloads folder.', 'success');
+                    } else {
+                      throw new Error('Export failed');
+                    }
+                  } catch (error) {
+                    console.error('Export error:', error);
+                    showNotification('Export failed. Please try again later.', 'error');
+                  }
+                }}
+                className="bg-gray-900 border-2 border-purple-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-purple-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] font-mono font-bold text-purple-400 h-full"
+                style={{
+                  boxShadow: '0 0 5px rgba(168, 85, 247, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                }}
+              >
+                <div className="flex items-center justify-center gap-1 h-full">
+                  <Download size={12} />
+                  <span className="text-xs">EXPORT</span>
+                </div>
+                <div className="absolute inset-0 bg-purple-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              </button>
+            </div>
+          </div>
           
-          {/* New Export Button */}
-          <PixelButton
-            onClick={async () => {
-              try {
-                console.log('Exporting all notes from LibraryTab');
-                
-                const response = await fetch(`/api/notes/export/all?username=user`);
-                
-                if (response.ok) {
-                  const blob = await response.blob();
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `all_notes_${new Date().toISOString().slice(0, 10)}.md`;
-                  document.body.appendChild(a);
-                  a.click();
-                  window.URL.revokeObjectURL(url);
-                  document.body.removeChild(a);
-                  
-                  // Beautiful success notification
-                  showNotification('All notes exported successfully! Check your Downloads folder.', 'success');
-                } else {
-                  throw new Error('Export failed');
-                }
-              } catch (error) {
-                console.error('Export error:', error);
-                showNotification('Export failed. Please try again later.', 'error');
-              }
-            }}
-            color="bg-blue-500"
-            hoverColor="hover:bg-blue-600"
-            icon={<Download size={18} />}
-          >
-            Export All
-          </PixelButton>
+          {/* Enhanced Search Terminal - Restored to proper size */}
+          <div className="bg-gray-900 border border-cyan-400 p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
+               style={{
+                 boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+               }}>
+            {/* Search Protocol Header */}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-3 h-3 bg-cyan-400" />
+              <span className="font-mono text-sm text-cyan-400 font-bold">SEARCH PROTOCOL</span>
+            </div>
+            
+            {/* Search Input - Normal size */}
+            <div className="relative mb-3 flex-1 flex flex-col justify-center min-h-0">
+              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search database archives..."
+                className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 text-white font-mono text-sm focus:border-cyan-400 focus:outline-none transition-colors"
+                style={{ color: '#fff' }}
+              />
+            </div>
+            
+            {/* Search Stats */}
+            <div className="text-xs font-mono text-gray-400 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span>{folders.length} FOLDERS</span>
+                  <span>{notebooks.length} COLLECTIONS</span>
+                  <span>{notes.length} ENTRIES</span>
+                </div>
+                <div className="text-cyan-400">
+                  {searchTerm ? 'FILTERING...' : 'READY'}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Search and View Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-          <PixelInput
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search folders, notebooks, and notes..."
-            className="pl-10"
-            style={{ color: '#000' }}
-          />
-        </div>
-        
-        <div className="flex gap-2">
-          <PixelButton
-            onClick={() => setViewMode('grid')}
-            color={viewMode === 'grid' ? 'bg-purple-400' : 'bg-gray-400'}
-            hoverColor={viewMode === 'grid' ? 'hover:bg-purple-500' : 'hover:bg-gray-500'}
-          >
-            Grid View
-          </PixelButton>
-          <PixelButton
-            onClick={() => setViewMode('tree')}
-            color={viewMode === 'tree' ? 'bg-purple-400' : 'bg-gray-400'}
-            hoverColor={viewMode === 'tree' ? 'hover:bg-purple-500' : 'hover:bg-gray-500'}
-          >
-            Tree View
-          </PixelButton>
-        </div>
-      </div>
-
-      {/* Content Area */}
+      {/* Content Sections - Updated styling */}
       <div className="space-y-8">
         {/* Folders Section */}
-        <div>
-          <h3 className="font-mono text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Folder size={20} className="text-yellow-400" />
-            Folders ({folders.length})
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          style={{
+            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          }}
+        >
+          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          
+          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+            <div className="w-4 h-4 bg-yellow-400 mr-2" />
+            FOLDER SYSTEMS ({folders.length})
           </h3>
+          
           {folders.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {folders.map(folder => (
-                <motion.div
-                  key={folder.id}
-                  className="border-2 border-gray-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-gray-800 p-4 cursor-pointer group relative"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleOpenFolder(folder)}
-                  style={{ borderTopColor: folder.colorCode, borderTopWidth: '4px' }}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <Folder size={24} style={{ color: folder.colorCode }} />
-                    <div className="flex flex-col items-end">
-                      <span className="text-xs text-gray-400 font-mono">
-                        {folder.totalItemCount || 0} items
-                      </span>
-                      <span className="text-xs text-gray-500 font-mono group-hover:text-gray-400 transition-colors">
-                        Click to open
-                      </span>
-                    </div>
-                  </div>
-                  <h4 className="font-mono font-bold text-white mb-1">{folder.name}</h4>
-                  <p className="text-xs text-gray-400 mb-3">{folder.description || 'Click to open folder'}</p>
-                  
-                  {/* Edit button moved to bottom right */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditFolder(folder);
-                    }}
-                    className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Edit folder"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="border-2 border-gray-600 bg-gray-800 p-6 text-center">
-              <Folder size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No folders yet. Create one to get started!</p>
-            </div>
-          )}
-        </div>
-
-        {/* Notebooks Section */}
-        <div>
-          <h3 className="font-mono text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <BookOpen size={20} className="text-blue-400" />
-            Notebooks ({notebooks.length})
-          </h3>
-          {notebooks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {notebooks.map(notebook => (
-                <motion.div
-                  key={notebook.id}
-                  className="border-2 border-blue-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-gray-800 p-4 cursor-pointer group relative"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleOpenNotebook(notebook)}
-                  style={{ borderTopColor: notebook.colorCode || '#87CEEB', borderTopWidth: '4px' }}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <BookOpen size={24} style={{ color: notebook.colorCode || '#87CEEB' }} />
-                    <span className="text-xs text-gray-400 font-mono">
-                      {notebook.noteCount || 0} notes
-                    </span>
-                  </div>
-                  <h4 className="font-mono font-bold text-white mb-1">{notebook.name}</h4>
-                  <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Click to open notebook'}</p>
-                  
-                  {/* Edit button moved to bottom right */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditNotebook(notebook);
-                    }}
-                    className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Edit notebook"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="border-2 border-gray-600 bg-gray-800 p-6 text-center">
-              <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No notebooks yet. Create one to organize your notes!</p>
-            </div>
-          )}
-        </div>
-
-        {/* Notes Section */}
-        <div>
-          <h3 className="font-mono text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <FileText size={20} className="text-green-400" />
-            Notes ({notes.length})
-          </h3>
-          {notes.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {notes.map(note => {
-                // Handle tags properly - could be string, array, or null
-                const getTags = (tags) => {
-                  if (!tags) return [];
-                  if (Array.isArray(tags)) return tags;
-                  if (typeof tags === 'string') return tags.split(',').map(tag => tag.trim());
-                  return [];
-                };
-                
-                const tagsArray = getTags(note.tags);
+              {folders.map(folder => {
+                const folderColor = folder.colorCode || '#FFD700'; // Default to yellow
+                const rgbColor = folderColor.startsWith('#') 
+                  ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
+                  : '251, 191, 36'; // Default yellow RGB
                 
                 return (
                   <motion.div
-                    key={note.id}
-                    className="border-2 border-gray-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-gray-800 p-4 cursor-pointer hover:bg-gray-750 transition-colors group relative"
-                    whileHover={{ scale: 1.02, y: -2 }}
+                    key={folder.id}
+                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                    style={{
+                      borderColor: folderColor,
+                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -2,
+                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                    }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => handleEditNote(note)} // Click to edit
-                    style={{ borderTopColor: note.color || '#4ADE80', borderTopWidth: '4px' }}
+                    onClick={() => handleOpenFolder(folder)}
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <FileText size={24} style={{ color: note.color || '#4ADE80' }} />
-                      <span className="text-xs text-gray-400 font-mono">
-                        {tagsArray.length} tags
-                      </span>
-                    </div>
-                    <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
-                      {note.title}
-                    </h4>
-                    <p className="text-xs text-gray-400 line-clamp-3 mb-3">
-                      {note.content && note.content.length > 100 
-                        ? `${note.content.substring(0, 100)}...` 
-                        : note.content}
-                    </p>
-                    {tagsArray.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {tagsArray.slice(0, 2).map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-gray-700 text-xs font-mono text-gray-300 rounded"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {tagsArray.length > 2 && (
-                          <span className="text-xs text-gray-500 font-mono">
-                            +{tagsArray.length - 2}
-                          </span>
-                        )}
+                      <Folder size={24} style={{ color: folderColor }} />
+                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                        {folder.totalItemCount || 0} ITEMS
                       </div>
-                    )}
+                    </div>
+                    <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
+                    <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access folder contents'}</p>
                     
-                    {/* Edit button in bottom right */}
+                    {/* Corner accent with matching color */}
+                    <div 
+                      className="absolute -top-1 -right-1 w-2 h-2" 
+                      style={{ backgroundColor: folderColor }}
+                    />
+                    
+                    {/* Edit button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleEditNote(note);
+                        handleEditFolder(folder);
                       }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Edit note"
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Modify folder"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -478,69 +441,217 @@ const LibraryTab = () => {
               })}
             </div>
           ) : (
-            <div className="border-2 border-gray-600 bg-gray-800 p-6 text-center">
+            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+              <Folder size={48} className="text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-400 font-mono">No folder systems detected. Initialize new directory structure.</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Notebooks Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          style={{
+            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          }}
+        >
+          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          
+          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+            <div className="w-4 h-4 bg-blue-400 mr-2" />
+            DATA COLLECTIONS ({notebooks.length})
+          </h3>
+          
+          {notebooks.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {notebooks.map(notebook => {
+                const notebookColor = notebook.colorCode || '#60A5FA'; // Default to blue
+                const rgbColor = notebookColor.startsWith('#') 
+                  ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
+                  : '96, 165, 250'; // Default blue RGB
+                
+                return (
+                  <motion.div
+                    key={notebook.id}
+                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                    style={{
+                      borderColor: notebookColor,
+                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -2,
+                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleOpenNotebook(notebook)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <BookOpen size={24} style={{ color: notebookColor }} />
+                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                        {notebook.noteCount || 0} ENTRIES
+                      </div>
+                    </div>
+                    <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
+                    <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
+                    
+                    {/* Corner accent with matching color */}
+                    <div 
+                      className="absolute -top-1 -right-1 w-2 h-2" 
+                      style={{ backgroundColor: notebookColor }}
+                    />
+                    
+                    {/* Edit button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditNotebook(notebook);
+                      }}
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Modify collection"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+              <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-400 font-mono">No collections found. Create data collection to begin.</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Notes Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          style={{
+            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          }}
+        >
+          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          
+          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+            <div className="w-4 h-4 bg-green-400 mr-2" />
+            DATA ENTRIES ({notes.length})
+          </h3>
+          
+          {notes.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {notes.map(note => {
+                const getTags = (tags) => {
+                  if (!tags) return [];
+                  if (Array.isArray(tags)) return tags;
+                  if (typeof tags === 'string') return tags.split(',').map(tag => tag.trim());
+                  return [];
+                };
+                
+                const tagsArray = getTags(note.tags);
+                const noteColor = note.colorCode || '#4ADE80'; // Default to green
+                const rgbColor = noteColor.startsWith('#') 
+                  ? `${parseInt(noteColor.slice(1, 3), 16)}, ${parseInt(noteColor.slice(3, 5), 16)}, ${parseInt(noteColor.slice(5, 7), 16)}`
+                  : '74, 222, 128'; // Default green RGB
+                
+                return (
+                  <motion.div
+                    key={note.id}
+                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                    style={{
+                      borderColor: noteColor,
+                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -2,
+                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleEditNote(note)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <FileText size={24} style={{ color: noteColor }} />
+                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                        {tagsArray.length} TAGS
+                      </div>
+                    </div>
+                    <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
+                      {note.title}
+                    </h4>
+                    <p className="text-xs text-gray-400 mb-3">
+                      {note.content && note.content.length > 100 
+                        ? `${note.content.substring(0, 100)}...` 
+                        : note.content}
+                    </p>
+                    
+                    {/* Tags */}
+                    {tagsArray.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {tagsArray.slice(0, 2).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {tagsArray.length > 2 && (
+                          <span className="text-xs text-gray-500 font-mono px-2 py-1">
+                            +{tagsArray.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Corner accent with matching color */}
+                    <div 
+                      className="absolute -top-1 -right-1 w-2 h-2" 
+                      style={{ backgroundColor: noteColor }}
+                    />
+                    
+                    {/* Edit button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditNote(note);
+                      }}
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Modify entry"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
               <FileText size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono mb-4">No notes yet. Create one to start writing!</p>
+              <p className="text-gray-400 font-mono mb-4">No data entries found. Initialize first entry.</p>
               <PixelButton
                 onClick={handleCreateNote}
                 color="bg-green-400"
                 hoverColor="hover:bg-green-500"
                 icon={<Plus size={18} />}
               >
-                Create Your First Note
+                CREATE FIRST ENTRY
               </PixelButton>
             </div>
           )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="border-2 border-gray-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-gray-800 p-6">
-          <h4 className="font-mono text-lg font-bold text-white mb-4">Quick Start</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-700 p-4 border border-gray-600">
-              <Folder size={24} className="text-yellow-400 mb-2" />
-              <h5 className="font-mono font-bold text-white mb-1">Create Folder</h5>
-              <p className="text-xs text-gray-400 mb-3">Organize related notebooks and notes</p>
-              <PixelButton
-                onClick={handleCreateFolder}
-                color="bg-yellow-400"
-                hoverColor="hover:bg-yellow-500"
-                size="sm"
-              >
-                New Folder
-              </PixelButton>
-            </div>
-            
-            <div className="bg-gray-700 p-4 border border-gray-600">
-              <BookOpen size={24} className="text-blue-400 mb-2" />
-              <h5 className="font-mono font-bold text-white mb-1">Create Notebook</h5>
-              <p className="text-xs text-gray-400 mb-3">Group related notes together</p>
-              <PixelButton
-                onClick={handleCreateNotebook}
-                color="bg-blue-400"
-                hoverColor="hover:bg-blue-500"
-                size="sm"
-              >
-                New Notebook
-              </PixelButton>
-            </div>
-            
-            <div className="bg-gray-700 p-4 border border-gray-600">
-              <FileText size={24} className="text-green-400 mb-2" />
-              <h5 className="font-mono font-bold text-white mb-1">Create Note</h5>
-              <p className="text-xs text-gray-400 mb-3">Start writing immediately</p>
-              <PixelButton
-                onClick={handleCreateNote}
-                color="bg-green-400"
-                hoverColor="hover:bg-green-500"
-                icon={<FileText size={18} />}
-                className="w-full"
-              >
-                Create Note
-              </PixelButton>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Note Creation Modal */}
