@@ -12,10 +12,13 @@ import { useAchievements } from '../hooks/useAchievements';
 import TabNavigation from './navigation/TabNavigation';
 import { useTabs } from '../hooks/useTabs';
 import '../styles/tabs.css'; // Import the tab styles
+import '../styles/background.css'; // Add this import
 import NotesTab from './tabs/NotesTab';
-import ProfileTab from './tabs/ProfileTab';
+import TasksTab from './tabs/TasksTab'; // ⭐ ADD THIS
 import LibraryTab from './tabs/LibraryTab';
+import FocusTab from './tabs/FocusTab'; // ⭐ ADD THIS
 import AchievementsTab from './tabs/AchievementsTab';
+import ProfileTab from './tabs/ProfileTab';
 
 const PixelPages = () => {
   // Add tab functionality
@@ -154,25 +157,42 @@ const PixelPages = () => {
     setShowAchievements(false);
   };
 
+  // Update the getCurrentTabColor function with the new progressive colors
+  const getCurrentTabColor = () => {
+    const tabs = [
+      { id: 'notes', color: '#22D3EE' }, // Cyan 400 - Bright cyan
+      { id: 'tasks', color: '#0EA5E9' }, // Sky 500 - Cyan-blue bridge
+      { id: 'library', color: '#3B82F6' }, // Blue 500 - True blue
+      { id: 'focus', color: '#6366F1' }, // Indigo 500 - Blue-purple bridge
+      { id: 'achievements', color: '#8B5CF6' }, // Purple 500 - Medium purple
+      { id: 'profile', color: '#A78BFA' } // Purple 400 - Light purple
+    ];
+    
+    const currentTab = tabs.find(tab => tab.id === activeTab);
+    return currentTab?.color || '#22D3EE';
+  };
 
-
-  // Temporary content renderer for testing
+  // Update the renderTabContent function
   const renderTabContent = () => {
+    const tabColor = getCurrentTabColor();
+    
     switch (activeTab) {
       case 'notes':
-        return <NotesTab />;
+        return <NotesTab tabColor={tabColor} />;
+      case 'tasks':
+        return <TasksTab tabColor={tabColor} />; // Will need to create this
       case 'library':
-        return <LibraryTab />;
+        return <LibraryTab tabColor={tabColor} />;
+      case 'focus':
+        return <FocusTab tabColor={tabColor} />; // Will need to create this
       case 'achievements':
-        return <AchievementsTab />;
+        return <AchievementsTab tabColor={tabColor} />;
       case 'profile':
-        return <ProfileTab />;
+        return <ProfileTab tabColor={tabColor} />;
       default:
         return <div>Tab not found</div>;
     }
   };
-
-
 
   // Loading state
   if (loading && notes.length === 0) {
@@ -185,10 +205,15 @@ const PixelPages = () => {
 
   return (
     <div className="pixel-pages-container">
-      {/* Add tab navigation at the top */}
+      {/* Add subtle noise texture overlay */}
+      <div className="fixed inset-0 opacity-5 pointer-events-none" 
+           style={{
+             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+           }} 
+      />
+      
       <TabNavigation activeTab={activeTab} onTabChange={changeTab} />
       
-      {/* Render active tab content */}
       <main className="tab-content-area">
         {renderTabContent()}
       </main>

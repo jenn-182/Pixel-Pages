@@ -1,0 +1,36 @@
+/* Custom scrollbar for gaming feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+  border: 1px solid #34d399;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #22d3ee, #8b5cf6);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #06b6d4, #7c3aed);
+}
+
+/* Add subtle glow to interactive elements */
+button:focus,
+input:focus,
+textarea:focus {
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.5) !important;
+}
+
+/* Enhance selection styling */
+::selection {
+  background: rgba(34, 211, 238, 0.3);
+  color: white;
+}
+
+/* Add cursor trail effect (optional) */
+.pixel-pages-container {
+  cursor: crosshair;
+}

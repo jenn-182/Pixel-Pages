@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Search, FileText, Clock, Save, X, Maximize2, Minimize2 } from 'lucide-react';
 import PixelButton from '../PixelButton';
 import PixelInput from '../PixelInput';
 import NoteCard from '../notes/NoteCard';
@@ -9,198 +9,430 @@ import useNotes from '../../hooks/useNotes';
 import useFolders from '../../hooks/useFolders';
 import useNotebooks from '../../hooks/useNotebooks';
 
-const NotesTab = () => {
+const NotesTab = ({ tabColor = '#22D3EE' }) => {
   const { notes, loading, error, deleteNote, createNote, updateNote } = useNotes();
   const { folders } = useFolders();
   const { notebooks } = useNotebooks();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  
+  // Quick entry state (for normal form)
+  const [quickTitle, setQuickTitle] = useState('');
+  const [quickContent, setQuickContent] = useState('');
+  const [quickTags, setQuickTags] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('SYSTEMS ONLINE');
+  
+  // Modal states
   const [activeNote, setActiveNote] = useState(null);
-  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isFullscreenModalOpen, setIsFullscreenModalOpen] = useState(false);
 
-  // Filter notes based on search
-  const filteredNotes = searchTerm
-    ? notes.filter(note =>
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (note.tags && Array.isArray(note.tags) && note.tags.some(tag =>
-          tag.toLowerCase().includes(searchTerm.toLowerCase())
-        ))
-      )
-    : notes;
+  // Get recent notes (last 8)
+  const recentNotes = notes
+    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+    .slice(0, 8);
 
-  const handleDeleteNote = async (note) => {
-    if (window.confirm('Are you sure you want to delete this note?')) {
-      try {
-        await deleteNote(note.id);
-      } catch (err) {
-        console.error('Failed to delete note:', err);
-      }
+  // Auto-save functionality for normal form only
+  useEffect(() => {
+    if (quickTitle.trim() || quickContent.trim()) {
+      setSaveStatus('TYPING...');
+    } else {
+      setSaveStatus('SYSTEMS ONLINE');
     }
-  };
+  }, [quickTitle, quickContent]);
 
-  const handleCreateNote = () => {
-    setIsCreateNoteModalOpen(true);
-  };
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Escape to exit fullscreen
+      if (e.key === 'Escape' && isFullscreenModalOpen) {
+        e.preventDefault();
+        setIsFullscreenModalOpen(false);
+      }
+      // Ctrl/Cmd + Enter to save
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (!isFullscreenModalOpen) {
+          handleQuickSave();
+        }
+      }
+      // F11 to toggle fullscreen
+      if (e.key === 'F11') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
 
-  const handleCreateNoteSubmit = async (noteData) => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreenModalOpen]);
+
+  // Regular form save
+  const handleQuickSave = React.useCallback(async () => {
+    if (!quickTitle.trim() && !quickContent.trim()) return;
+    
+    setIsSaving(true);
+    setSaveStatus('SAVING...');
+    
     try {
-      console.log('NotesTab: Creating note:', noteData); // Debug log
+      const noteData = {
+        title: quickTitle.trim() || 'Untitled Note',
+        content: quickContent.trim(),
+        tags: quickTags.trim() ? quickTags.split(',').map(tag => tag.trim()) : [],
+        color: '#4ADE80',
+      };
+      
       await createNote(noteData);
-      setIsCreateNoteModalOpen(false);
-      console.log('Note created successfully from NotesTab!');
+      
+      // Clear form
+      setQuickTitle('');
+      setQuickContent('');
+      setQuickTags('');
+      setSaveStatus('MISSION LOGGED!');
+      
+      setTimeout(() => setSaveStatus('READY'), 2000);
+      
     } catch (error) {
-      console.error('Failed to create note:', error);
-      alert('Failed to create note: ' + error.message);
+      console.error('Failed to save quick note:', error);
+      setSaveStatus('ERROR');
+      setTimeout(() => setSaveStatus('READY'), 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [quickTitle, quickContent, quickTags, createNote]);
+
+  const handleClearForm = () => {
+    setQuickTitle('');
+    setQuickContent('');
+    setQuickTags('');
+    setSaveStatus('READY');
+  };
+
+  const handleEditNote = (note) => {
+    setActiveNote(note);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateNote = async (noteData) => {
+    try {
+      await updateNote(activeNote.id, noteData);
+      setIsEditModalOpen(false);
+      setActiveNote(null);
+    } catch (error) {
+      console.error('Failed to update note:', error);
+      alert('Failed to update note: ' + error.message);
     }
   };
 
-  const handleSaveNote = async (noteData) => {
+  // Handle fullscreen modal save (for new notes)
+  const handleFullscreenSave = async (noteData) => {
     try {
-      console.log('NotesTab: Saving note data:', noteData); // Debug log
+      await createNote(noteData);
+      setIsFullscreenModalOpen(false);
       
-      if (activeNote && activeNote.id) {
-        console.log('NotesTab: Updating existing note:', activeNote.id); // Debug log
-        await updateNote(activeNote.id, noteData);
-      } else {
-        console.log('NotesTab: Creating new note'); // Debug log
-        await createNote(noteData);
-      }
-      
-      setIsEditing(false);
-      setActiveNote(null);
-      
-      console.log('NotesTab: Note saved successfully'); // Debug log
+      // Update the status indicators
+      setSaveStatus('MISSION LOGGED!');
+      setTimeout(() => setSaveStatus('SYSTEMS ONLINE'), 2000);
+
     } catch (error) {
-      console.error('NotesTab: Failed to save note:', error);
+      console.error('Failed to save fullscreen note:', error);
       alert('Failed to save note: ' + error.message);
     }
+  };
+
+  const toggleFullscreen = () => {
+    console.log('Toggling fullscreen modal');
+    setIsFullscreenModalOpen(!isFullscreenModalOpen);
+  };
+
+  // Create a draft note object for fullscreen mode
+  const draftNote = {
+    title: quickTitle,
+    content: quickContent,
+    tags: quickTags.trim() ? quickTags.split(',').map(tag => tag.trim()) : [],
+    color: '#4ADE80',
   };
 
   return (
     <div className="notes-tab-container p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div>
-          <h1 className="font-mono text-2xl font-bold text-white mb-2">Your Notes</h1>
-          <p className="text-gray-400 font-mono text-sm">
-            {notes.length} {notes.length === 1 ? 'note' : 'notes'} total
-          </p>
-        </div>
-        
-        <div className="flex gap-3">
-          <PixelButton
-            onClick={handleCreateNote}
-            color="bg-green-400"
-            hoverColor="hover:bg-green-500"
-            icon={<Plus size={18} />}
-          >
-            New Note
-          </PixelButton>
-        </div>
-      </div>
-
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
-          <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-          <PixelInput
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search notes..."
-            className="pl-10"
+      <div className="mb-8">
+        <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
+          <div 
+            className="w-6 h-6 border border-gray-600" 
+            style={{ backgroundColor: tabColor }}
           />
-        </div>
-        {searchTerm && (
-          <p className="text-sm text-gray-400 mt-2 font-mono">
-            Found {filteredNotes.length} {filteredNotes.length === 1 ? 'note' : 'notes'}
-          </p>
-        )}
+          MISSION CONTROL
+        </h1>
+        <p className="text-gray-400 font-mono text-sm">
+          Quick entry terminal for creating new missions and editing recently archived logs.
+        </p>
       </div>
 
       {/* Error Display */}
       {error && (
-        <div className="border-2 border-red-500 bg-red-100 p-4 mb-4 font-mono text-red-800">
-          Error: {error}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-800 border-2 border-red-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6"
+          style={{
+            boxShadow: '0 0 20px rgba(239, 68, 68, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          }}
+        >
+          <div className="font-mono text-red-400">
+            ERROR: {error}
+          </div>
+        </motion.div>
       )}
 
-      {/* Notes Grid */}
-      {loading ? (
-        <div className="text-center py-8 font-mono text-white">Loading notes...</div>
-      ) : filteredNotes.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredNotes.map(note => (
-            <NoteCard
-              key={note.id || note.filename || note.title}
-              note={note}
-              onView={setActiveNote}
-              onEdit={(note) => {
-                setActiveNote(note);
-                setIsEditing(true);
-              }}
-              onDelete={handleDeleteNote}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="border-2 border-gray-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-gray-800 p-8 text-center">
-          {searchTerm ? (
-            <div>
-              <h3 className="font-mono text-lg font-bold mb-2 text-white">No notes found</h3>
-              <p className="text-gray-400 mb-4">Try a different search term or create a new note</p>
-              <div className="flex gap-2 justify-center">
-                <PixelButton
-                  onClick={() => setSearchTerm('')}
-                  color="bg-blue-400"
-                  hoverColor="hover:bg-blue-500"
+      {/* Split Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left Side - Quick Entry Terminal (2/3 width) */}
+        <div className="lg:col-span-2">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative h-full"
+            style={{
+              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+            }}
+          >
+            <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+            
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-mono font-bold text-white">MISSION LOGGER</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-xs font-mono">
+                  <div className={`w-2 h-2 ${
+                    saveStatus === 'SYSTEMS ONLINE' ? 'bg-green-400' :
+                    saveStatus === 'TYPING...' ? 'bg-yellow-400' :
+                    saveStatus === 'SAVING...' ? 'bg-blue-400' :
+                    saveStatus === 'MISSION LOGGED!' ? 'bg-green-400' :
+                    'bg-red-400'
+                  }`} />
+                  <span className="text-cyan-400">{saveStatus}</span>
+                </div>
+                <button
+                  onClick={toggleFullscreen}
+                  className="bg-gray-900 border border-cyan-400 p-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)] text-cyan-400"
+                  style={{
+                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  }}
+                  title="Fullscreen Mode (F11)"
                 >
-                  Clear Search
-                </PixelButton>
-                <PixelButton
-                  onClick={handleCreateNote}
-                  color="bg-green-400"
-                  hoverColor="hover:bg-green-500"
-                  icon={<Plus size={18} />}
-                >
-                  Create Note
-                </PixelButton>
+                  <Maximize2 size={16} />
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                </button>
               </div>
             </div>
-          ) : (
-            <div>
-              <h3 className="font-mono text-lg font-bold mb-2 text-white">No notes yet</h3>
-              <p className="text-gray-400 mb-4">Create your first note to get started on your digital adventure!</p>
-              <PixelButton
-                onClick={handleCreateNote}
-                color="bg-green-400"
-                hoverColor="hover:bg-green-500"
-                icon={<Plus size={18} />}
-              >
-                Create Your First Note
-              </PixelButton>
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* Modals */}
+            {/* Quick Entry Form */}
+            <div className="space-y-4">
+              {/* Title Input */}
+              <div>
+                <label className="block text-sm font-mono text-gray-400 mb-2">TITLE</label>
+                <input
+                  value={quickTitle}
+                  onChange={(e) => setQuickTitle(e.target.value)}
+                  placeholder="Enter note title..."
+                  className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                  style={{ 
+                    color: '#ffffff !important',
+                    WebkitTextFillColor: '#ffffff',
+                    textFillColor: '#ffffff'
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              {/* Content Input */}
+              <div>
+                <label className="block text-sm font-mono text-gray-400 mb-2">CONTENT</label>
+                <textarea
+                  value={quickContent}
+                  onChange={(e) => setQuickContent(e.target.value)}
+                  placeholder="Start typing your note content..."
+                  className="w-full px-4 py-3 transition-colors resize-none placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                  style={{ 
+                    color: '#ffffff !important',
+                    WebkitTextFillColor: '#ffffff',
+                    textFillColor: '#ffffff'
+                  }}
+                  rows={8}
+                />
+              </div>
+
+              {/* Tags Input */}
+              <div>
+                <label className="block text-sm font-mono text-gray-400 mb-2">TAGS (comma separated)</label>
+                <input
+                  value={quickTags}
+                  onChange={(e) => setQuickTags(e.target.value)}
+                  placeholder="idea, project, important..."
+                  className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                  style={{ 
+                    color: '#ffffff !important',
+                    WebkitTextFillColor: '#ffffff',
+                    textFillColor: '#ffffff'
+                  }}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleQuickSave}
+                  disabled={isSaving || (!quickTitle.trim() && !quickContent.trim())}
+                  className="bg-gray-900 border-2 border-cyan-400 px-6 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Save size={18} className="text-cyan-400" />
+                    <span className="text-cyan-400">{isSaving ? 'SAVING...' : 'SAVE PROGRESS'}</span>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                </button>
+
+                <button
+                  onClick={handleClearForm}
+                  className="bg-gray-900 border-2 border-cyan-400 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+                  style={{
+                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <X size={18} className="text-cyan-400" />
+                    <span className="text-cyan-400">ABORT MISSION</span>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Right Side - Recent Activity Feed (1/3 width) */}
+        <div className="lg:col-span-1">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative h-full"
+            style={{
+              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+            }}
+          >
+            <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+            
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-6">
+              <Clock size={20} className="text-cyan-400" />
+              <h2 className="text-xl font-mono font-bold text-white">MISSION HISTORY</h2>
+            </div>
+
+            {/* Recent Notes List */}
+            {loading ? (
+              <div className="text-center py-8 font-mono text-white">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="inline-block mb-4"
+                >
+                  <FileText size={24} className="text-cyan-400" />
+                </motion.div>
+                <div className="text-sm">Loading...</div>
+              </div>
+            ) : recentNotes.length > 0 ? (
+              <div className="space-y-3">
+                {recentNotes.map(note => {
+                  const noteColor = note.color || note.colorCode || '#4ADE80';
+                  const hexToRgb = (hex) => {
+                    if (!hex || !hex.startsWith('#')) return '74, 222, 128';
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? 
+                      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                      '74, 222, 128';
+                  };
+                  const rgbColor = hexToRgb(noteColor);
+
+                  return (
+                    <motion.div
+                      key={note.id || note.filename || note.title}
+                      className="bg-gray-900 border-2 p-3 cursor-pointer group transition-all duration-300 hover:scale-[1.02]"
+                      style={{
+                        borderColor: noteColor,
+                        boxShadow: `0 0 5px rgba(${rgbColor}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`,
+                      }}
+                      whileHover={{
+                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.6), 1px 1px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      onClick={() => handleEditNote(note)}
+                    >
+                      <div className="flex items-start gap-2">
+                        <FileText size={14} style={{ color: noteColor }} className="mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-mono font-bold text-white text-sm truncate mb-1">
+                            {note.title}
+                          </h4>
+                          <p className="text-xs text-gray-400 line-clamp-2">
+                            {note.content && note.content.length > 60 
+                              ? `${note.content.substring(0, 60)}...` 
+                              : note.content}
+                          </p>
+                          <div className="text-xs text-gray-500 font-mono mt-1">
+                            {new Date(note.createdAt || note.date).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+                
+                {/* View All Button */}
+                <div className="pt-4 border-t border-gray-600">
+                  <button className="w-full bg-gray-900 border border-cyan-400 px-3 py-2 text-cyan-400 font-mono text-sm hover:bg-gray-800 transition-colors hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]"
+                    style={{
+                      boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    }}
+                  >
+                    <span className="text-cyan-400">VIEW ALL LOGS →</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FileText size={32} className="text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400 font-mono text-sm">No recent entries</p>
+                <p className="text-gray-500 font-mono text-xs mt-1">Create your first note!</p>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Fullscreen Modal using NoteModal */}
       <NoteModal
-        isOpen={isCreateNoteModalOpen}
-        onClose={() => setIsCreateNoteModalOpen(false)}
-        onSave={handleCreateNoteSubmit}  
+        isOpen={isFullscreenModalOpen}
+        onClose={() => setIsFullscreenModalOpen(false)}
+        onSave={handleFullscreenSave}
         folders={folders}
         notebooks={notebooks}
-        existingNote={null}
+        existingNote={draftNote}
+        isFullscreen={true}
+        title="FULLSCREEN ENTRY TERMINAL"
       />
+
+      {/* Edit Modal */}
       <NoteModal
-        isOpen={isEditing}
+        isOpen={isEditModalOpen}
         onClose={() => {
-          setIsEditing(false);
+          setIsEditModalOpen(false);
           setActiveNote(null);
         }}
-        onSave={handleSaveNote}  
+        onSave={handleUpdateNote}
         folders={folders}
         notebooks={notebooks}
         existingNote={activeNote}

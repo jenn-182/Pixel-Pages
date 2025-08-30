@@ -6,7 +6,7 @@ import PixelInput from '../PixelInput';
 import AchievementCard from '../achievements/AchievementCard';
 import { useAchievements } from '../../hooks/useAchievements';
 
-const AchievementsTab = () => {
+const AchievementsTab = ({ tabColor = '#8B5CF6' }) => {
   const { achievements, summary, loading } = useAchievements();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, completed, inProgress, locked
@@ -43,11 +43,14 @@ const AchievementsTab = () => {
           >
             <Trophy size={32} className="text-yellow-400" />
           </motion.div>
-          <div className="w-6 h-6 bg-purple-400 border border-gray-600" />
+          <div 
+            className="w-6 h-6 border border-gray-600" 
+            style={{ backgroundColor: tabColor }}
+          />
           ACHIEVEMENT TERMINAL
         </h1>
         <p className="text-gray-400 font-mono text-sm">
-          Track progress and unlock digital accomplishments
+          Track progress and unlock digital accomplishments.
         </p>
       </div>
 
@@ -64,7 +67,7 @@ const AchievementsTab = () => {
         
         <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
           <div className="w-4 h-4 bg-purple-400 mr-2" />
-          PROGRESS ANALYSIS
+          PROGRESS METRICS
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -74,7 +77,7 @@ const AchievementsTab = () => {
                }}>
             <div className="flex items-center gap-3 mb-2">
               <CheckCircle size={20} className="text-green-400" />
-              <span className="font-mono font-bold text-white">COMPLETED</span>
+              <span className="font-mono font-bold text-white">MISSIONS ACCOMPLISHED</span>
             </div>
             <div className="text-2xl font-mono font-bold text-green-400">
               {summary?.completed || 0}
@@ -89,7 +92,7 @@ const AchievementsTab = () => {
                }}>
             <div className="flex items-center gap-3 mb-2">
               <Clock size={20} className="text-blue-400" />
-              <span className="font-mono font-bold text-white">IN PROGRESS</span>
+              <span className="font-mono font-bold text-white">CURRENT MISSIONS</span>
             </div>
             <div className="text-2xl font-mono font-bold text-blue-400">
               {summary?.inProgress || 0}
@@ -244,7 +247,7 @@ const AchievementsTab = () => {
         <div className="bg-gray-800 border-2 border-gray-600 p-6 text-center">
           <Trophy size={48} className="text-gray-500 mx-auto mb-3" />
           <h3 className="font-mono text-lg font-bold text-white mb-2">NO ACHIEVEMENTS DETECTED</h3>
-          <p className="text-gray-400 mb-4 font-mono">Initialize data entries to unlock achievements!</p>
+          <p className="text-gray-400 mb-4 font-mono">Create mission logs to unlock achievements!</p>
           <PixelButton
             onClick={() => console.log('Go to notes')}
             color="bg-green-400"

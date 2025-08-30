@@ -8,7 +8,7 @@ import { useAchievements } from '../../hooks/useAchievements';
 import useNotes from '../../hooks/useNotes';
 import HeroCard from '../profile/HeroCard';
 
-const ProfileTab = () => {
+const ProfileTab = ({ tabColor = '#A78BFA' }) => {
   const { player, loading: playerLoading } = usePlayer();
   const { summary } = useAchievements();
   const { notes, loading: notesLoading } = useNotes();
@@ -31,14 +31,17 @@ const ProfileTab = () => {
 
   return (
     <div className="profile-tab-container p-6">
-      {/* Header - Updated with purple square */}
+      {/* Header */}
       <div className="mb-8">
         <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-          <div className="w-6 h-6 bg-purple-400 border border-gray-600" />
+          <div 
+            className="w-6 h-6 border border-gray-600" 
+            style={{ backgroundColor: tabColor }}
+          />
           PLAYER PROFILE
         </h1>
         <p className="text-gray-400 font-mono text-sm">
-          View player statistics and progression data
+          View player statistics and mission progression.
         </p>
       </div>
 
