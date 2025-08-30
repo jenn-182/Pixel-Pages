@@ -219,9 +219,8 @@ const LibraryTab = () => {
            }}>
         <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
         
-        {/* Terminal Header - Much Larger */}
+        {/* Terminal Header - Remove the box */}
         <div className="flex items-center mb-6">
-          <div className="w-6 h-6 bg-cyan-400 mr-3" />
           <span className="font-mono font-bold text-white text-2xl">COMMAND INTERFACE</span>
         </div>
 
@@ -233,14 +232,14 @@ const LibraryTab = () => {
               Initialize new data structures or export existing archives
             </p>
             
-            {/* Command Buttons - At Bottom */}
+            {/* Command Buttons - Updated to cyan theme */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
-              {/* Create Data Entry */}
+              {/* Create Data Entry - Now cyan */}
               <button
                 onClick={() => setIsCreateNoteModalOpen(true)}
-                className="bg-gray-900 border-2 border-green-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-green-300 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)] font-mono font-bold text-green-400 h-full"
+                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
                 style={{
-                  boxShadow: '0 0 5px rgba(34, 197, 94, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
                 }}
               >
                 <div className="flex items-center justify-center gap-1 h-full">
@@ -248,15 +247,15 @@ const LibraryTab = () => {
                   <FileText size={12} />
                   <span className="text-xs">ENTRY</span>
                 </div>
-                <div className="absolute inset-0 bg-green-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Create Data Collection */}
+              {/* Create Data Collection - Now cyan */}
               <button
                 onClick={() => setIsNotebookModalOpen(true)}
-                className="bg-gray-900 border-2 border-blue-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-blue-300 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] font-mono font-bold text-blue-400 h-full"
+                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
                 style={{
-                  boxShadow: '0 0 5px rgba(59, 130, 246, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
                 }}
               >
                 <div className="flex items-center justify-center gap-1 h-full">
@@ -264,15 +263,15 @@ const LibraryTab = () => {
                   <BookOpen size={12} />
                   <span className="text-xs">COLLECTION</span>
                 </div>
-                <div className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Create Folder System */}
+              {/* Create Folder System - Now cyan */}
               <button
                 onClick={() => setIsFolderModalOpen(true)}
-                className="bg-gray-900 border-2 border-yellow-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-yellow-300 hover:shadow-[0_0_15px_rgba(251,191,36,0.3)] font-mono font-bold text-yellow-400 h-full"
+                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
                 style={{
-                  boxShadow: '0 0 5px rgba(251, 191, 36, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
                 }}
               >
                 <div className="flex items-center justify-center gap-1 h-full">
@@ -280,10 +279,10 @@ const LibraryTab = () => {
                   <Folder size={12} />
                   <span className="text-xs">FOLDER</span>
                 </div>
-                <div className="absolute inset-0 bg-yellow-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Export All */}
+              {/* Export All - Now cyan */}
               <button
                 onClick={async () => {
                   try {
@@ -311,16 +310,16 @@ const LibraryTab = () => {
                     showNotification('Export failed. Please try again later.', 'error');
                   }
                 }}
-                className="bg-gray-900 border-2 border-purple-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-purple-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] font-mono font-bold text-purple-400 h-full"
+                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
                 style={{
-                  boxShadow: '0 0 5px rgba(168, 85, 247, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
                 }}
               >
                 <div className="flex items-center justify-center gap-1 h-full">
                   <Download size={12} />
                   <span className="text-xs">EXPORT</span>
                 </div>
-                <div className="absolute inset-0 bg-purple-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
             </div>
           </div>
@@ -365,9 +364,9 @@ const LibraryTab = () => {
         </div>
       </div>
 
-      {/* Content Sections - Updated styling */}
+      {/* Content Sections - All sections now have cyan borders */}
       <div className="space-y-8">
-        {/* Folders Section */}
+        {/* Folders Section - Now CYAN border */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -379,12 +378,12 @@ const LibraryTab = () => {
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
           
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            <div className="w-4 h-4 bg-yellow-400 mr-2" />
             FOLDER SYSTEMS ({folders.length})
           </h3>
           
           {folders.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {/* Folders Section - Remove corner decoration */}
               {folders.map(folder => {
                 const folderColor = folder.colorCode || '#FFD700'; // Default to yellow
                 const rgbColor = folderColor.startsWith('#') 
@@ -416,11 +415,7 @@ const LibraryTab = () => {
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access folder contents'}</p>
                     
-                    {/* Corner accent with matching color */}
-                    <div 
-                      className="absolute -top-1 -right-1 w-2 h-2" 
-                      style={{ backgroundColor: folderColor }}
-                    />
+                    {/* Corner decoration removed */}
                     
                     {/* Edit button */}
                     <button
@@ -432,7 +427,7 @@ const LibraryTab = () => {
                       title="Modify folder"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </button>
@@ -448,7 +443,7 @@ const LibraryTab = () => {
           )}
         </motion.div>
 
-        {/* Notebooks Section */}
+        {/* Notebooks Section - Now CYAN border */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -461,12 +456,12 @@ const LibraryTab = () => {
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
           
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            <div className="w-4 h-4 bg-blue-400 mr-2" />
             DATA COLLECTIONS ({notebooks.length})
           </h3>
           
           {notebooks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {/* Notebooks Section - Corner accent always blue */}
               {notebooks.map(notebook => {
                 const notebookColor = notebook.colorCode || '#60A5FA'; // Default to blue
                 const rgbColor = notebookColor.startsWith('#') 
@@ -498,11 +493,7 @@ const LibraryTab = () => {
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
                     
-                    {/* Corner accent with matching color */}
-                    <div 
-                      className="absolute -top-1 -right-1 w-2 h-2" 
-                      style={{ backgroundColor: notebookColor }}
-                    />
+                    {/* Corner decoration removed */}
                     
                     {/* Edit button */}
                     <button
@@ -514,7 +505,7 @@ const LibraryTab = () => {
                       title="Modify collection"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </button>
@@ -530,7 +521,7 @@ const LibraryTab = () => {
           )}
         </motion.div>
 
-        {/* Notes Section */}
+        {/* Notes Section - Now CYAN border */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -543,7 +534,6 @@ const LibraryTab = () => {
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
           
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            <div className="w-4 h-4 bg-green-400 mr-2" />
             DATA ENTRIES ({notes.length})
           </h3>
           
@@ -558,10 +548,29 @@ const LibraryTab = () => {
                 };
                 
                 const tagsArray = getTags(note.tags);
-                const noteColor = note.colorCode || '#4ADE80'; // Default to green
-                const rgbColor = noteColor.startsWith('#') 
-                  ? `${parseInt(noteColor.slice(1, 3), 16)}, ${parseInt(noteColor.slice(3, 5), 16)}, ${parseInt(noteColor.slice(5, 7), 16)}`
-                  : '74, 222, 128'; // Default green RGB
+                
+                // Fix: Use note.color instead of note.colorCode
+                const noteColor = note.color || note.colorCode || '#4ADE80'; // Default to green
+                
+                // Convert hex to RGB with proper validation
+                const hexToRgb = (hex) => {
+                  if (!hex || !hex.startsWith('#')) return '74, 222, 128'; // Default green RGB
+                  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                  return result ? 
+                    `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                    '74, 222, 128'; // Default green RGB
+                };
+                
+                const rgbColor = hexToRgb(noteColor);
+                
+                console.log('Note color data:', { 
+                  noteId: note.id, 
+                  noteTitle: note.title,
+                  color: note.color,
+                  colorCode: note.colorCode, 
+                  noteColor, 
+                  rgbColor 
+                }); // Debug log
                 
                 return (
                   <motion.div
@@ -613,11 +622,7 @@ const LibraryTab = () => {
                       </div>
                     )}
                     
-                    {/* Corner accent with matching color */}
-                    <div 
-                      className="absolute -top-1 -right-1 w-2 h-2" 
-                      style={{ backgroundColor: noteColor }}
-                    />
+                    {/* Corner decoration removed */}
                     
                     {/* Edit button */}
                     <button
@@ -629,7 +634,7 @@ const LibraryTab = () => {
                       title="Modify entry"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </button>
