@@ -149,9 +149,15 @@ const HeroCard = ({ player, notes = [] }) => {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-30 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                 <span className="font-mono font-bold text-lg text-cyan-400 relative z-10">LVL {currentLevel}</span>
               </div>
-              {/* Corner accents matching the futuristic theme - updated to purple */}
-              <div className="absolute -top-1 -left-1 w-2 h-2 bg-purple-400 border border-gray-600" />
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 border border-gray-600" />
+              
+              {/* Online Status Indicator - ADD THIS */}
+              <div className="mt-2 flex items-center justify-center gap-2 bg-gray-900 border border-gray-600 px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" 
+                     style={{ 
+                       boxShadow: '0 0 6px rgba(34, 197, 94, 0.8)' 
+                     }} />
+                <span className="font-mono text-xs font-bold text-green-400">ONLINE</span>
+              </div>
             </div>
           </div>
 
@@ -192,7 +198,20 @@ const HeroCard = ({ player, notes = [] }) => {
                   </p>
                 </div>
                 {/* Corner decoration - updated to purple */}
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 border border-gray-600" />
+<div className="absolute -top-2 -left-2">
+  <div className="relative w-5 h-5">
+    <span className="absolute top-0 left-1 text-purple-400 text-sm animate-pulse font-bold">✦</span>
+    <span className="absolute top-1 left-3 text-purple-300 text-xs animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
+    <span className="absolute top-3 left-0 text-purple-500 text-xs animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
+  </div>
+</div>
+<div className="absolute -top-2 -right-2">
+  <div className="relative w-5 h-5">
+    <span className="absolute top-0 right-1 text-purple-400 text-sm animate-pulse font-bold">✦</span>
+    <span className="absolute top-1 right-3 text-purple-300 text-xs animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
+    <span className="absolute top-3 right-0 text-purple-500 text-xs animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
+  </div>
+</div>
               </div>
               {currentLevel >= 8 && (
                 <div className="bg-cyan-400 text-black px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
