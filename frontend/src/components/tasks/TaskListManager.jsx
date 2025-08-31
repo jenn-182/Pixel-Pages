@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FolderOpen, Plus, Edit, Trash2, X, Folder } from 'lucide-react';
+import { Target, Plus, Edit, Trash2, X, Folder, Search } from 'lucide-react';
 
 const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSelectTaskList, selectedTaskListId }) => {
   const [isCreating, setIsCreating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [newListData, setNewListData] = useState({ name: '', description: '', color: '#0EA5E9' });
 
   const colorOptions = [
@@ -17,6 +18,12 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
     '#6B7280', // Gray
   ];
 
+  // Filter operations based on search
+  const filteredTaskLists = taskLists.filter(list =>
+    list.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (list.description && list.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     if (!newListData.name.trim()) return;
@@ -26,7 +33,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
       setNewListData({ name: '', description: '', color: '#0EA5E9' });
       setIsCreating(false);
     } catch (err) {
-      console.error('Failed to create task list:', err);
+      console.error('Failed to deploy operation:', err);
     }
   };
 
@@ -40,14 +47,34 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
       {/* Header */}
       <div className="bg-gray-900 px-4 py-3 border-b border-gray-600">
         <h3 className="text-lg font-mono font-bold text-white flex items-center">
-          <FolderOpen className="mr-2" size={20} />
-          PROJECTS
+          <Target className="mr-2" size={20} />
+          MISSION OPERATIONS
         </h3>
       </div>
 
       {/* Content */}
       <div className="p-4 space-y-3">
-        {/* General Tasks */}
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search operations..."
+            className="w-full bg-gray-900 border border-gray-600 text-white pl-9 pr-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* General Operations */}
         <button
           onClick={() => onSelectTaskList(null)}
           className={`w-full text-left p-3 border-2 transition-all duration-200 font-mono ${
@@ -58,12 +85,12 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
         >
           <div className="flex items-center">
             <Folder size={16} className="mr-2" />
-            <span className="font-bold">General Tasks</span>
+            <span className="font-bold">General Missions</span>
           </div>
         </button>
 
-        {/* Task Lists */}
-        {taskLists.map((list) => (
+        {/* Filtered Operations */}
+        {filteredTaskLists.map((list) => (
           <div key={list.id} className="relative group">
             <button
               onClick={() => onSelectTaskList(list.id)}
@@ -89,30 +116,37 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
               </div>
             </button>
             
-            {/* Delete Button (appears on hover) */}
+            {/* Terminate Button (appears on hover) */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (window.confirm(`Delete "${list.name}" project? Tasks will be moved to General.`)) {
+                if (window.confirm(`Terminate "${list.name}" operation? Missions will be moved to General Mission Operations.`)) {
                   onDeleteTaskList(list.id);
                 }
               }}
               className="absolute top-2 right-2 text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1"
-              title="Delete project"
+              title="Terminate operation"
             >
               <Trash2 size={14} />
             </button>
           </div>
         ))}
 
-        {/* Create New Task List */}
+        {/* Search Results Info */}
+        {searchQuery && (
+          <div className="text-xs font-mono text-gray-400 px-2">
+            {filteredTaskLists.length} of {taskLists.length} operations
+          </div>
+        )}
+
+        {/* Deploy New Operation */}
         {!isCreating ? (
           <button
             onClick={() => setIsCreating(true)}
             className="w-full p-3 border-2 border-dashed border-gray-600 text-gray-400 hover:border-cyan-400 hover:text-cyan-400 transition-all duration-200 font-mono font-bold flex items-center justify-center gap-2"
           >
             <Plus size={16} />
-            NEW PROJECT
+            CREATE OPERATION
           </button>
         ) : (
           <motion.form
@@ -127,7 +161,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
               type="text"
               value={newListData.name}
               onChange={(e) => setNewListData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Project name..."
+              placeholder="Operation codename..."
               className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:outline-none focus:border-cyan-400"
               autoFocus
             />
@@ -137,13 +171,13 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
               type="text"
               value={newListData.description}
               onChange={(e) => setNewListData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Description (optional)..."
+              placeholder="Operation briefing (optional)..."
               className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:outline-none focus:border-cyan-400"
             />
 
             {/* Color Picker */}
             <div>
-              <div className="text-xs font-mono text-gray-400 mb-2">COLOR</div>
+              <div className="text-xs font-mono text-gray-400 mb-2">IDENTIFICATION COLOR</div>
               <div className="flex gap-2">
                 {colorOptions.map((color) => (
                   <button
@@ -165,7 +199,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
                 type="submit"
                 className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1 border border-cyan-500 font-mono text-sm font-bold transition-colors duration-200"
               >
-                CREATE
+                DEPLOY
               </button>
               <button
                 type="button"

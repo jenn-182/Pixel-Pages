@@ -19,7 +19,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
   const [quickContent, setQuickContent] = useState('');
   const [quickTags, setQuickTags] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState('SYSTEMS ONLINE');
+  const [saveStatus, setSaveStatus] = useState('TERMINAL READY');
   
   // Modal states
   const [activeNote, setActiveNote] = useState(null);
@@ -34,9 +34,9 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
   // Auto-save functionality for normal form only
   useEffect(() => {
     if (quickTitle.trim() || quickContent.trim()) {
-      setSaveStatus('TYPING...');
+      setSaveStatus('INPUT DETECTED...');
     } else {
-      setSaveStatus('SYSTEMS ONLINE');
+      setSaveStatus('TERMINAL READY');
     }
   }, [quickTitle, quickContent]);
 
@@ -71,11 +71,11 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     if (!quickTitle.trim() && !quickContent.trim()) return;
     
     setIsSaving(true);
-    setSaveStatus('SAVING...');
+    setSaveStatus('TRANSMITTING...');
     
     try {
       const noteData = {
-        title: quickTitle.trim() || 'Untitled Note',
+        title: quickTitle.trim() || 'Untitled Log Entry',
         content: quickContent.trim(),
         tags: quickTags.trim() ? quickTags.split(',').map(tag => tag.trim()) : [],
         color: '#4ADE80',
@@ -87,14 +87,14 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
       setQuickTitle('');
       setQuickContent('');
       setQuickTags('');
-      setSaveStatus('MISSION LOGGED!');
+      setSaveStatus('LOG ARCHIVED!');
       
-      setTimeout(() => setSaveStatus('READY'), 2000);
+      setTimeout(() => setSaveStatus('TERMINAL READY'), 2000);
       
     } catch (error) {
       console.error('Failed to save quick note:', error);
-      setSaveStatus('ERROR');
-      setTimeout(() => setSaveStatus('READY'), 3000);
+      setSaveStatus('TRANSMISSION FAILED');
+      setTimeout(() => setSaveStatus('TERMINAL READY'), 3000);
     } finally {
       setIsSaving(false);
     }
@@ -104,7 +104,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     setQuickTitle('');
     setQuickContent('');
     setQuickTags('');
-    setSaveStatus('READY');
+    setSaveStatus('TERMINAL READY');
   };
 
   const handleEditNote = (note) => {
@@ -119,7 +119,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
       setActiveNote(null);
     } catch (error) {
       console.error('Failed to update note:', error);
-      alert('Failed to update note: ' + error.message);
+      alert('Failed to update log entry: ' + error.message);
     }
   };
 
@@ -130,12 +130,12 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
       setIsFullscreenModalOpen(false);
       
       // Update the status indicators
-      setSaveStatus('MISSION LOGGED!');
-      setTimeout(() => setSaveStatus('SYSTEMS ONLINE'), 2000);
+      setSaveStatus('LOG ARCHIVED!');
+      setTimeout(() => setSaveStatus('TERMINAL READY'), 2000);
 
     } catch (error) {
       console.error('Failed to save fullscreen note:', error);
-      alert('Failed to save note: ' + error.message);
+      alert('Failed to save log entry: ' + error.message);
     }
   };
 
@@ -161,10 +161,10 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
             className="w-6 h-6 border border-gray-600" 
             style={{ backgroundColor: tabColor }}
           />
-          MISSION CONTROL
+          PLAYER LOGS
         </h1>
         <p className="text-gray-400 font-mono text-sm">
-          Quick entry terminal for creating new missions and editing recently archived logs.
+          Quick entry terminal for creating notes, ideas and lists.
         </p>
       </div>
 
@@ -179,7 +179,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
           }}
         >
           <div className="font-mono text-red-400">
-            ERROR: {error}
+            SYSTEM ERROR: {error}
           </div>
         </motion.div>
       )}
@@ -201,14 +201,14 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
             
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-mono font-bold text-white">MISSION LOGGER</h2>
+              <h2 className="text-xl font-mono font-bold text-white">LOG ENTRY TERMINAL</h2>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-xs font-mono">
                   <div className={`w-2 h-2 ${
-                    saveStatus === 'SYSTEMS ONLINE' ? 'bg-green-400' :
-                    saveStatus === 'TYPING...' ? 'bg-yellow-400' :
-                    saveStatus === 'SAVING...' ? 'bg-blue-400' :
-                    saveStatus === 'MISSION LOGGED!' ? 'bg-green-400' :
+                    saveStatus === 'TERMINAL READY' ? 'bg-green-400' :
+                    saveStatus === 'INPUT DETECTED...' ? 'bg-yellow-400' :
+                    saveStatus === 'TRANSMITTING...' ? 'bg-blue-400' :
+                    saveStatus === 'LOG ARCHIVED!' ? 'bg-green-400' :
                     'bg-red-400'
                   }`} />
                   <span className="text-cyan-400">{saveStatus}</span>
@@ -219,7 +219,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                   style={{
                     boxShadow: '0 0 3px rgba(34, 211, 238, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)'
                   }}
-                  title="Fullscreen Mode (F11)"
+                  title="Extended Terminal Mode (F11)"
                 >
                   <Maximize2 size={16} />
                   <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
@@ -235,7 +235,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                 <input
                   value={quickTitle}
                   onChange={(e) => setQuickTitle(e.target.value)}
-                  placeholder="Enter note title..."
+                  placeholder="Enter title..."
                   className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
                   style={{ 
                     color: '#ffffff !important',
@@ -252,7 +252,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                 <textarea
                   value={quickContent}
                   onChange={(e) => setQuickContent(e.target.value)}
-                  placeholder="Start typing your note content..."
+                  placeholder="Enter content here..."
                   className="w-full px-4 py-3 transition-colors resize-none placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
                   style={{ 
                     color: '#ffffff !important',
@@ -265,11 +265,11 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
 
               {/* Tags Input */}
               <div>
-                <label className="block text-sm font-mono text-gray-400 mb-2">TAGS (comma separated)</label>
+                <label className="block text-sm font-mono text-gray-400 mb-2">CLASSIFICATION TAGS</label>
                 <input
                   value={quickTags}
                   onChange={(e) => setQuickTags(e.target.value)}
-                  placeholder="idea, project, important..."
+                  placeholder="personal, work, idea, important..."
                   className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
                   style={{ 
                     color: '#ffffff !important',
@@ -291,7 +291,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                 >
                   <div className="flex items-center gap-2">
                     <Save size={18} className="text-cyan-400" />
-                    <span className="text-cyan-400">{isSaving ? 'SAVING...' : 'SAVE PROGRESS'}</span>
+                    <span className="text-cyan-400">{isSaving ? 'ARCHIVING...' : 'ARCHIVE LOG'}</span>
                   </div>
                   <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
                 </button>
@@ -305,7 +305,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                 >
                   <div className="flex items-center gap-2">
                     <X size={18} className="text-cyan-400" />
-                    <span className="text-cyan-400">ABORT MISSION</span>
+                    <span className="text-cyan-400">CLEAR TERMINAL</span>
                   </div>
                   <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
                 </button>
@@ -330,7 +330,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
             {/* Header */}
             <div className="flex items-center gap-2 mb-6">
               <Clock size={20} className="text-cyan-400" />
-              <h2 className="text-xl font-mono font-bold text-white">MISSION HISTORY</h2>
+              <h2 className="text-xl font-mono font-bold text-white">RECENT LOGS</h2>
             </div>
 
             {/* Recent Notes List */}
@@ -343,7 +343,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                 >
                   <FileText size={24} className="text-cyan-400" />
                 </motion.div>
-                <div className="text-sm">Loading...</div>
+                <div className="text-sm">Accessing archives...</div>
               </div>
             ) : recentNotes.length > 0 ? (
               <div className="space-y-3">
@@ -398,15 +398,15 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                       boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)'
                     }}
                   >
-                    <span className="text-cyan-400">VIEW ALL LOGS →</span>
+                    <span className="text-cyan-400">ACCESS ALL ARCHIVES →</span>
                   </button>
                 </div>
               </div>
             ) : (
               <div className="text-center py-8">
                 <FileText size={32} className="text-gray-500 mx-auto mb-3" />
-                <p className="text-gray-400 font-mono text-sm">No recent entries</p>
-                <p className="text-gray-500 font-mono text-xs mt-1">Create your first note!</p>
+                <p className="text-gray-400 font-mono text-sm">No log entries found</p>
+                <p className="text-gray-500 font-mono text-xs mt-1">Begin your first personal log!</p>
               </div>
             )}
           </motion.div>
@@ -422,7 +422,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
         notebooks={notebooks}
         existingNote={draftNote}
         isFullscreen={true}
-        title="FULLSCREEN ENTRY TERMINAL"
+        title="EXTENDED LOG ENTRY TERMINAL"
       />
 
       {/* Edit Modal */}

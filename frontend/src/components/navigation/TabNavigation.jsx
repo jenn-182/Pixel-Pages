@@ -4,8 +4,8 @@ import { FileText, Archive, Trophy, User, CheckSquare, Target } from 'lucide-rea
 
 const TabNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'notes', label: 'MISSIONS', icon: FileText, color: '#22D3EE' },        // Cyan 400 - Bright cyan
-    { id: 'tasks', label: 'TASKS', icon: CheckSquare, color: '#0EA5E9' },       // Sky 500 - Cyan-blue bridge
+    { id: 'notes', label: 'LOGS', icon: FileText, color: '#22D3EE' },        // Cyan 400 - Bright cyan
+    { id: 'tasks', label: 'MISSIONS', icon: CheckSquare, color: '#0EA5E9' },       // Sky 500 - Cyan-blue bridge
     { id: 'library', label: 'VAULT', icon: Archive, color: '#3B82F6' },         // Blue 500 - True blue  
     { id: 'focus', label: 'FOCUS', icon: Target, color: '#6366F1' },            // Indigo 500 - Blue-purple bridge
     { id: 'achievements', label: 'ACHIEVEMENTS', icon: Trophy, color: '#8B5CF6' }, // Purple 500 - Medium purple

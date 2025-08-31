@@ -5,7 +5,7 @@ import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react';
 const TaskSearch = ({ tasks, onFilteredResults, onQuickAction }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('priority'); // priority, dueDate, created, title
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [quickFilters, setQuickFilters] = useState({
     overdue: false,
     dueSoon: false,
@@ -59,8 +59,8 @@ const TaskSearch = ({ tasks, onFilteredResults, onQuickAction }) => {
           valueB = b.dueDate ? new Date(b.dueDate) : new Date('9999-12-31');
           break;
         case 'created':
-          valueA = new Date(a.createdAt);
-          valueB = new Date(b.createdAt);
+          valueA = new Date(a.createdAt || a.created || '2020-01-01');
+          valueB = new Date(b.createdAt || b.created || '2020-01-01');
           break;
         case 'title':
           valueA = a.title.toLowerCase();
@@ -88,7 +88,7 @@ const TaskSearch = ({ tasks, onFilteredResults, onQuickAction }) => {
   const clearAllFilters = () => {
     setSearchQuery('');
     setSortBy('priority');
-    setSortOrder('asc');
+    setSortOrder('desc');
     setQuickFilters({
       overdue: false,
       dueSoon: false,

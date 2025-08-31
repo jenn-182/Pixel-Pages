@@ -6,16 +6,16 @@ import PixelInput from '../PixelInput';
 import useFolders from '../../hooks/useFolders';
 import useNotebooks from '../../hooks/useNotebooks';
 import useNotes from '../../hooks/useNotes';
-import NoteModal from '../notes/NoteModal'; // Updated import path and name
+import NoteModal from '../notes/NoteModal';
 import FolderModal from '../modals/FolderModal';
-import NotebookModal from '../modals/NotebookModal'; // Fixed path
+import NotebookModal from '../modals/NotebookModal';
 import FolderView from '../views/FolderView';
 import NotebookView from '../views/NotebookView';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const LibraryTab = ({ tabColor = '#3B82F6' }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // grid or tree
+  const [viewMode, setViewMode] = useState('grid');
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [isNotebookModalOpen, setIsNotebookModalOpen] = useState(false);
@@ -37,27 +37,27 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
   const handleCreateFolder = async () => {
     try {
       const folderData = {
-        name: `New Folder ${folders.length + 1}`,
-        description: 'A new folder for organizing your notes',
+        name: `New Archive ${folders.length + 1}`,
+        description: 'A new archive for organizing your intel',
         colorCode: '#FFD700',
         parentFolderId: null
       };
       await createFolder(folderData);
     } catch (error) {
-      console.error('Failed to create folder:', error);
+      console.error('Failed to initialize archive:', error);
     }
   };
 
   const handleCreateNotebook = async () => {
     try {
       const notebookData = {
-        name: `New Notebook ${notebooks.length + 1}`,
-        description: 'A new notebook for your notes',
+        name: `New Collection ${notebooks.length + 1}`,
+        description: 'A new log collection for your intel',
         colorCode: '#87CEEB'
       };
       await createNotebook(notebookData);
     } catch (error) {
-      console.error('Failed to create notebook:', error);
+      console.error('Failed to deploy collection:', error);
     }
   };
 
@@ -72,27 +72,24 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
 
   const handleCreateNoteSubmit = async (noteData) => {
     try {
-      console.log('Saving note:', { editingNote, noteData }); // Debug log
+      console.log('Archiving log entry:', { editingNote, noteData });
       
       if (editingNote) {
-        // Update existing note
-        console.log('Updating note with ID:', editingNote.id); // Debug log
+        console.log('Updating log entry with ID:', editingNote.id);
         await updateNote(editingNote.id, noteData);
-        console.log('Note updated successfully'); // Debug log
+        console.log('Log entry updated successfully');
       } else {
-        // Create new note
-        console.log('Creating new note'); // Debug log
+        console.log('Creating new log entry');
         await createNote(noteData);
-        console.log('Note created successfully'); // Debug log
+        console.log('Log entry archived successfully');
       }
       
       setEditingNote(null);
-      setIsCreateNoteModalOpen(false); // Close modal after successful save
+      setIsCreateNoteModalOpen(false);
       
     } catch (error) {
-      console.error('Failed to save note:', error);
-      // Show error to user
-      alert('Failed to save note. Please try again.');
+      console.error('Failed to archive log entry:', error);
+      alert('Failed to archive log entry. Please try again.');
     }
   };
 
@@ -120,15 +117,13 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
   const handleFolderSave = async (idOrData, folderData = null) => {
     try {
       if (editingFolder && folderData) {
-        // Editing case: first param is ID, second is data
         await updateFolder(idOrData, folderData);
       } else {
-        // Creating case: first param is data
         await createFolder(idOrData);
       }
       setEditingFolder(null);
     } catch (error) {
-      console.error('Failed to save folder:', error);
+      console.error('Failed to save archive:', error);
     }
   };
 
@@ -140,15 +135,13 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
   const handleNotebookSave = async (idOrData, notebookData = null) => {
     try {
       if (editingNotebook && notebookData) {
-        // Editing case: first param is ID, second is data
         await updateNotebook(idOrData, notebookData);
       } else {
-        // Creating case: first param is data
         await createNotebook(idOrData);
       }
       setEditingNotebook(null);
     } catch (error) {
-      console.error('Failed to save notebook:', error);
+      console.error('Failed to save collection:', error);
     }
   };
 
@@ -161,9 +154,9 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="inline-block mb-4"
           >
-            <Folder size={32} className="text-yellow-400" />
+            <Archive size={32} className="text-cyan-400" />
           </motion.div>
-          <div>Loading library...</div>
+          <div>Accessing intelligence archives...</div>
         </div>
       </div>
     );
@@ -211,33 +204,33 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           STORAGE VAULT
         </h1>
         <p className="text-gray-400 font-mono text-sm">
-          Access your mission logs and archives.
+          Storage for all player logs, collections, and archive systems.
         </p>
       </div>
       
-      {/* Action Bar - Enhanced Futuristic style */}
+      {/* Command Interface */}
       <div className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative"
            style={{
              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
            }}>
         <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
         
-        {/* Terminal Header - Remove the box */}
+        {/* Terminal Header */}
         <div className="flex items-center mb-6">
           <span className="font-mono font-bold text-white text-2xl">COMMAND INTERFACE</span>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start justify-between h-32">
-          {/* Command Buttons Section - Smaller width */}
+          {/* Command Buttons Section */}
           <div className="w-full lg:w-1/2 flex flex-col justify-end h-full">
-            {/* Description Text - Above buttons with space - Larger */}
+            {/* Description Text */}
             <p className="font-mono text-sm text-gray-300 mb-4 font-semibold">
-              Create new mission logs or export existing archives.
+              Create new player log, collection, or archive system.
             </p>
             
-            {/* Command Buttons - Updated to cyan theme */}
+            {/* Command Buttons */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
-              {/* Create Data Entry - Now cyan */}
+              {/* Create Player Log */}
               <button
                 onClick={() => setIsCreateNoteModalOpen(true)}
                 className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
@@ -248,12 +241,12 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                 <div className="flex items-center justify-center gap-1 h-full">
                   <Plus size={10} />
                   <FileText size={12} />
-                  <span className="text-xs">MISSION LOG</span>
+                  <span className="text-xs">PLAYER LOG</span>
                 </div>
                 <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Create Data Collection - Now cyan */}
+              {/* Create Log Collection */}
               <button
                 onClick={() => setIsNotebookModalOpen(true)}
                 className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
@@ -269,7 +262,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                 <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Create Folder System - Now cyan */}
+              {/* Create Archive */}
               <button
                 onClick={() => setIsFolderModalOpen(true)}
                 className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
@@ -280,16 +273,16 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                 <div className="flex items-center justify-center gap-1 h-full">
                   <Plus size={10} />
                   <Folder size={12} />
-                  <span className="text-xs">FOLDER</span>
+                  <span className="text-xs">ARCHIVE</span>
                 </div>
                 <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Export All - Now cyan */}
+              {/* Export Intel */}
               <button
                 onClick={async () => {
                   try {
-                    console.log('Exporting all notes from LibraryTab');
+                    console.log('Exporting all intelligence from Archive Terminal');
                     
                     const response = await fetch(`/api/notes/export/all?username=user`);
                     
@@ -298,13 +291,13 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                       const url = window.URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `all_notes_${new Date().toISOString().slice(0, 10)}.md`;
+                      a.download = `intelligence_export_${new Date().toISOString().slice(0, 10)}.md`;
                       document.body.appendChild(a);
                       a.click();
                       window.URL.revokeObjectURL(url);
                       document.body.removeChild(a);
                       
-                      showNotification('All notes exported successfully! Check your Downloads folder.', 'success');
+                      showNotification('Intelligence data exported successfully! Check your Downloads folder.', 'success');
                     } else {
                       throw new Error('Export failed');
                     }
@@ -327,7 +320,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
             </div>
           </div>
           
-          {/* Enhanced Search Terminal - Restored to proper size */}
+          {/* Search Terminal */}
           <div className="bg-gray-900 border border-cyan-400 p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
                style={{
                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
@@ -338,25 +331,25 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
               <span className="font-mono text-sm text-cyan-400 font-bold">SEARCH PROTOCOL</span>
             </div>
             
-            {/* Search Input - Normal size */}
+            {/* Search Input */}
             <div className="relative mb-3 flex-1 flex flex-col justify-center min-h-0">
               <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" />
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search mission logs..."
+                placeholder="Search storage vault..."
                 className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 text-white font-mono text-sm focus:border-cyan-400 focus:outline-none transition-colors"
                 style={{ color: '#fff' }}
               />
             </div>
             
-            {/* Search Stats */}
+            {/* Archive Stats */}
             <div className="text-xs font-mono text-gray-400 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span>{folders.length} FOLDERS</span>
+                  <span>{folders.length} ARCHIVES</span>
                   <span>{notebooks.length} COLLECTIONS</span>
-                  <span>{notes.length} ENTRIES</span>
+                  <span>{notes.length} LOGS</span>
                 </div>
                 <div className="text-cyan-400">
                   {searchTerm ? 'SCANNING...' : 'READY'}
@@ -367,9 +360,9 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
         </div>
       </div>
 
-      {/* Content Sections - Reorganized order with custom descriptions */}
+      {/* Content Sections */}
       <div className="space-y-8">
-        {/* Notes Section - NOW FIRST */}
+        {/* Player Logs Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -381,10 +374,10 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
           
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-2">
-            MISSION LOGS ({notes.length})
+            PLAYER LOGS ({notes.length})
           </h3>
           <p className="text-sm font-mono text-gray-400 mb-4">
-            Individual notes for storing ideas, lists, notes, etc.
+            Individual log entries for storing notes, thoughts and ideas.
           </p>
           
           {notes.length > 0 ? (
@@ -441,7 +434,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                         : note.content}
                     </p>
                     
-                    {/* Tags */}
+                    {/* Classification Tags */}
                     {tagsArray.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-2">
                         {tagsArray.slice(0, 2).map((tag, index) => (
@@ -460,14 +453,14 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                       </div>
                     )}
                     
-                    {/* Edit button */}
+                    {/* Access button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditNote(note);
                       }}
                       className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Modify entry"
+                      title="Access log entry"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
@@ -481,20 +474,20 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           ) : (
             <div className="bg-gray-900 border border-gray-600 p-6 text-center">
               <FileText size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono mb-4">No missions found. Initialize first log.</p>
+              <p className="text-gray-400 font-mono mb-4">No player logs found. Initialize first log entry.</p>
               <PixelButton
                 onClick={handleCreateNote}
                 color="bg-green-400"
                 hoverColor="hover:bg-green-500"
                 icon={<Plus size={18} />}
               >
-                CREATE FIRST ENTRY
+                CREATE FIRST LOG
               </PixelButton>
             </div>
           )}
         </motion.div>
 
-        {/* Notebooks Section - NOW SECOND */}
+        {/* Log Collections Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -507,10 +500,10 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
           
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-2">
-            MISSION COLLECTIONS ({notebooks.length})
+            LOG COLLECTIONS ({notebooks.length})
           </h3>
           <p className="text-sm font-mono text-gray-400 mb-4">
-            Collections for organizing notes by subject, project, or category.
+            Organized collections for grouping logs by subject, project or types.
           </p>
           
           {notebooks.length > 0 ? (
@@ -540,13 +533,13 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                     <div className="flex items-start justify-between mb-3">
                       <BookOpen size={24} style={{ color: notebookColor }} />
                       <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {notebook.noteCount || 0} ENTRIES
+                        {notebook.noteCount || 0} LOGS
                       </div>
                     </div>
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
                     
-                    {/* Edit button */}
+                    {/* Access button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -567,12 +560,12 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           ) : (
             <div className="bg-gray-900 border border-gray-600 p-6 text-center">
               <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No collections found. Create mission collection to begin.</p>
+              <p className="text-gray-400 font-mono">No log collections found. Deploy first collection to begin.</p>
             </div>
           )}
         </motion.div>
 
-        {/* Folders Section - NOW THIRD */}
+        {/* Archive Systems Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -585,10 +578,10 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
           
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-2">
-            FOLDER SYSTEMS ({folders.length})
+            LOG ARCHIVES ({folders.length})
           </h3>
           <p className="text-sm font-mono text-gray-400 mb-4">
-            Folder storage for organizing multiple collections & mission logs.
+            Archive systems for organizing multiple collections and logs.
           </p>
           
           {folders.length > 0 ? (
@@ -622,16 +615,16 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                       </div>
                     </div>
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
-                    <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access folder contents'}</p>
+                    <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
                     
-                    {/* Edit button */}
+                    {/* Access button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditFolder(folder);
                       }}
                       className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Modify folder"
+                      title="Modify archive"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
@@ -645,13 +638,13 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           ) : (
             <div className="bg-gray-900 border border-gray-600 p-6 text-center">
               <Folder size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No folder systems found. Initialize new folder storage.</p>
+              <p className="text-gray-400 font-mono">No archive systems found. Initialize first archive storage.</p>
             </div>
           )}
         </motion.div>
       </div>
 
-      {/* Note Creation Modal */}
+      {/* Modals */}
       <NoteModal
         isOpen={isCreateNoteModalOpen}
         onClose={() => {
@@ -661,7 +654,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
         onSave={handleCreateNoteSubmit}
         folders={folders}
         notebooks={notebooks}
-        existingNote={editingNote} // Pass the note being edited
+        existingNote={editingNote}
       />
 
       <FolderModal

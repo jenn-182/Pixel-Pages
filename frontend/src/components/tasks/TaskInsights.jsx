@@ -9,7 +9,6 @@ const TaskInsights = ({ tasks, taskLists }) => {
     overdueTasks: 0,
     dueSoonTasks: 0,
     completionRate: 0,
-    avgCompletionTime: 0,
     productivityTrend: 'stable',
     topPriorities: [],
     mostUsedTags: [],
@@ -21,6 +20,21 @@ const TaskInsights = ({ tasks, taskLists }) => {
   }, [tasks, taskLists]);
 
   const calculateInsights = () => {
+    if (!tasks || tasks.length === 0) {
+      setInsights({
+        totalTasks: 0,
+        completedTasks: 0,
+        overdueTasks: 0,
+        dueSoonTasks: 0,
+        completionRate: 0,
+        productivityTrend: 'stable',
+        topPriorities: [],
+        mostUsedTags: [],
+        projectProgress: []
+      });
+      return;
+    }
+
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     
@@ -49,7 +63,7 @@ const TaskInsights = ({ tasks, taskLists }) => {
     // Top priorities (incomplete high priority tasks)
     const topPriorities = tasks
       .filter(t => !t.completed && t.priority === 'high')
-      .slice(0, 5);
+      .slice(0, 3);
 
     // Most used tags
     const tagCounts = {};
@@ -66,24 +80,30 @@ const TaskInsights = ({ tasks, taskLists }) => {
 
     const mostUsedTags = Object.entries(tagCounts)
       .sort(([,a], [,b]) => b - a)
-      .slice(0, 5)
+      .slice(0, 3)
       .map(([tag, count]) => ({ tag, count }));
 
     // Project progress
-    const projectProgress = taskLists.map(list => {
-      const listTasks = tasks.filter(t => t.taskListId === list.id);
-      const completed = listTasks.filter(t => t.completed).length;
-      const total = listTasks.length;
-      const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-      
-      return {
-        name: list.name,
-        color: list.color,
-        completed,
-        total,
-        progress
-      };
-    });
+    const projectProgress = [];
+    
+    if (taskLists && taskLists.length > 0) {
+      taskLists.forEach(list => {
+        const listTasks = tasks.filter(t => t.taskListId === list.id);
+        const completed = listTasks.filter(t => t.completed).length;
+        const total = listTasks.length;
+        const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        if (total > 0) {
+          projectProgress.push({
+            name: list.name,
+            color: list.color,
+            completed,
+            total,
+            progress
+          });
+        }
+      });
+    }
 
     // General tasks progress
     const generalTasks = tasks.filter(t => !t.taskListId);
@@ -119,119 +139,109 @@ const TaskInsights = ({ tasks, taskLists }) => {
     }
   };
 
-  const getTrendColor = (trend) => {
-    switch (trend) {
-      case 'up': return '#10B981';
-      case 'down': return '#EF4444';
-      default: return '#6B7280';
-    }
-  };
-
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gray-800 border border-gray-600 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] space-y-4"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-mono font-bold text-white flex items-center">
-          <BarChart3 className="mr-2" size={24} />
-          TASK INSIGHTS
-        </h3>
-      </div>
+      <h3 className="text-lg font-mono font-bold text-white flex items-center">
+        <BarChart3 className="mr-2" size={20} />
+        MISSION INSIGHTS
+      </h3>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Total Tasks */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-600 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-        >
+        <div className="bg-gray-900 border border-gray-600 p-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-mono text-gray-400">TOTAL QUESTS</div>
-              <div className="text-2xl font-mono font-bold text-white">{insights.totalTasks}</div>
+              <div className="text-xs font-mono text-gray-400">TOTAL</div>
+              <div className="text-lg font-mono font-bold text-white">{insights.totalTasks}</div>
             </div>
-            <Target className="text-blue-400" size={24} />
+            <Target className="text-blue-400" size={16} />
           </div>
-        </motion.div>
+        </div>
 
         {/* Completion Rate */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border border-gray-600 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-        >
+        <div className="bg-gray-900 border border-gray-600 p-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-mono text-gray-400">COMPLETION</div>
-              <div className="text-2xl font-mono font-bold text-green-400">{insights.completionRate}%</div>
+              <div className="text-xs font-mono text-gray-400">COMPLETE</div>
+              <div className="text-lg font-mono font-bold text-green-400">{insights.completionRate}%</div>
             </div>
-            <div className="flex items-center">
-              {getTrendIcon(insights.productivityTrend)}
-            </div>
+            {getTrendIcon(insights.productivityTrend)}
           </div>
-        </motion.div>
+        </div>
 
         {/* Overdue Tasks */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border border-red-500 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-          style={{ boxShadow: insights.overdueTasks > 0 ? '0 0 10px rgba(239, 68, 68, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)' : '2px 2px 0px 0px rgba(0,0,0,1)' }}
-        >
+        <div className="bg-gray-900 border border-red-500 p-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-mono text-gray-400">OVERDUE</div>
-              <div className="text-2xl font-mono font-bold text-red-400">{insights.overdueTasks}</div>
+              <div className="text-xs font-mono text-gray-400">OVERDUE</div>
+              <div className="text-lg font-mono font-bold text-red-400">{insights.overdueTasks}</div>
             </div>
-            <AlertTriangle className="text-red-400" size={24} />
+            <AlertTriangle className="text-red-400" size={16} />
           </div>
-        </motion.div>
+        </div>
 
         {/* Due Soon */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gray-800 border border-yellow-500 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-          style={{ boxShadow: insights.dueSoonTasks > 0 ? '0 0 10px rgba(245, 158, 11, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)' : '2px 2px 0px 0px rgba(0,0,0,1)' }}
-        >
+        <div className="bg-gray-900 border border-yellow-500 p-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-mono text-gray-400">DUE SOON</div>
-              <div className="text-2xl font-mono font-bold text-yellow-400">{insights.dueSoonTasks}</div>
+              <div className="text-xs font-mono text-gray-400">DUE SOON</div>
+              <div className="text-lg font-mono font-bold text-yellow-400">{insights.dueSoonTasks}</div>
             </div>
-            <Clock className="text-yellow-400" size={24} />
+            <Clock className="text-yellow-400" size={16} />
           </div>
-        </motion.div>
+        </div>
       </div>
+
+      {/* High Priority Tasks */}
+      {insights.topPriorities.length > 0 && (
+        <div className="bg-gray-900 border border-red-500 p-3">
+          <h4 className="text-sm font-mono font-bold text-red-400 mb-2 flex items-center">
+            <AlertTriangle className="mr-1" size={14} />
+            HIGH PRIORITY
+          </h4>
+          <div className="space-y-1">
+            {insights.topPriorities.map((task, index) => (
+              <div key={task.id} className="flex items-center gap-2 text-xs">
+                <AlertTriangle className="text-red-400" size={10} />
+                <span className="font-mono text-white truncate">{task.title}</span>
+                {task.dueDate && (
+                  <span className="text-gray-400 ml-auto">
+                    <Calendar size={10} className="inline mr-1" />
+                    {new Date(task.dueDate).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Project Progress */}
       {insights.projectProgress.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gray-800 border border-gray-600 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-        >
-          <h4 className="text-lg font-mono font-bold text-white mb-4">PROJECT PROGRESS</h4>
-          <div className="space-y-3">
-            {insights.projectProgress.map((project, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
+        <div className="bg-gray-900 border border-gray-600 p-3">
+          <h4 className="text-sm font-mono font-bold text-white mb-3">MISSION PROGRESS</h4>
+          <div className="space-y-2">
+            {insights.projectProgress.slice(0, 3).map((project, index) => (
+              <div key={index} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div 
-                      className="w-3 h-3 border"
+                      className="w-2 h-2 border"
                       style={{ backgroundColor: project.color, borderColor: project.color }}
                     />
-                    <span className="font-mono text-white">{project.name}</span>
+                    <span className="font-mono text-white truncate">{project.name}</span>
                   </div>
-                  <span className="font-mono text-gray-400 text-sm">
-                    {project.completed}/{project.total} ({project.progress}%)
+                  <span className="font-mono text-gray-400">
+                    {project.completed}/{project.total}
                   </span>
                 </div>
-                <div className="w-full bg-gray-700 h-2 border border-gray-600">
+                <div className="w-full bg-gray-700 h-1 border border-gray-600">
                   <div 
                     className="h-full transition-all duration-500"
                     style={{ 
@@ -243,88 +253,23 @@ const TaskInsights = ({ tasks, taskLists }) => {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
-      {/* High Priority Tasks & Tags */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* High Priority Tasks */}
-        {insights.topPriorities.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-gray-800 border border-red-500 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-            style={{ boxShadow: '0 0 10px rgba(239, 68, 68, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)' }}
-          >
-            <h4 className="text-lg font-mono font-bold text-red-400 mb-4 flex items-center">
-              <AlertTriangle className="mr-2" size={20} />
-              HIGH PRIORITY TASKS
-            </h4>
-            <div className="space-y-2">
-              {insights.topPriorities.map((task, index) => (
-                <div key={task.id} className="flex items-center gap-3 p-2 bg-gray-900 border border-gray-700">
-                  <AlertTriangle className="text-red-400" size={14} />
-                  <span className="font-mono text-white text-sm flex-1">{task.title}</span>
-                  {task.dueDate && (
-                    <span className="text-xs font-mono text-gray-400">
-                      <Calendar size={12} className="inline mr-1" />
-                      {new Date(task.dueDate).toLocaleDateString()}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Most Used Tags */}
-        {insights.mostUsedTags.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-gray-800 border border-gray-600 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-          >
-            <h4 className="text-lg font-mono font-bold text-white mb-4">POPULAR TAGS</h4>
-            <div className="space-y-2">
-              {insights.mostUsedTags.map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <span className="font-mono text-cyan-400">#{item.tag}</span>
-                  <span className="font-mono text-gray-400 text-sm">{item.count} tasks</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Productivity Trend */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="bg-gray-800 border border-gray-600 p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-      >
-        <h4 className="text-lg font-mono font-bold text-white mb-4">PRODUCTIVITY STATUS</h4>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            {getTrendIcon(insights.productivityTrend)}
-            <span 
-              className="font-mono font-bold"
-              style={{ color: getTrendColor(insights.productivityTrend) }}
-            >
-              {insights.productivityTrend.toUpperCase()}
-            </span>
+      {/* Popular Tags */}
+      {insights.mostUsedTags.length > 0 && (
+        <div className="bg-gray-900 border border-gray-600 p-3">
+          <h4 className="text-sm font-mono font-bold text-white mb-2">POPULAR TAGS</h4>
+          <div className="flex flex-wrap gap-1">
+            {insights.mostUsedTags.map((item, index) => (
+              <span key={index} className="px-2 py-1 text-xs font-mono bg-cyan-400 bg-opacity-20 text-cyan-400 border border-cyan-400">
+                #{item.tag} ({item.count})
+              </span>
+            ))}
           </div>
-          <span className="font-mono text-gray-400">
-            {insights.productivityTrend === 'up' && 'Great job! You completed more tasks this week.'}
-            {insights.productivityTrend === 'down' && 'Productivity is down. Consider reviewing your priorities.'}
-            {insights.productivityTrend === 'stable' && 'Steady progress. Keep up the consistent work!'}
-          </span>
         </div>
-      </motion.div>
-    </div>
+      )}
+    </motion.div>
   );
 };
 
