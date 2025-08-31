@@ -161,7 +161,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
               type="text"
               value={newListData.name}
               onChange={(e) => setNewListData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Operation codename..."
+              placeholder="Operation name..."
               className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:outline-none focus:border-cyan-400"
               autoFocus
             />
@@ -171,7 +171,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
               type="text"
               value={newListData.description}
               onChange={(e) => setNewListData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Operation briefing (optional)..."
+              placeholder="Operation details (optional)..."
               className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:outline-none focus:border-cyan-400"
             />
 
@@ -199,7 +199,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
                 type="submit"
                 className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1 border border-cyan-500 font-mono text-sm font-bold transition-colors duration-200"
               >
-                DEPLOY
+                CREATE OPERATION
               </button>
               <button
                 type="button"

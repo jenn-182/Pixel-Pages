@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Plus, Clock, AlertTriangle, Trash2, Edit, Calendar, Tag, FileText, Filter, BarChart3 } from 'lucide-react';
+import { Target, Plus, Clock, AlertTriangle, Trash2, Edit, Calendar, Tag, FileText, Filter, BarChart3, Check } from 'lucide-react';
 import useTasks from '../../hooks/useTasks';
 import TaskModal from '../modals/TaskModal';
 import TaskListManager from '../tasks/TaskListManager';
@@ -200,10 +200,10 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
 
   const getPriorityLabel = (priority) => {
     switch (priority) {
-      case 'high': return 'CRITICAL';
-      case 'medium': return 'STANDARD';
-      case 'low': return 'ROUTINE';
-      default: return 'STANDARD';
+      case 'high': return 'HIGH';
+      case 'medium': return 'MEDIUM';
+      case 'low': return 'LOW';
+      default: return 'LOW';
     }
   };
 
@@ -248,13 +248,13 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   };
 
   const getTaskListName = (taskListId) => {
-    if (!taskListId) return 'General Player Missions';
+    if (!taskListId) return 'General Missions';
     const list = taskLists.find(l => l.id === taskListId);
     return list ? list.name : 'Unknown Operation';
   };
 
   const getCurrentViewName = () => {
-    if (selectedTaskListId === null) return 'General Player Missions';
+    if (selectedTaskListId === null) return 'General Missions';
     const list = taskLists.find(l => l.id === selectedTaskListId);
     return list ? list.name : 'Unknown Operation';
   };
@@ -325,7 +325,6 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
             
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-mono font-bold text-white flex items-center">
-                <Target className="mr-3" style={{ color: tabColor }} />
                 {getCurrentViewName()}
               </h2>
               <div className="flex items-center gap-4">
@@ -411,9 +410,9 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                       className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
                     >
                       <option value="all">All Priorities</option>
-                      <option value="high">Critical</option>
-                      <option value="medium">Standard</option>
-                      <option value="low">Routine</option>
+                      <option value="high">HIGH PRIORITY</option>
+                      <option value="medium">MEDIUM PRIORITY</option>
+                      <option value="low">LOW PRIORITY</option>
                     </select>
                   </div>
 
@@ -429,7 +428,6 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                       <option value="active">Active</option>
                       <option value="completed">Completed</option>
                       <option value="overdue">Overdue</option>
-                      <option value="urgent">Urgent</option>
                     </select>
                   </div>
 
@@ -440,7 +438,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                       type="text"
                       value={filters.tags}
                       onChange={(e) => setFilters(prev => ({ ...prev, tags: e.target.value }))}
-                      placeholder="combat, stealth, recon..."
+                      placeholder="to-do, ideas, work..."
                       className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
                     />
                   </div>
@@ -449,67 +447,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
             </motion.div>
           )}
 
-          {/* Mission Stats */}
-          {filteredTasks.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-              style={{
-                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
-              
-              <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                <div className="w-4 h-4 bg-purple-400 mr-2" />
-                MISSION STATISTICS
-              </h3>
-              
-              <div className="grid grid-cols-4 gap-4 text-center">
-                <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-                     style={{
-                       boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                     }}>
-                  <div className="text-xs font-mono text-gray-400">TOTAL MISSIONS</div>
-                  <div className="text-2xl font-mono font-bold text-white">{filteredTasks.length}</div>
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
-                </div>
-                <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-                     style={{
-                       boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                     }}>
-                  <div className="text-xs font-mono text-gray-400">COMPLETED</div>
-                  <div className="text-2xl font-mono font-bold text-green-400">
-                    {filteredTasks.filter(t => t.completed).length}
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
-                </div>
-                <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-                     style={{
-                       boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                     }}>
-                  <div className="text-xs font-mono text-gray-400">OVERDUE</div>
-                  <div className="text-2xl font-mono font-bold text-red-400">
-                    {filteredTasks.filter(t => t.overdue && !t.completed).length}
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
-                </div>
-                <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-                     style={{
-                       boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                     }}>
-                  <div className="text-xs font-mono text-gray-400">URGENT</div>
-                  <div className="text-2xl font-mono font-bold text-yellow-400">
-                    {filteredTasks.filter(t => t.dueSoon && !t.completed).length}
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Missions List */}
+          {/* Active Missions List */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -522,41 +460,41 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
             <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
             
             <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-              <div className="w-4 h-4 bg-purple-400 mr-2" />
               ACTIVE MISSIONS
+              <span className="ml-3 text-sm text-cyan-400">
+                [{filteredTasks.filter(task => !task.completed).length}]
+              </span>
             </h3>
 
-            {(searchResults.length > 0 ? searchResults : filteredTasks).length === 0 ? (
+            {(searchResults.length > 0 ? searchResults : filteredTasks).filter(task => !task.completed).length === 0 ? (
               <div className="text-center py-8 text-gray-400 font-mono">
                 {selectedTaskListId === null 
                   ? "No active missions. Deploy your first mission above!"
-                  : `No missions in "${getCurrentViewName()}" operation. Deploy your first mission above!`
+                  : `No active missions in "${getCurrentViewName()}" operation. Deploy your first mission above!`
                 }
               </div>
             ) : (
-              (searchResults.length > 0 ? searchResults : filteredTasks).map((task, index) => (
+              (searchResults.length > 0 ? searchResults : filteredTasks)
+                .filter(task => !task.completed)
+                .map((task, index) => (
                 <motion.div
                   key={task.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className={`bg-gray-900 border-2 p-4 transition-all duration-200 ${
-                    task.completed 
-                      ? 'border-green-500' 
-                      : task.overdue 
-                        ? 'border-red-500' 
-                        : task.dueSoon 
-                          ? 'border-yellow-500' 
-                          : 'border-cyan-400'
+                    task.overdue 
+                      ? 'border-red-500' 
+                      : task.dueSoon 
+                        ? 'border-yellow-500' 
+                        : 'border-cyan-400'
                   }`}
                   style={{
-                    boxShadow: task.completed 
-                      ? '0 0 10px rgba(34, 197, 94, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
-                      : task.overdue
-                        ? '0 0 10px rgba(239, 68, 68, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
-                        : task.dueSoon
-                          ? '0 0 10px rgba(245, 158, 11, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
-                          : '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                    boxShadow: task.overdue
+                      ? '0 0 10px rgba(239, 68, 68, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                      : task.dueSoon
+                        ? '0 0 10px rgba(245, 158, 11, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                        : '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
                   }}
                 >
                   <div className="space-y-3">
@@ -565,33 +503,13 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                       {/* Completion Status */}
                       <button
                         onClick={() => handleToggleTask(task.id)}
-                        className={`w-6 h-6 border-2 flex items-center justify-center transition-all duration-200 ${
-                          task.completed
-                            ? 'bg-green-500 border-green-500 text-white'
-                            : 'border-gray-500 hover:border-cyan-400'
-                        }`}
-                        title={task.completed ? 'Mission Complete' : 'Mark as Complete'}
+                        className="w-6 h-6 border-2 border-gray-500 hover:border-cyan-400 flex items-center justify-center transition-all duration-200"
+                        title="Mark as Complete"
                       >
-                        {task.completed && <Target size={16} />}
                       </button>
 
-                      {/* Priority Indicator */}
-                      <div
-                        className="p-1"
-                        style={{ color: getPriorityColor(task.priority) }}
-                        title={`${getPriorityLabel(task.priority)} priority mission`}
-                      >
-                        {getPriorityIcon(task.priority)}
-                      </div>
-
                       {/* Mission Title */}
-                      <span
-                        className={`flex-1 font-mono ${
-                          task.completed
-                            ? 'text-gray-400 line-through'
-                            : 'text-white'
-                        }`}
-                      >
+                      <span className="flex-1 font-mono text-white">
                         {task.title}
                       </span>
 
@@ -629,9 +547,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                     {task.description && (
                       <div className="ml-10 text-gray-300 text-sm font-mono flex items-start gap-2">
                         <FileText size={14} className="mt-0.5 text-gray-500" />
-                        <span className={task.completed ? 'line-through text-gray-500' : ''}>
-                          {task.description}
-                        </span>
+                        <span>{task.description}</span>
                       </div>
                     )}
 
@@ -675,12 +591,135 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
             )}
           </motion.div>
 
+          {/* Completed Missions List */}
+          {filteredTasks.filter(task => task.completed).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative space-y-3"
+              style={{
+                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+              
+              <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+                COMPLETED MISSIONS
+                <span className="ml-3 text-sm text-cyan-400">
+                  [{filteredTasks.filter(task => task.completed).length}]
+                </span>
+              </h3>
+
+              {filteredTasks.filter(task => task.completed).map((task, index) => (
+                <motion.div
+                  key={task.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-gray-900 border-2 border-cyan-400 p-4 transition-all duration-200"
+                  style={{
+                    boxShadow: '0 0 10px rgba(34, 211, 238, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="space-y-3">
+                    {/* Main mission row */}
+                    <div className="flex items-center gap-3">
+                      {/* Completion Status */}
+                      <button
+                        onClick={() => handleToggleTask(task.id)}
+                        className="w-6 h-6 border-2 bg-cyan-500 border-cyan-500 text-white flex items-center justify-center transition-all duration-200"
+                        title="Mission Complete - Click to reactivate"
+                      >
+                        <Check size={16} />
+                      </button>
+
+                      {/* Mission Title */}
+                      <span className="flex-1 font-mono text-gray-400 line-through">
+                        {task.title}
+                      </span>
+
+                      {/* Priority Badge */}
+                      <span
+                        className="px-2 py-1 text-xs font-mono font-bold border opacity-60"
+                        style={{
+                          color: getPriorityColor(task.priority),
+                          borderColor: getPriorityColor(task.priority),
+                          backgroundColor: `${getPriorityColor(task.priority)}15`
+                        }}
+                      >
+                        {getPriorityLabel(task.priority)}
+                      </span>
+
+                      {/* Action Buttons */}
+                      <button
+                        onClick={() => handleEditTask(task)}
+                        className="text-blue-400 hover:text-blue-300 p-1 transition-colors duration-200 opacity-60 hover:opacity-100"
+                        title="Modify mission"
+                      >
+                        <Edit size={16} />
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="text-red-400 hover:text-red-300 p-1 transition-colors duration-200 opacity-60 hover:opacity-100"
+                        title="Archive mission"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    {/* Mission Briefing */}
+                    {task.description && (
+                      <div className="ml-10 text-gray-500 text-sm font-mono flex items-start gap-2">
+                        <FileText size={14} className="mt-0.5 text-gray-600" />
+                        <span className="line-through">{task.description}</span>
+                      </div>
+                    )}
+
+                    {/* Mission Details */}
+                    {(task.dueDate || (task.tags && task.tags.length > 0)) && (
+                      <div className="ml-10 flex items-center gap-4 text-sm opacity-60">
+                        {/* Mission Deadline */}
+                        {task.dueDate && (
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} className="text-gray-500" />
+                            <span className="font-mono text-gray-500">
+                              {formatDueDate(task.dueDate)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Mission Tags */}
+                        {task.tags && parseTagsToArray(task.tags).length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <Tag size={14} className="text-gray-600" />
+                            <div className="flex gap-1">
+                              {parseTagsToArray(task.tags).map((tag, tagIndex) => (
+                                <span
+                                  key={tagIndex}
+                                  className="px-2 py-0.5 text-xs font-mono bg-gray-800 text-gray-500 border border-gray-700"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+
           {/* Mission Intelligence Dashboard */}
           {showInsights && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.3 }}
             >
               <TaskInsights tasks={tasks} taskLists={taskLists} />
             </motion.div>

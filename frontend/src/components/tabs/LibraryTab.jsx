@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Folder, BookOpen, FileText, Search, Download, Archive } from 'lucide-react';
+import { Plus, Folder, BookOpen, FileText, Search, Download, Archive, Eye } from 'lucide-react';
 import PixelButton from '../PixelButton';
 import PixelInput from '../PixelInput';
 import useFolders from '../../hooks/useFolders';
@@ -11,6 +11,9 @@ import FolderModal from '../modals/FolderModal';
 import NotebookModal from '../modals/NotebookModal';
 import FolderView from '../views/FolderView';
 import NotebookView from '../views/NotebookView';
+import NoteListView from '../views/NoteListView';
+import NotebookListView from '../views/NotebookListView';
+import FolderListView from '../views/FolderListView';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const LibraryTab = ({ tabColor = '#3B82F6' }) => {
@@ -22,7 +25,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
   const [editingFolder, setEditingFolder] = useState(null);
   const [editingNotebook, setEditingNotebook] = useState(null);
   const [editingNote, setEditingNote] = useState(null);
-  const [currentView, setCurrentView] = useState('library'); // 'library', 'folder', or 'notebook'
+  const [currentView, setCurrentView] = useState('library'); // 'library', 'folder', 'notebook', 'allNotes', 'allNotebooks', 'allFolders'
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedNotebook, setSelectedNotebook] = useState(null);
   
@@ -114,6 +117,26 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
     setSelectedNotebook(null);
   };
 
+  // New view handlers
+  const handleViewAllNotes = () => {
+    setCurrentView('allNotes');
+  };
+
+  // Add this function to handle editing notes from the NoteListView
+  const handleEditNoteFromList = (note) => {
+    setEditingNote(note);
+    setIsCreateNoteModalOpen(true);
+    setCurrentView('library'); // Return to library view when modal opens
+  };
+
+  const handleViewAllNotebooks = () => {
+    setCurrentView('allNotebooks');
+  };
+
+  const handleViewAllFolders = () => {
+    setCurrentView('allFolders');
+  };
+
   const handleFolderSave = async (idOrData, folderData = null) => {
     try {
       if (editingFolder && folderData) {
@@ -134,14 +157,22 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
 
   const handleNotebookSave = async (idOrData, notebookData = null) => {
     try {
+      console.log('handleNotebookSave called with:', { idOrData, notebookData, editingNotebook });
+      
       if (editingNotebook && notebookData) {
+        // When editing: first param is ID, second is data
+        console.log('Updating notebook with folderId:', notebookData.folderId);
         await updateNotebook(idOrData, notebookData);
       } else {
+        // When creating: first param is the complete data object
+        console.log('Creating notebook with folderId:', idOrData.folderId);
         await createNotebook(idOrData);
       }
       setEditingNotebook(null);
+      setIsNotebookModalOpen(false);
     } catch (error) {
       console.error('Failed to save collection:', error);
+      console.error('Error details:', error.response?.data || error.message);
     }
   };
 
@@ -162,6 +193,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
     );
   }
 
+  // View routing
   if (currentView === 'folder' && selectedFolder) {
     return (
       <div className="library-tab-container p-6">
@@ -187,6 +219,81 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           folders={folders}
           notebooks={notebooks}
           notes={notes}
+        />
+      </div>
+    );
+  }
+
+  if (currentView === 'allNotes') {
+    return (
+      <>
+        <NoteListView 
+          notes={notes}
+          onBack={() => setCurrentView('library')}
+          onCreateNote={() => {
+            setEditingNote(null);
+            setIsCreateNoteModalOpen(true);
+          }}
+          onEditNote={handleEditNoteFromList}
+          folders={folders}
+          notebooks={notebooks}
+        />
+        
+        {/* Include the NoteModal here as well */}
+        <NoteModal
+          isOpen={isCreateNoteModalOpen}
+          onClose={() => {
+            setIsCreateNoteModalOpen(false);
+            setEditingNote(null);
+          }}
+          onSave={handleCreateNoteSubmit}
+          folders={folders}
+          notebooks={notebooks}
+          existingNote={editingNote}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'allNotebooks') {
+    return (
+      <>
+        <NotebookListView 
+          notebooks={notebooks}
+          onBack={() => setCurrentView('library')}
+          onCreateNotebook={() => {
+            setEditingNotebook(null);
+            setIsNotebookModalOpen(true);
+          }}
+          onEditNotebook={handleEditNotebook}
+          onOpenNotebook={handleOpenNotebook}
+          folders={folders}
+        />
+        
+        {/* Include the NotebookModal here as well */}
+        <NotebookModal
+          isOpen={isNotebookModalOpen}
+          onClose={() => {
+            setIsNotebookModalOpen(false);
+            setEditingNotebook(null);
+          }}
+          onSave={handleNotebookSave}
+          existingNotebook={editingNotebook}
+          folders={folders} // Make sure folders are passed here too
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'allFolders') {
+    return (
+      <div className="library-tab-container">
+        <FolderListView
+          folders={folders}
+          onBack={handleBackToLibrary}
+          onCreateFolder={() => setIsFolderModalOpen(true)}
+          onEditFolder={handleEditFolder}
+          onOpenFolder={handleOpenFolder}
         />
       </div>
     );
@@ -362,7 +469,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
 
       {/* Content Sections */}
       <div className="space-y-8">
-        {/* Player Logs Section */}
+        {/* Archive Systems Section - MOVED TO FIRST */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -373,16 +480,223 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
         >
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
           
-          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-2">
-            PLAYER LOGS ({notes.length})
-          </h3>
-          <p className="text-sm font-mono text-gray-400 mb-4">
-            Individual log entries for storing notes, thoughts and ideas.
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                ARCHIVES ({folders.length})
+              </h3>
+              <p className="text-sm font-mono text-gray-400">
+                Archive systems for organizing multiple collections and logs.
+              </p>
+            </div>
+            <button
+              onClick={handleViewAllFolders}
+              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              style={{
+                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Eye size={16} />
+                <span>VIEW ALL</span>
+              </div>
+              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </button>
+          </div>
+          
+          {folders.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {folders.slice(0, 4).map(folder => {
+                const folderColor = folder.colorCode || '#FFD700';
+                const rgbColor = folderColor.startsWith('#') 
+                  ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
+                  : '251, 191, 36';
+                
+                return (
+                  <motion.div
+                    key={folder.id}
+                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                    style={{
+                      borderColor: folderColor,
+                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -2,
+                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleOpenFolder(folder)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <Folder size={24} style={{ color: folderColor }} />
+                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                        {folder.totalItemCount || 0} ITEMS
+                      </div>
+                    </div>
+                    <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
+                    <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
+                    
+                    {/* Access button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditFolder(folder);
+                      }}
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Modify archive"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+              <Folder size={48} className="text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-400 font-mono">No archive systems found. Initialize first archive storage.</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Log Collections Section - MOVED TO SECOND */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          style={{
+            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          }}
+        >
+          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                COLLECTIONS ({notebooks.length})
+              </h3>
+              <p className="text-sm font-mono text-gray-400">
+                Organized collections for grouping logs by subject, project or types.
+              </p>
+            </div>
+            <button
+              onClick={handleViewAllNotebooks}
+              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              style={{
+                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Eye size={16} />
+                <span>VIEW ALL</span>
+              </div>
+              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </button>
+          </div>
+          
+          {notebooks.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {notebooks.slice(0, 4).map(notebook => {
+                const notebookColor = notebook.colorCode || '#60A5FA';
+                const rgbColor = notebookColor.startsWith('#') 
+                  ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
+                  : '96, 165, 250';
+                
+                return (
+                  <motion.div
+                    key={notebook.id}
+                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                    style={{
+                      borderColor: notebookColor,
+                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -2,
+                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleOpenNotebook(notebook)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <BookOpen size={24} style={{ color: notebookColor }} />
+                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                        {notebook.noteCount || 0} LOGS
+                      </div>
+                    </div>
+                    <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
+                    <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
+                    
+                    {/* Access button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditNotebook(notebook);
+                      }}
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Modify collection"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+              <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-400 font-mono">No log collections found. Deploy first collection to begin.</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Player Logs Section - MOVED TO THIRD */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          style={{
+            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          }}
+        >
+          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                LOGS ({notes.length})
+              </h3>
+              <p className="text-sm font-mono text-gray-400">
+                Individual log entries for storing notes, thoughts and ideas.
+              </p>
+            </div>
+            <button
+              onClick={handleViewAllNotes}
+              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              style={{
+                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Eye size={16} />
+                <span>VIEW ALL</span>
+              </div>
+              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </button>
+          </div>
           
           {notes.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {notes.map(note => {
+              {notes.slice(0, 4).map(note => {
                 const getTags = (tags) => {
                   if (!tags) return [];
                   if (Array.isArray(tags)) return tags;
@@ -486,162 +800,6 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
             </div>
           )}
         </motion.div>
-
-        {/* Log Collections Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-          style={{
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-          }}
-        >
-          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
-          
-          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-2">
-            LOG COLLECTIONS ({notebooks.length})
-          </h3>
-          <p className="text-sm font-mono text-gray-400 mb-4">
-            Organized collections for grouping logs by subject, project or types.
-          </p>
-          
-          {notebooks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {notebooks.map(notebook => {
-                const notebookColor = notebook.colorCode || '#60A5FA';
-                const rgbColor = notebookColor.startsWith('#') 
-                  ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
-                  : '96, 165, 250';
-                
-                return (
-                  <motion.div
-                    key={notebook.id}
-                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                    style={{
-                      borderColor: notebookColor,
-                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                    }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      y: -2,
-                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleOpenNotebook(notebook)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <BookOpen size={24} style={{ color: notebookColor }} />
-                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {notebook.noteCount || 0} LOGS
-                      </div>
-                    </div>
-                    <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
-                    <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
-                    
-                    {/* Access button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditNotebook(notebook);
-                      }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Modify collection"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                    </button>
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
-              <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No log collections found. Deploy first collection to begin.</p>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Archive Systems Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-          style={{
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-          }}
-        >
-          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
-          
-          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-2">
-            LOG ARCHIVES ({folders.length})
-          </h3>
-          <p className="text-sm font-mono text-gray-400 mb-4">
-            Archive systems for organizing multiple collections and logs.
-          </p>
-          
-          {folders.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {folders.map(folder => {
-                const folderColor = folder.colorCode || '#FFD700';
-                const rgbColor = folderColor.startsWith('#') 
-                  ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
-                  : '251, 191, 36';
-                
-                return (
-                  <motion.div
-                    key={folder.id}
-                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                    style={{
-                      borderColor: folderColor,
-                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                    }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      y: -2,
-                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleOpenFolder(folder)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <Folder size={24} style={{ color: folderColor }} />
-                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {folder.totalItemCount || 0} ITEMS
-                      </div>
-                    </div>
-                    <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
-                    <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
-                    
-                    {/* Access button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditFolder(folder);
-                      }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Modify archive"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                    </button>
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
-              <Folder size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No archive systems found. Initialize first archive storage.</p>
-            </div>
-          )}
-        </motion.div>
       </div>
 
       {/* Modals */}
@@ -675,6 +833,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
         }}
         onSave={handleNotebookSave}
         existingNotebook={editingNotebook}
+        folders={folders} // Make sure this line is present
       />
     </div>
   );

@@ -56,24 +56,40 @@ const useNotebooks = () => {
     }
   };
 
-  // UPDATE NOTEBOOK - Add this method
+  // UPDATE NOTEBOOK - Fixed to include folderId explicitly
   const updateNotebook = async (id, notebookData) => {
     try {
+      console.log('updateNotebook called with:', { id, notebookData });
+      
+      const payload = {
+        name: notebookData.name,
+        description: notebookData.description,
+        colorCode: notebookData.colorCode,
+        tags: notebookData.tags,
+        folderId: notebookData.folderId || null
+      };
+      
+      console.log('Sending payload to API:', payload);
+      
       const response = await fetch(`/api/notebooks/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(notebookData)
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
         const updatedNotebook = await response.json();
+        console.log('Received updated notebook from API:', updatedNotebook);
+        
         setNotebooks(prevNotebooks => 
           prevNotebooks.map(notebook => notebook.id === id ? updatedNotebook : notebook)
         );
         return updatedNotebook;
       } else {
+        const errorText = await response.text();
+        console.error('Failed to update notebook:', response.status, errorText);
         throw new Error(`Failed to update notebook: ${response.status}`);
       }
     } catch (error) {

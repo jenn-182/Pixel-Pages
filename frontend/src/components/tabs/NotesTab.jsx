@@ -164,7 +164,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
           PLAYER LOGS
         </h1>
         <p className="text-gray-400 font-mono text-sm">
-          Quick entry terminal for creating notes, ideas and lists.
+          Quick entry terminal for creating notes, ideas and reports.
         </p>
       </div>
 
