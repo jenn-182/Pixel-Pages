@@ -176,6 +176,17 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
     }
   };
 
+  // Add these helper functions to calculate counts
+  const getNotebookNoteCount = (notebookId) => {
+    return notes.filter(note => note.notebookId === notebookId).length;
+  };
+
+  const getFolderItemCount = (folderId) => {
+    const folderNotes = notes.filter(note => note.folderId === folderId);
+    const folderNotebooks = notebooks.filter(notebook => notebook.folderId === folderId);
+    return folderNotes.length + folderNotebooks.length;
+  };
+
   if (loading) {
     return (
       <div className="library-tab-container p-6">
@@ -197,10 +208,13 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
   if (currentView === 'folder' && selectedFolder) {
     return (
       <div className="library-tab-container p-6">
-        <FolderView
+        <FolderView 
           folder={selectedFolder}
           onBack={handleBackToLibrary}
-          onCreateNote={handleCreateNoteSubmit}
+          onCreateNote={handleCreateNoteSubmit}  // ✅ Use existing note creation function
+          onEditNote={handleCreateNoteSubmit}    // ✅ Use existing note edit function
+          onOpenNotebook={handleOpenNotebook}
+          onCreateNotebook={handleNotebookSave}  // ✅ Use existing notebook creation function
           folders={folders}
           notebooks={notebooks}
           notes={notes}
@@ -469,7 +483,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
 
       {/* Content Sections */}
       <div className="space-y-8">
-        {/* Archive Systems Section - MOVED TO FIRST */}
+        {/* Archive Systems Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -512,6 +526,8 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                   ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
                   : '251, 191, 36';
                 
+                const itemCount = getFolderItemCount(folder.id); // ✅ Calculate actual count
+                
                 return (
                   <motion.div
                     key={folder.id}
@@ -531,13 +547,12 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                     <div className="flex items-start justify-between mb-3">
                       <Folder size={24} style={{ color: folderColor }} />
                       <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {folder.totalItemCount || 0} ITEMS
+                        {itemCount} ITEMS {/* ✅ Use calculated count */}
                       </div>
                     </div>
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
                     
-                    {/* Access button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -563,7 +578,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           )}
         </motion.div>
 
-        {/* Log Collections Section - MOVED TO SECOND */}
+        {/* Log Collections Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -607,6 +622,8 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                   ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
                   : '96, 165, 250';
                 
+                const noteCount = getNotebookNoteCount(notebook.id); // ✅ Calculate actual count
+                
                 return (
                   <motion.div
                     key={notebook.id}
@@ -626,13 +643,12 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                     <div className="flex items-start justify-between mb-3">
                       <BookOpen size={24} style={{ color: notebookColor }} />
                       <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {notebook.noteCount || 0} LOGS
+                        {noteCount} LOGS {/* ✅ Use calculated count */}
                       </div>
                     </div>
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
                     
-                    {/* Access button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -673,7 +689,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-mono font-bold text-white flex items-center">
-                LOGS ({notes.length})
+                LOG ENTRIES ({notes.length})
               </h3>
               <p className="text-sm font-mono text-gray-400">
                 Individual log entries for storing notes, thoughts and ideas.

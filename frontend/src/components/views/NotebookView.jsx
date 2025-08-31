@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, FileText, Plus, Edit } from 'lucide-react';
+import { ArrowLeft, BookOpen, FileText, Plus, Edit, Tag } from 'lucide-react';
 import NoteModal from '../notes/NoteModal';
 
 const NotebookView = ({ notebook, onBack, onCreateNote, onEditNote, folders, notebooks, notes }) => {
@@ -134,43 +134,43 @@ const NotebookView = ({ notebook, onBack, onCreateNote, onEditNote, folders, not
         <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-          <div className="bg-gray-900 border-2 border-green-500 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 197, 94, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-green-400 font-bold">TOTAL LOGS</div>
-                <div className="text-2xl font-mono font-bold text-green-400">{notebookNotes.length}</div>
+                <div className="text-xs font-mono text-cyan-400 font-bold">TOTAL LOGS</div>
+                <div className="text-2xl font-mono font-bold text-cyan-400">{notebookNotes.length}</div>
               </div>
-              <FileText className="text-green-400" size={20} />
+              <FileText className="text-cyan-400" size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-purple-500 p-4" style={{
-            boxShadow: '0 0 10px rgba(168, 85, 247, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-purple-400 font-bold">TOTAL WORDS</div>
-                <div className="text-2xl font-mono font-bold text-purple-400">
+                <div className="text-xs font-mono text-cyan-400 font-bold">TOTAL WORDS</div>
+                <div className="text-2xl font-mono font-bold text-cyan-400">
                   {notebookNotes.reduce((total, note) => total + (note.content ? note.content.split(' ').length : 0), 0)}
                 </div>
               </div>
-              <span className="text-purple-400 text-xl">📝</span>
+              <Edit className="text-cyan-400" size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-blue-500 p-4" style={{
-            boxShadow: '0 0 10px rgba(59, 130, 246, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-blue-400 font-bold">UNIQUE TAGS</div>
-                <div className="text-2xl font-mono font-bold text-blue-400">
+                <div className="text-xs font-mono text-cyan-400 font-bold">UNIQUE TAGS</div>
+                <div className="text-2xl font-mono font-bold text-cyan-400">
                   {[...new Set(notebookNotes.flatMap(note => getTags(note.tags)))].length}
                 </div>
               </div>
-              <span className="text-blue-400 text-xl">🏷️</span>
+              <Tag className="text-cyan-400" size={20} />
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ const NotebookView = ({ notebook, onBack, onCreateNote, onEditNote, folders, not
         
         <div className="relative z-10">
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            COLLECTION LOG ENTRIES
+            LOG ENTRIES
             <span className="ml-3 text-sm text-cyan-400">
               [{notebookNotes.length}]
             </span>

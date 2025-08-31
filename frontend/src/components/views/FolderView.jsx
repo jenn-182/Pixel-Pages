@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Folder, BookOpen, FileText, Plus, Edit } from 'lucide-react';
 import NoteModal from '../notes/NoteModal';
+import NotebookModal from '../modals/NotebookModal'; // ✅ Add this import
 import PixelButton from '../PixelButton';
 
-const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, folders, notebooks, notes }) => {
+const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, onCreateNotebook, folders, notebooks, notes }) => {
   const [folderNotes, setFolderNotes] = useState([]);
   const [folderNotebooks, setFolderNotebooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
+  const [isCreateNotebookModalOpen, setIsCreateNotebookModalOpen] = useState(false); // ✅ Add this state
   const [editingNote, setEditingNote] = useState(null);
 
   useEffect(() => {
@@ -44,6 +46,10 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
     setIsCreateNoteModalOpen(true);
   };
 
+  const handleCreateNotebook = () => {
+    setIsCreateNotebookModalOpen(true);
+  };
+
   const handleCreateNoteSubmit = async (noteData) => {
     try {
       const noteWithFolder = {
@@ -62,6 +68,21 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
       filterFolderContents();
     } catch (error) {
       console.error('Failed to save note:', error);
+    }
+  };
+
+  const handleCreateNotebookSubmit = async (notebookData) => {
+    try {
+      const notebookWithFolder = {
+        ...notebookData,
+        folderId: folder.id
+      };
+      
+      await onCreateNotebook(notebookWithFolder);
+      setIsCreateNotebookModalOpen(false);
+      filterFolderContents(); // Refresh the folder contents
+    } catch (error) {
+      console.error('Failed to save notebook:', error);
     }
   };
 
@@ -114,19 +135,37 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
             </div>
           </div>
 
-          <button
-            onClick={handleCreateNote}
-            className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-            style={{
-              boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-            }}
-          >
-            <div className="flex items-center gap-2">
-              <Plus size={16} />
-              <span>NEW LOG</span>
-            </div>
-            <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleCreateNote}
+              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              style={{
+                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Plus size={16} />
+                <FileText size={16} />
+                <span>NEW LOG</span>
+              </div>
+              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </button>
+
+            <button
+              onClick={handleCreateNotebook}
+              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              style={{
+                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Plus size={16} />
+                <BookOpen size={16} />
+                <span>NEW COLLECTION</span>
+              </div>
+              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -142,41 +181,41 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
         <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-          <div className="bg-gray-900 border-2 border-blue-500 p-4" style={{
-            boxShadow: '0 0 10px rgba(59, 130, 246, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-blue-400 font-bold">COLLECTIONS</div>
-                <div className="text-2xl font-mono font-bold text-blue-400">{folderNotebooks.length}</div>
+                <div className="text-xs font-mono text-cyan-400 font-bold">COLLECTIONS</div>
+                <div className="text-2xl font-mono font-bold text-cyan-400">{folderNotebooks.length}</div>
               </div>
-              <BookOpen className="text-blue-400" size={20} />
+              <BookOpen className="text-cyan-400" size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-green-500 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 197, 94, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-green-400 font-bold">LOGS</div>
-                <div className="text-2xl font-mono font-bold text-green-400">{folderNotes.length}</div>
+                <div className="text-xs font-mono text-cyan-400 font-bold">LOGS</div>
+                <div className="text-2xl font-mono font-bold text-cyan-400">{folderNotes.length}</div>
               </div>
-              <FileText className="text-green-400" size={20} />
+              <FileText className="text-cyan-400" size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-purple-500 p-4" style={{
-            boxShadow: '0 0 10px rgba(168, 85, 247, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-purple-400 font-bold">TOTAL ITEMS</div>
-                <div className="text-2xl font-mono font-bold text-purple-400">
+                <div className="text-xs font-mono text-cyan-400 font-bold">TOTAL ITEMS</div>
+                <div className="text-2xl font-mono font-bold text-cyan-400">
                   {folderNotebooks.length + folderNotes.length}
                 </div>
               </div>
-              <span className="text-purple-400 text-xl">📝</span>
+              <Folder className="text-cyan-400" size={20} />
             </div>
           </div>
         </div>
@@ -236,8 +275,8 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
               
               <div className="relative z-10">
                 <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <BookOpen size={20} className="text-blue-400 mr-2" />
-                  ARCHIVE COLLECTIONS
+                  <BookOpen size={20} className="text-cyan-400 mr-2" />
+                  COLLECTIONS
                   <span className="ml-3 text-sm text-cyan-400">
                     [{folderNotebooks.length}]
                   </span>
@@ -274,7 +313,14 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
                           boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
                         }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => onOpenNotebook && onOpenNotebook(notebook)}
+                        onClick={() => {
+                          console.log('Opening notebook from folder:', notebook);
+                          if (onOpenNotebook) {
+                            onOpenNotebook(notebook);
+                          } else {
+                            console.error('onOpenNotebook function not provided');
+                          }
+                        }}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <BookOpen size={24} style={{ color: notebookColor }} />
@@ -312,7 +358,7 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
               <div className="relative z-10">
                 <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
                   <FileText size={20} className="text-green-400 mr-2" />
-                  ARCHIVE LOG ENTRIES
+                  LOG ENTRIES
                   <span className="ml-3 text-sm text-cyan-400">
                     [{folderNotes.length}]
                   </span>
@@ -419,6 +465,14 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
         notebooks={notebooks}
         existingNote={editingNote}
         defaultFolderId={folder.id}
+      />
+
+      <NotebookModal
+        isOpen={isCreateNotebookModalOpen}
+        onClose={() => setIsCreateNotebookModalOpen(false)}
+        onSave={handleCreateNotebookSubmit}
+        existingNotebook={null}
+        folders={folders}
       />
     </div>
   );

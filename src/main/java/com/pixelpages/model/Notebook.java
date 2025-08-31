@@ -22,7 +22,7 @@ public class Notebook {
     private String updatedAt;
 
     @Column(name = "folder_id")
-    private Long folderId; // Use Long instead of entity reference
+    private Long folderId;
 
     @PrePersist
     protected void onCreate() {

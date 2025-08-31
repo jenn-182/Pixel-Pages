@@ -65,14 +65,15 @@ public class NotebookService {
     }
 
     // Update notebook with tags
-    public Notebook updateNotebook(Long id, String name, String description, String colorCode, String tags) {
+    public Notebook updateNotebook(Long id, String name, String description, String colorCode, String tags, Long folderId) {
         Optional<Notebook> optionalNotebook = notebookRepository.findById(id);
         if (optionalNotebook.isPresent()) {
             Notebook notebook = optionalNotebook.get();
             if (name != null) notebook.setName(name);
             if (description != null) notebook.setDescription(description);
             if (colorCode != null) notebook.setColorCode(colorCode);
-            // Note: You'll need to add tags field to Notebook model if it doesn't exist
+            //if (tags != null) notebook.setTags(tags);  // Assuming you have a tags field
+            notebook.setFolderId(folderId);  // ✅ Set the folderId
             return notebookRepository.save(notebook);
         } else {
             throw new RuntimeException("Notebook not found with ID: " + id);

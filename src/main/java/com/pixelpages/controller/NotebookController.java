@@ -88,7 +88,8 @@ public class NotebookController {
                 request.getName(),
                 request.getDescription(),
                 request.getColorCode(),
-                request.getTags()
+                request.getTags(),
+                request.getFolderId()  // Add folderId parameter
             );
             return ResponseEntity.ok(notebook);
         } catch (Exception e) {
@@ -121,6 +122,7 @@ public class NotebookController {
         private String description;
         private String colorCode;
         private String tags;
+        private Long folderId;  // Add folderId field
 
         // Getters and setters
         public String getName() { return name; }
@@ -134,5 +136,8 @@ public class NotebookController {
 
         public String getTags() { return tags; }
         public void setTags(String tags) { this.tags = tags; }
+
+        public Long getFolderId() { return folderId; }  // Add getter
+        public void setFolderId(Long folderId) { this.folderId = folderId; }  // Add setter
     }
 }
