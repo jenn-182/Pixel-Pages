@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, FileText, Clock, Save, X, Maximize2, Minimize2 } from 'lucide-react';
+import { Plus, Search, FileText, Clock, Save, X, Maximize2, Minimize2, Eye } from 'lucide-react';
 import PixelButton from '../PixelButton';
 import PixelInput from '../PixelInput';
 import NoteCard from '../notes/NoteCard';
 import NoteModal from '../notes/NoteModal';
+import NoteListView from '../views/NoteListView';
 import useNotes from '../../hooks/useNotes';
 import useFolders from '../../hooks/useFolders';
 import useNotebooks from '../../hooks/useNotebooks';
@@ -25,11 +26,12 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
   const [activeNote, setActiveNote] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFullscreenModalOpen, setIsFullscreenModalOpen] = useState(false);
+  const [showAllNotes, setShowAllNotes] = useState(false);
 
-  // Get recent notes (last 8)
+  // ✅ Get recent notes (last 6)
   const recentNotes = notes
     .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-    .slice(0, 8);
+    .slice(0, 6);
 
   // Auto-save functionality for normal form only
   useEffect(() => {
@@ -123,11 +125,16 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     }
   };
 
-  // Handle fullscreen modal save (for new notes)
+  // ✅ Handle fullscreen modal save (for new notes created from form data)
   const handleFullscreenSave = async (noteData) => {
     try {
       await createNote(noteData);
       setIsFullscreenModalOpen(false);
+      
+      // ✅ Clear the form since we saved via fullscreen
+      setQuickTitle('');
+      setQuickContent('');
+      setQuickTags('');
       
       // Update the status indicators
       setSaveStatus('LOG ARCHIVED!');
@@ -139,12 +146,24 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     }
   };
 
+  // ✅ Updated toggleFullscreen to use current form data
   const toggleFullscreen = () => {
-    console.log('Toggling fullscreen modal');
+    console.log('Toggling fullscreen modal with current form data');
     setIsFullscreenModalOpen(!isFullscreenModalOpen);
   };
 
-  // Create a draft note object for fullscreen mode
+  // ✅ Handle view all archives
+  const handleViewAllArchives = () => {
+    setShowAllNotes(true);
+  };
+
+  const handleEditNoteFromList = (note) => {
+    setActiveNote(note);
+    setIsEditModalOpen(true);
+    setShowAllNotes(false);
+  };
+
+  // ✅ Create a draft note object for fullscreen mode with current form data
   const draftNote = {
     title: quickTitle,
     content: quickContent,
@@ -152,57 +171,138 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     color: '#4ADE80',
   };
 
-  return (
-    <div className="notes-tab-container p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-          <div 
-            className="w-6 h-6 border border-gray-600" 
-            style={{ backgroundColor: tabColor }}
-          />
-          PLAYER LOGS
-        </h1>
-        <p className="text-gray-400 font-mono text-sm">
-          Quick entry terminal for creating notes, ideas and reports.
-        </p>
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border-2 border-red-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6"
-          style={{
-            boxShadow: '0 0 20px rgba(239, 68, 68, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+  // ✅ Show all notes view
+  if (showAllNotes) {
+    return (
+      <>
+        <NoteListView 
+          notes={notes}
+          onBack={() => setShowAllNotes(false)}
+          onCreateNote={() => {
+            setActiveNote(null);
+            setIsEditModalOpen(true);
           }}
-        >
-          <div className="font-mono text-red-400">
-            SYSTEM ERROR: {error}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Split Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          onEditNote={handleEditNoteFromList}
+          folders={folders}
+          notebooks={notebooks}
+        />
         
-        {/* Left Side - Quick Entry Terminal (2/3 width) */}
-        <div className="lg:col-span-2">
+        <NoteModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setActiveNote(null);
+          }}
+          onSave={activeNote ? handleUpdateNote : handleFullscreenSave}
+          onDelete={deleteNote}
+          folders={folders}
+          notebooks={notebooks}
+          existingNote={activeNote}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/* Force white text CSS */}
+      <style jsx>{`
+        .notes-tab-container input,
+        .notes-tab-container textarea {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+        
+        .notes-tab-container input::placeholder,
+        .notes-tab-container textarea::placeholder {
+          color: #6b7280 !important;
+          -webkit-text-fill-color: #6b7280 !important;
+        }
+        
+        .notes-tab-container input::-webkit-spelling-error,
+        .notes-tab-container textarea::-webkit-spelling-error {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          text-decoration: underline wavy red !important;
+        }
+        
+        .notes-tab-container input::-webkit-grammar-error,
+        .notes-tab-container textarea::-webkit-grammar-error {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          text-decoration: underline wavy red !important;
+        }
+      `}</style>
+      
+      <div className="notes-tab-container p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
+            <div 
+              className="w-6 h-6 border border-gray-600" 
+              style={{ backgroundColor: tabColor }}
+            />
+            PLAYER LOGS
+          </h1>
+          <p className="text-gray-400 font-mono text-sm">
+            Quick entry terminal for creating notes, ideas and reports.
+          </p>
+        </div>
+
+        {/* Error Display */}
+        {error && (
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative h-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gray-800 border-2 border-red-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6"
             style={{
-              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+              boxShadow: '0 0 20px rgba(239, 68, 68, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
             }}
           >
-            <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
-            
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-mono font-bold text-white">LOG ENTRY TERMINAL</h2>
-              <div className="flex items-center gap-4">
+            <div className="font-mono text-red-400">
+              SYSTEM ERROR: {error}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ✅ Updated Split Layout - 70/30 split */}
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 min-h-[calc(100vh-300px)]">
+          
+          {/* Left Side - Quick Entry Terminal (70% width) */}
+          <div className="lg:col-span-7">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative min-h-full flex flex-col"
+              style={{
+                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+              
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-mono font-bold text-white">LOG ENTRY TERMINAL</h2>
+                <div className="flex items-center">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+                    style={{
+                      boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                    }}
+                    title="Extended Terminal Mode (F11)"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Maximize2 size={16} className="text-cyan-400" />
+                      <span className="text-cyan-400">EXTENDED MODE</span>
+                    </div>
+                    <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Terminal Status - moved below header */}
+              <div className="flex justify-end mb-4">
                 <div className="flex items-center gap-2 text-xs font-mono">
                   <div className={`w-2 h-2 ${
                     saveStatus === 'TERMINAL READY' ? 'bg-green-400' :
@@ -213,231 +313,236 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                   }`} />
                   <span className="text-cyan-400">{saveStatus}</span>
                 </div>
-                <button
-                  onClick={toggleFullscreen}
-                  className="bg-gray-900 border border-cyan-400 p-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)] text-cyan-400"
-                  style={{
-                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)'
-                  }}
-                  title="Extended Terminal Mode (F11)"
-                >
-                  <Maximize2 size={16} />
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Entry Form */}
-            <div className="space-y-4">
-              {/* Title Input */}
-              <div>
-                <label className="block text-sm font-mono text-gray-400 mb-2">TITLE</label>
-                <input
-                  value={quickTitle}
-                  onChange={(e) => setQuickTitle(e.target.value)}
-                  placeholder="Enter title..."
-                  className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                  style={{ 
-                    color: '#ffffff !important',
-                    WebkitTextFillColor: '#ffffff',
-                    textFillColor: '#ffffff'
-                  }}
-                  autoFocus
-                />
               </div>
 
-              {/* Content Input */}
-              <div>
-                <label className="block text-sm font-mono text-gray-400 mb-2">CONTENT</label>
-                <textarea
-                  value={quickContent}
-                  onChange={(e) => setQuickContent(e.target.value)}
-                  placeholder="Enter content here..."
-                  className="w-full px-4 py-3 transition-colors resize-none placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                  style={{ 
-                    color: '#ffffff !important',
-                    WebkitTextFillColor: '#ffffff',
-                    textFillColor: '#ffffff'
-                  }}
-                  rows={8}
-                />
-              </div>
+              {/* Quick Entry Form */}
+              <div className="space-y-4 flex-1 flex flex-col">
+                {/* Title Input */}
+                <div>
+                  <label className="block text-sm font-mono text-gray-400 mb-2">TITLE</label>
+                  <input
+                    value={quickTitle}
+                    onChange={(e) => setQuickTitle(e.target.value)}
+                    placeholder="Enter title..."
+                    spellCheck={false}
+                    className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                    style={{ 
+                      color: '#ffffff !important',
+                      WebkitTextFillColor: '#ffffff !important',
+                      textFillColor: '#ffffff !important',
+                      caretColor: '#ffffff !important'
+                    }}
+                    autoFocus
+                  />
+                </div>
 
-              {/* Tags Input */}
-              <div>
-                <label className="block text-sm font-mono text-gray-400 mb-2">CLASSIFICATION TAGS</label>
-                <input
-                  value={quickTags}
-                  onChange={(e) => setQuickTags(e.target.value)}
-                  placeholder="personal, work, idea, important..."
-                  className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                  style={{ 
-                    color: '#ffffff !important',
-                    WebkitTextFillColor: '#ffffff',
-                    textFillColor: '#ffffff'
-                  }}
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={handleQuickSave}
-                  disabled={isSaving || (!quickTitle.trim() && !quickContent.trim())}
-                  className="bg-gray-900 border-2 border-cyan-400 px-6 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <Save size={18} className="text-cyan-400" />
-                    <span className="text-cyan-400">{isSaving ? 'ARCHIVING...' : 'ARCHIVE LOG'}</span>
+                {/* Content Input */}
+                <div className="flex-1 flex flex-col">
+                  <label className="block text-sm font-mono text-gray-400 mb-2">CONTENT</label>
+                  <div className="mb-2 text-xs font-mono text-purple-400 flex items-center gap-2">
+                    <Maximize2 size={12} />
+                    <span>Open in Extended Mode to use Markdown formatting and advanced features</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
+                  <textarea
+                    value={quickContent}
+                    onChange={(e) => setQuickContent(e.target.value)}
+                    placeholder="Enter content here..."
+                    spellCheck={false}
+                    className="w-full px-4 py-3 transition-colors resize-none placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none flex-1"
+                    style={{ 
+                      color: '#ffffff !important',
+                      WebkitTextFillColor: '#ffffff !important',
+                      textFillColor: '#ffffff !important',
+                      minHeight: '300px',
+                      caretColor: '#ffffff !important'
+                    }}
+                  />
+                </div>
 
-                <button
-                  onClick={handleClearForm}
-                  className="bg-gray-900 border-2 border-cyan-400 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-                  style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <X size={18} className="text-cyan-400" />
-                    <span className="text-cyan-400">CLEAR TERMINAL</span>
-                  </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+                {/* Tags Input */}
+                <div>
+                  <label className="block text-sm font-mono text-gray-400 mb-2">CLASSIFICATION TAGS</label>
+                  <input
+                    value={quickTags}
+                    onChange={(e) => setQuickTags(e.target.value)}
+                    placeholder="personal, work, idea, important..."
+                    spellCheck={false}
+                    className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                    style={{ 
+                      color: '#ffffff !important',
+                      WebkitTextFillColor: '#ffffff !important',
+                      textFillColor: '#ffffff !important',
+                      caretColor: '#ffffff !important'
+                    }}
+                  />
+                </div>
 
-        {/* Right Side - Recent Activity Feed (1/3 width) */}
-        <div className="lg:col-span-1">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative h-full"
-            style={{
-              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-            }}
-          >
-            <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
-            
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-6">
-              <Clock size={20} className="text-cyan-400" />
-              <h2 className="text-xl font-mono font-bold text-white">RECENT LOGS</h2>
-            </div>
-
-            {/* Recent Notes List */}
-            {loading ? (
-              <div className="text-center py-8 font-mono text-white">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="inline-block mb-4"
-                >
-                  <FileText size={24} className="text-cyan-400" />
-                </motion.div>
-                <div className="text-sm">Accessing archives...</div>
-              </div>
-            ) : recentNotes.length > 0 ? (
-              <div className="space-y-3">
-                {recentNotes.map(note => {
-                  const noteColor = note.color || note.colorCode || '#4ADE80';
-                  const hexToRgb = (hex) => {
-                    if (!hex || !hex.startsWith('#')) return '74, 222, 128';
-                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                    return result ? 
-                      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-                      '74, 222, 128';
-                  };
-                  const rgbColor = hexToRgb(noteColor);
-
-                  return (
-                    <motion.div
-                      key={note.id || note.filename || note.title}
-                      className="bg-gray-900 border-2 p-3 cursor-pointer group transition-all duration-300 hover:scale-[1.02]"
-                      style={{
-                        borderColor: noteColor,
-                        boxShadow: `0 0 5px rgba(${rgbColor}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`,
-                      }}
-                      whileHover={{
-                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.6), 1px 1px 0px 0px rgba(0,0,0,1)`
-                      }}
-                      onClick={() => handleEditNote(note)}
-                    >
-                      <div className="flex items-start gap-2">
-                        <FileText size={14} style={{ color: noteColor }} className="mt-0.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-mono font-bold text-white text-sm truncate mb-1">
-                            {note.title}
-                          </h4>
-                          <p className="text-xs text-gray-400 line-clamp-2">
-                            {note.content && note.content.length > 60 
-                              ? `${note.content.substring(0, 60)}...` 
-                              : note.content}
-                          </p>
-                          <div className="text-xs text-gray-500 font-mono mt-1">
-                            {new Date(note.createdAt || note.date).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-                
-                {/* View All Button */}
-                <div className="pt-4 border-t border-gray-600">
-                  <button className="w-full bg-gray-900 border border-cyan-400 px-3 py-2 text-cyan-400 font-mono text-sm hover:bg-gray-800 transition-colors hover:shadow-[0_0_10px_rgba(34,211,238,0.3)]"
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 mt-auto">
+                  <button
+                    onClick={handleQuickSave}
+                    disabled={isSaving || (!quickTitle.trim() && !quickContent.trim())}
+                    className="bg-gray-900 border-2 border-cyan-400 px-6 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
-                      boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)'
+                      boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
                     }}
                   >
-                    <span className="text-cyan-400">ACCESS ALL ARCHIVES →</span>
+                    <div className="flex items-center gap-2">
+                      <Save size={18} className="text-cyan-400" />
+                      <span className="text-cyan-400">{isSaving ? 'ARCHIVING...' : 'ARCHIVE LOG'}</span>
+                    </div>
+                    <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  </button>
+
+                  <button
+                    onClick={handleClearForm}
+                    className="bg-gray-900 border-2 border-cyan-400 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+                    style={{
+                      boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <X size={18} className="text-cyan-400" />
+                      <span className="text-cyan-400">CLEAR TERMINAL</span>
+                    </div>
+                    <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <FileText size={32} className="text-gray-500 mx-auto mb-3" />
-                <p className="text-gray-400 font-mono text-sm">No log entries found</p>
-                <p className="text-gray-500 font-mono text-xs mt-1">Begin your first personal log!</p>
+            </motion.div>
+          </div>
+
+          {/* Right Side - Recent Activity Feed (30% width) */}
+          <div className="lg:col-span-3">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative h-full"
+              style={{
+                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+              
+              {/* Header */}
+              <div className="flex items-center gap-2 mb-6">
+                <Clock size={20} className="text-cyan-400" />
+                <h2 className="text-xl font-mono font-bold text-white">RECENT LOGS</h2>
               </div>
-            )}
-          </motion.div>
+
+              {/* Recent Notes List */}
+              {loading ? (
+                <div className="text-center py-8 font-mono text-white">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="inline-block mb-4"
+                  >
+                    <FileText size={24} className="text-cyan-400" />
+                  </motion.div>
+                  <div className="text-sm">Accessing archives...</div>
+                </div>
+              ) : recentNotes.length > 0 ? (
+                <div className="space-y-3">
+                  {recentNotes.map(note => {
+                    const noteColor = note.color || note.colorCode || '#4ADE80';
+                    const hexToRgb = (hex) => {
+                      if (!hex || !hex.startsWith('#')) return '74, 222, 128';
+                      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                      return result ? 
+                        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                        '74, 222, 128';
+                    };
+                    const rgbColor = hexToRgb(noteColor);
+
+                    return (
+                      <motion.div
+                        key={note.id || note.filename || note.title}
+                        className="bg-gray-900 border-2 p-3 cursor-pointer group transition-all duration-300 hover:scale-[1.02]"
+                        style={{
+                          borderColor: noteColor,
+                          boxShadow: `0 0 5px rgba(${rgbColor}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`,
+                        }}
+                        whileHover={{
+                          boxShadow: `0 0 10px rgba(${rgbColor}, 0.6), 1px 1px 0px 0px rgba(0,0,0,1)`
+                        }}
+                        onClick={() => handleEditNote(note)}
+                      >
+                        <div className="flex items-start gap-2">
+                          <FileText size={14} style={{ color: noteColor }} className="mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-mono font-bold text-white text-sm truncate mb-1">
+                              {note.title}
+                            </h4>
+                            <p className="text-xs text-gray-400 line-clamp-2">
+                              {note.content && note.content.length > 60 
+                                ? `${note.content.substring(0, 60)}...` 
+                                : note.content}
+                            </p>
+                            <div className="text-xs text-gray-500 font-mono mt-1">
+                              {new Date(note.createdAt || note.date).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                  
+                  {/* ✅ Updated View All Button */}
+                  <div className="pt-4 border-t border-gray-600">
+                    <button 
+                      onClick={handleViewAllArchives}
+                      className="w-full bg-gray-900 border-2 border-cyan-400 px-3 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+                      style={{
+                        boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                      }}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Eye size={16} className="text-cyan-400" />
+                        <span className="text-cyan-400">ACCESS ALL ARCHIVES</span>
+                      </div>
+                      <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText size={32} className="text-gray-500 mx-auto mb-3" />
+                  <p className="text-gray-400 font-mono text-sm">No log entries found</p>
+                  <p className="text-gray-500 font-mono text-xs mt-1">Begin your first personal log!</p>
+                </div>
+              )}
+            </motion.div>
+          </div>
         </div>
+
+        {/* ✅ Use NoteModal for fullscreen - passes current form data as draft */}
+        <NoteModal
+          isOpen={isFullscreenModalOpen}
+          onClose={() => setIsFullscreenModalOpen(false)}
+          onSave={handleFullscreenSave}
+          folders={folders}
+          notebooks={notebooks}
+          existingNote={draftNote}
+          title="EXTENDED LOG ENTRY TERMINAL"
+        />
+
+        {/* Edit Modal */}
+        <NoteModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setActiveNote(null);
+          }}
+          onSave={activeNote ? handleUpdateNote : handleFullscreenSave}
+          onDelete={deleteNote}
+          folders={folders}
+          notebooks={notebooks}
+          existingNote={activeNote}
+        />
       </div>
-
-      {/* Fullscreen Modal using NoteModal */}
-      <NoteModal
-        isOpen={isFullscreenModalOpen}
-        onClose={() => setIsFullscreenModalOpen(false)}
-        onSave={handleFullscreenSave}
-        folders={folders}
-        notebooks={notebooks}
-        existingNote={draftNote}
-        isFullscreen={true}
-        title="EXTENDED LOG ENTRY TERMINAL"
-      />
-
-      {/* Edit Modal */}
-      <NoteModal
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setActiveNote(null);
-        }}
-        onSave={handleUpdateNote}
-        folders={folders}
-        notebooks={notebooks}
-        existingNote={activeNote}
-      />
-    </div>
+    </>
   );
 };
 

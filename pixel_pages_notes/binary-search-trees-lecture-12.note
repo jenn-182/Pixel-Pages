@@ -1,0 +1,31 @@
+Binary Search Trees (Lecture 12)
+Created: 2025-08-31 15:49:57
+Updated: 2025-08-31 16:20:08
+Tags: Computer Science,   School
+Color: #34D399
+
+## Key Properties
+- **Left subtree**: All values < parent node
+- **Right subtree**: All values > parent node  
+- **No duplicates** allowed in basic BST
+
+## Time Complexity
+- **Search**: O(log n) average, O(n) worst case
+- **Insert**: O(log n) average, O(n) worst case
+- **Delete**: O(log n) average, O(n) worst case
+
+## Implementation Notes:
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+## Important for Midterm
+- ==Self-balancing trees== (AVL, Red-Black)
+- Tree traversal methods:
+  - **Inorder**: Left → Root → Right
+  - **Preorder**: Root → Left → Right  
+  - **Postorder**: Left → Right → Root
+
+> Remember: Inorder traversal of BST gives sorted sequence!

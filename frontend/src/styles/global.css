@@ -34,3 +34,50 @@ textarea:focus {
 .pixel-pages-container {
   cursor: crosshair;
 }
+
+/* Remove the problematic color overrides - these were causing black text */
+/* REMOVED:
+input, textarea {
+  color: white !important;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: #6b7280 !important;
+}
+
+input::-webkit-spelling-error-color,
+textarea::-webkit-spelling-error-color {
+  color: white !important;
+}
+
+input::-webkit-grammar-error-color,
+textarea::-webkit-grammar-error-color {
+  color: white !important;
+}
+*/
+
+/* Better spellcheck override that doesn't affect all text */
+input::-webkit-spelling-error {
+  color: white !important;
+  text-decoration: underline red !important;
+  text-decoration-thickness: 1px !important;
+}
+
+textarea::-webkit-spelling-error {
+  color: white !important;
+  text-decoration: underline red !important;
+  text-decoration-thickness: 1px !important;
+}
+
+input::-webkit-grammar-error {
+  color: white !important;
+  text-decoration: underline red !important;
+  text-decoration-thickness: 1px !important;
+}
+
+textarea::-webkit-grammar-error {
+  color: white !important;
+  text-decoration: underline red !important;
+  text-decoration-thickness: 1px !important;
+}

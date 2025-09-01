@@ -1,0 +1,37 @@
+SN2 vs SN1 Mechanisms - Lab Prep
+Created: 2025-08-31 15:53:56
+Updated: 2025-08-31 16:20:27
+Tags: Chemistry,  School,  Lab
+Color: #60A5FA
+
+## SN2 Mechanism (Bimolecular)
+- **One step** - concerted mechanism
+- **Backside attack** → ==inversion of stereochemistry==
+- Rate = k[RX][Nu⁻]
+- Works best with **1° alkyl halides**
+
+### SN2 Favoring Conditions:
+- Strong nucleophile (OH⁻, CN⁻, I⁻)
+- Polar aprotic solvent (DMSO, acetone)
+- **Less substituted** carbon center
+
+## SN1 Mechanism (Unimolecular)  
+- **Two steps**: 1) Ionization 2) Nucleophilic attack
+- Forms carbocation intermediate
+- Rate = k[RX] (first order)
+- Works best with **3° alkyl halides**
+
+### SN1 Favoring Conditions:
+- Weak nucleophile (H₂O, alcohols)
+- Polar protic solvent (water, alcohols)  
+- **More substituted** carbon (stable carbocation)
+
+## Lab Tomorrow - Key Points
+- We're testing ==tert-butyl chloride vs n-butyl bromide==
+- Expected: *tert-butyl → SN1, n-butyl → SN2*
+- **Safety**: Work in fume hood, wear safety glasses!
+
+## Study Tips for Exam
+1. Practice drawing mechanisms step-by-step
+2. Memorize nucleophile strength order
+3. ==Stereochemistry is crucial== - know retention vs inversion`,

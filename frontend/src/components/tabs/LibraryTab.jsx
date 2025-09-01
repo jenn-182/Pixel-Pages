@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Folder, BookOpen, FileText, Search, Download, Archive, Eye } from 'lucide-react';
+import { Plus, Folder, BookOpen, FileText, Search, Download, Archive, Eye, Trash2 } from 'lucide-react';
 import PixelButton from '../PixelButton';
 import PixelInput from '../PixelInput';
 import useFolders from '../../hooks/useFolders';
@@ -25,18 +25,58 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
   const [editingFolder, setEditingFolder] = useState(null);
   const [editingNotebook, setEditingNotebook] = useState(null);
   const [editingNote, setEditingNote] = useState(null);
-  const [currentView, setCurrentView] = useState('library'); // 'library', 'folder', 'notebook', 'allNotes', 'allNotebooks', 'allFolders'
+  const [currentView, setCurrentView] = useState('library');
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedNotebook, setSelectedNotebook] = useState(null);
   
-  // Use the new hooks
-  const { folders, loading: foldersLoading, createFolder, updateFolder } = useFolders();
-  const { notebooks, loading: notebooksLoading, createNotebook, updateNotebook } = useNotebooks();
-  const { notes, loading: notesLoading, createNote, updateNote } = useNotes();
+  // Use the hooks
+  const { folders, loading: foldersLoading, createFolder, updateFolder, deleteFolder } = useFolders();
+  const { notebooks, loading: notebooksLoading, createNotebook, updateNotebook, deleteNotebook } = useNotebooks();
+  const { notes, loading: notesLoading, createNote, updateNote, deleteNote } = useNotes();
   const { showNotification } = useNotification();
 
   const loading = foldersLoading || notebooksLoading || notesLoading;
 
+  // ✅ Define ALL delete handlers at the top level
+  const handleDeleteNote = async (noteId) => {
+    if (window.confirm('Are you sure you want to delete this log entry? This action cannot be undone.')) {
+      try {
+        await deleteNote(noteId);
+        showNotification('Log entry deleted successfully!', 'success');
+      } catch (error) {
+        console.error('Failed to delete note:', error);
+        showNotification('Failed to delete log entry. Please try again.', 'error');
+      }
+    }
+  };
+
+  const handleDeleteNotebook = async (notebookId) => {
+    if (window.confirm('Are you sure you want to delete this collection? All associated notes will become unorganized.')) {
+      try {
+        console.log('Deleting notebook with ID:', notebookId); // Add this for debugging
+        await deleteNotebook(notebookId);
+        showNotification('Collection deleted successfully!', 'success');
+      } catch (error) {
+        console.error('Failed to delete notebook:', error);
+        console.error('Error details:', error.message); // Add more detailed error logging
+        showNotification('Failed to delete collection. Please try again.', 'error');
+      }
+    }
+  };
+
+  const handleDeleteFolder = async (folderId) => {
+    if (window.confirm('Are you sure you want to delete this archive? All associated notes and collections will become unorganized.')) {
+      try {
+        await deleteFolder(folderId);
+        showNotification('Archive deleted successfully!', 'success');
+      } catch (error) {
+        console.error('Failed to delete folder:', error);
+        showNotification('Failed to delete archive. Please try again.', 'error');
+      }
+    }
+  };
+
+  // ✅ All other handlers
   const handleCreateFolder = async () => {
     try {
       const folderData = {
@@ -117,16 +157,14 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
     setSelectedNotebook(null);
   };
 
-  // New view handlers
   const handleViewAllNotes = () => {
     setCurrentView('allNotes');
   };
 
-  // Add this function to handle editing notes from the NoteListView
   const handleEditNoteFromList = (note) => {
     setEditingNote(note);
     setIsCreateNoteModalOpen(true);
-    setCurrentView('library'); // Return to library view when modal opens
+    setCurrentView('library');
   };
 
   const handleViewAllNotebooks = () => {
@@ -160,11 +198,9 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
       console.log('handleNotebookSave called with:', { idOrData, notebookData, editingNotebook });
       
       if (editingNotebook && notebookData) {
-        // When editing: first param is ID, second is data
         console.log('Updating notebook with folderId:', notebookData.folderId);
         await updateNotebook(idOrData, notebookData);
       } else {
-        // When creating: first param is the complete data object
         console.log('Creating notebook with folderId:', idOrData.folderId);
         await createNotebook(idOrData);
       }
@@ -176,7 +212,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
     }
   };
 
-  // Add these helper functions to calculate counts
+  // Helper functions to calculate counts
   const getNotebookNoteCount = (notebookId) => {
     return notes.filter(note => note.notebookId === notebookId).length;
   };
@@ -211,10 +247,10 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
         <FolderView 
           folder={selectedFolder}
           onBack={handleBackToLibrary}
-          onCreateNote={handleCreateNoteSubmit}  // ✅ Use existing note creation function
-          onEditNote={handleCreateNoteSubmit}    // ✅ Use existing note edit function
+          onCreateNote={handleCreateNoteSubmit}
+          onEditNote={handleCreateNoteSubmit}
           onOpenNotebook={handleOpenNotebook}
-          onCreateNotebook={handleNotebookSave}  // ✅ Use existing notebook creation function
+          onCreateNotebook={handleNotebookSave}
           folders={folders}
           notebooks={notebooks}
           notes={notes}
@@ -253,7 +289,6 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           notebooks={notebooks}
         />
         
-        {/* Include the NoteModal here as well */}
         <NoteModal
           isOpen={isCreateNoteModalOpen}
           onClose={() => {
@@ -261,6 +296,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
             setEditingNote(null);
           }}
           onSave={handleCreateNoteSubmit}
+          onDelete={handleDeleteNote}
           folders={folders}
           notebooks={notebooks}
           existingNote={editingNote}
@@ -284,7 +320,6 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           folders={folders}
         />
         
-        {/* Include the NotebookModal here as well */}
         <NotebookModal
           isOpen={isNotebookModalOpen}
           onClose={() => {
@@ -293,7 +328,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           }}
           onSave={handleNotebookSave}
           existingNotebook={editingNotebook}
-          folders={folders} // Make sure folders are passed here too
+          folders={folders}
         />
       </>
     );
@@ -336,22 +371,17 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
            }}>
         <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
         
-        {/* Terminal Header */}
         <div className="flex items-center mb-6">
           <span className="font-mono font-bold text-white text-2xl">COMMAND INTERFACE</span>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start justify-between h-32">
-          {/* Command Buttons Section */}
           <div className="w-full lg:w-1/2 flex flex-col justify-end h-full">
-            {/* Description Text */}
             <p className="font-mono text-sm text-gray-300 mb-4 font-semibold">
               Create new player log, collection, or archive system.
             </p>
             
-            {/* Command Buttons */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
-              {/* Create Player Log */}
               <button
                 onClick={() => setIsCreateNoteModalOpen(true)}
                 className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
@@ -367,7 +397,6 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                 <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Create Log Collection */}
               <button
                 onClick={() => setIsNotebookModalOpen(true)}
                 className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
@@ -383,7 +412,6 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                 <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Create Archive */}
               <button
                 onClick={() => setIsFolderModalOpen(true)}
                 className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
@@ -399,7 +427,6 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                 <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
               </button>
 
-              {/* Export Intel */}
               <button
                 onClick={async () => {
                   try {
@@ -441,18 +468,15 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
             </div>
           </div>
           
-          {/* Search Terminal */}
           <div className="bg-gray-900 border border-cyan-400 p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
                style={{
                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
                }}>
-            {/* Search Protocol Header */}
             <div className="flex items-center gap-2 mb-3">
               <div className="w-3 h-3 bg-cyan-400" />
               <span className="font-mono text-sm text-cyan-400 font-bold">SEARCH PROTOCOL</span>
             </div>
             
-            {/* Search Input */}
             <div className="relative mb-3 flex-1 flex flex-col justify-center min-h-0">
               <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" />
               <input
@@ -464,7 +488,6 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
               />
             </div>
             
-            {/* Archive Stats */}
             <div className="text-xs font-mono text-gray-400 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -526,7 +549,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                   ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
                   : '251, 191, 36';
                 
-                const itemCount = getFolderItemCount(folder.id); // ✅ Calculate actual count
+                const itemCount = getFolderItemCount(folder.id);
                 
                 return (
                   <motion.div
@@ -547,25 +570,38 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                     <div className="flex items-start justify-between mb-3">
                       <Folder size={24} style={{ color: folderColor }} />
                       <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {itemCount} ITEMS {/* ✅ Use calculated count */}
+                        {itemCount} ITEMS
                       </div>
                     </div>
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
                     
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditFolder(folder);
-                      }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Modify archive"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                    </button>
+                    <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditFolder(folder);
+                        }}
+                        className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                        title="Modify archive"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteFolder(folder.id);
+                        }}
+                        className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                        title="Delete archive"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -622,7 +658,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                   ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
                   : '96, 165, 250';
                 
-                const noteCount = getNotebookNoteCount(notebook.id); // ✅ Calculate actual count
+                const noteCount = getNotebookNoteCount(notebook.id);
                 
                 return (
                   <motion.div
@@ -643,25 +679,38 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                     <div className="flex items-start justify-between mb-3">
                       <BookOpen size={24} style={{ color: notebookColor }} />
                       <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {noteCount} LOGS {/* ✅ Use calculated count */}
+                        {noteCount} LOGS
                       </div>
                     </div>
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
                     
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditNotebook(notebook);
-                      }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Modify collection"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                    </button>
+                    <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditNotebook(notebook);
+                        }}
+                        className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                        title="Edit collection"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNotebook(notebook.id);
+                        }}
+                        className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                        title="Delete collection"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -674,7 +723,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           )}
         </motion.div>
 
-        {/* Player Logs Section - MOVED TO THIRD */}
+        {/* Player Logs Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -712,107 +761,104 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           
           {notes.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {notes.slice(0, 4).map(note => {
-                const getTags = (tags) => {
-                  if (!tags) return [];
-                  if (Array.isArray(tags)) return tags;
-                  if (typeof tags === 'string') return tags.split(',').map(tag => tag.trim());
-                  return [];
-                };
-                
-                const tagsArray = getTags(note.tags);
-                const noteColor = note.color || note.colorCode || '#4ADE80';
-                
-                const hexToRgb = (hex) => {
-                  if (!hex || !hex.startsWith('#')) return '74, 222, 128';
-                  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                  return result ? 
-                    `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-                    '74, 222, 128';
-                };
-                
-                const rgbColor = hexToRgb(noteColor);
-                
-                return (
-                  <motion.div
-                    key={note.id}
-                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                    style={{
-                      borderColor: noteColor,
-                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                    }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      y: -2,
-                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleEditNote(note)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <FileText size={24} style={{ color: noteColor }} />
-                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {tagsArray.length} TAGS
-                      </div>
-                    </div>
-                    <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
-                      {note.title}
-                    </h4>
-                    <p className="text-xs text-gray-400 mb-3">
-                      {note.content && note.content.length > 100 
-                        ? `${note.content.substring(0, 100)}...` 
-                        : note.content}
-                    </p>
-                    
-                    {/* Classification Tags */}
-                    {tagsArray.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {tagsArray.slice(0, 2).map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {tagsArray.length > 2 && (
-                          <span className="text-xs text-gray-500 font-mono px-2 py-1">
-                            +{tagsArray.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Access button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditNote(note);
+              {notes
+                .slice() // Create a copy to avoid mutating original array
+                .sort((a, b) => new Date(b.createdAt || b.updatedAt || 0) - new Date(a.createdAt || a.updatedAt || 0)) // Sort by most recent first
+                .slice(0, 4) // Take only the first 4 (most recent)
+                .map((note, index) => {
+                  const noteColor = note.color || '#4ADE80';
+                  const hexToRgb = (hex) => {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? 
+                      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                      '74, 222, 128';
+                  };
+                  const rgbColor = hexToRgb(noteColor);
+                  const tagsArray = Array.isArray(note.tags) ? note.tags : (note.tags ? note.tags.split(',').map(tag => tag.trim()) : []);
+
+                  return (
+                    <motion.div
+                      key={note.id}
+                      className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                      style={{
+                        borderColor: noteColor,
+                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
                       }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Access log entry"
+                      whileHover={{ 
+                        scale: 1.02, 
+                        y: -2,
+                        boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleEditNote(note)}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                    </button>
-                  </motion.div>
-                );
-              })}
+                      <div className="flex items-start justify-between mb-3">
+                        <FileText size={24} style={{ color: noteColor }} />
+                        <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                          {tagsArray.length} TAGS
+                        </div>
+                      </div>
+                      <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
+                        {note.title}
+                      </h4>
+                      <p className="text-xs text-gray-400 mb-3">
+                        {note.content && note.content.length > 100 
+                          ? `${note.content.substring(0, 100)}...` 
+                          : note.content}
+                      </p>
+                      
+                      {tagsArray.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {tagsArray.slice(0, 2).map((tag, tagIndex) => (
+                            <span
+                              key={tagIndex}
+                              className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {tagsArray.length > 2 && (
+                            <span className="text-xs text-gray-500 font-mono px-2 py-1">
+                              +{tagsArray.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditNote(note);
+                          }}
+                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                          title="Edit log entry"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNote(note.id);
+                          }}
+                          className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                          title="Delete log entry"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
             </div>
           ) : (
             <div className="bg-gray-900 border border-gray-600 p-6 text-center">
               <FileText size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono mb-4">No player logs found. Initialize first log entry.</p>
-              <PixelButton
-                onClick={handleCreateNote}
-                color="bg-green-400"
-                hoverColor="hover:bg-green-500"
-                icon={<Plus size={18} />}
-              >
-                CREATE FIRST LOG
-              </PixelButton>
+              <p className="text-gray-400 font-mono">No log entries found. Initialize first player log to begin.</p>
             </div>
           )}
         </motion.div>
@@ -826,6 +872,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
           setEditingNote(null);
         }}
         onSave={handleCreateNoteSubmit}
+        onDelete={handleDeleteNote}
         folders={folders}
         notebooks={notebooks}
         existingNote={editingNote}
@@ -849,7 +896,7 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
         }}
         onSave={handleNotebookSave}
         existingNotebook={editingNotebook}
-        folders={folders} // Make sure this line is present
+        folders={folders}
       />
     </div>
   );

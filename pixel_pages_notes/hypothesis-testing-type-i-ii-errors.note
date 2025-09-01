@@ -1,0 +1,42 @@
+Hypothesis Testing - Type I & II Errors
+Created: 2025-08-31 15:54:53
+Updated: 2025-08-31 16:20:35
+Tags: Stat,   School,   Testing
+Color: #FB7185
+
+## The Setup
+- **H₀ (Null)**: No effect, status quo, ==what we assume is true==
+- **H₁ (Alternative)**: What we're trying to prove
+- **α (Alpha)**: Significance level (usually 0.05)
+- **p-value**: Probability of observing data if H₀ is true
+
+## Decision Making
+- If p-value < α → **Reject H₀**
+- If p-value ≥ α → **Fail to reject H₀**
+
+> Never say "accept H₀" - we only fail to reject it!
+
+## Types of Errors
+
+### Type I Error (α)
+- **False Positive** - rejecting true H₀
+- "Convicting an innocent person"
+- Probability = α = 0.05
+
+### Type II Error (β)  
+- **False Negative** - failing to reject false H₀
+- "Letting a guilty person go free"
+- Power = 1 - β = *probability of correctly rejecting false H₀*
+
+## Example from Class
+**Research Question**: Does new drug reduce blood pressure?
+
+- H₀: μ_drug = μ_placebo (no difference)
+- H₁: μ_drug < μ_placebo (drug works)
+- n = 100, x̄ = 145, s = 12, μ₀ = 150
+- **Result**: p = 0.032 < 0.05 → ==Reject H₀==
+
+## Homework Problems
+- Chapter 9: #15, 23, 31, 45
+- ==Practice interpreting p-values in context==
+- Quiz Friday covers everything through today`,

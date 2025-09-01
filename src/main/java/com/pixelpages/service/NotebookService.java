@@ -1,8 +1,10 @@
 package com.pixelpages.service;
 
 import com.pixelpages.model.Notebook;
+import com.pixelpages.model.Note;
 import com.pixelpages.repository.NotebookRepository;
 import com.pixelpages.repository.FolderRepository;
+import com.pixelpages.repository.NoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,9 @@ public class NotebookService {
     
     @Autowired
     private FolderRepository folderRepository;
+
+    @Autowired
+    private NoteRepository noteRepository;
 
     // Get all notebooks
     public List<Notebook> getAllNotebooks() {
@@ -41,7 +46,7 @@ public class NotebookService {
     // Create new notebook
     public Notebook createNotebook(String name, String description, String colorCode, Long folderId) {
         Notebook notebook = new Notebook(name, description, colorCode);
-        notebook.setFolderId(folderId); // Use Long instead of entity
+        notebook.setFolderId(folderId);
         
         return notebookRepository.save(notebook);
     }
@@ -72,20 +77,41 @@ public class NotebookService {
             if (name != null) notebook.setName(name);
             if (description != null) notebook.setDescription(description);
             if (colorCode != null) notebook.setColorCode(colorCode);
-            //if (tags != null) notebook.setTags(tags);  // Assuming you have a tags field
-            notebook.setFolderId(folderId);  // ✅ Set the folderId
+            notebook.setFolderId(folderId);
             return notebookRepository.save(notebook);
         } else {
             throw new RuntimeException("Notebook not found with ID: " + id);
         }
     }
 
-    // Delete notebook
+    // ✅ Fixed Delete notebook method
     public void deleteNotebook(Long id) {
-        if (notebookRepository.existsById(id)) {
+        try {
+            System.out.println("Attempting to delete notebook with ID: " + id);
+            
+            if (!notebookRepository.existsById(id)) {
+                throw new RuntimeException("Notebook not found with ID: " + id);
+            }
+
+            // ✅ Handle notes in this notebook - set their notebookId to null
+            List<Note> notesInNotebook = noteRepository.findByNotebookId(id);
+            System.out.println("Found " + notesInNotebook.size() + " notes in notebook " + id);
+            
+            for (Note note : notesInNotebook) {
+                System.out.println("Updating note " + note.getId() + " to remove notebook association");
+                note.setNotebookId(null);
+                noteRepository.save(note);
+            }
+            
+            // ✅ Now delete the notebook
+            System.out.println("Deleting notebook " + id);
             notebookRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Notebook not found with ID: " + id);
+            System.out.println("Successfully deleted notebook " + id);
+            
+        } catch (Exception e) {
+            System.err.println("Error deleting notebook " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete notebook: " + e.getMessage(), e);
         }
     }
 
@@ -99,7 +125,7 @@ public class NotebookService {
         return updateNotebook(notebookId, null, null, null, targetFolderId);
     }
 
-    // Check if notebook name is unique in folder - simplified
+    // Check if notebook name is unique in folder
     public boolean isNotebookNameUniqueInFolder(String name, Long folderId) {
         List<Notebook> existingNotebooks;
         if (folderId == null) {

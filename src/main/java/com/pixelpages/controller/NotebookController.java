@@ -2,6 +2,7 @@ package com.pixelpages.controller;
 
 import com.pixelpages.model.Notebook;
 import com.pixelpages.service.NotebookService;
+import org.springframework.http.HttpStatus; // ✅ Add this import
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,7 +90,7 @@ public class NotebookController {
                 request.getDescription(),
                 request.getColorCode(),
                 request.getTags(),
-                request.getFolderId()  // Add folderId parameter
+                request.getFolderId()
             );
             return ResponseEntity.ok(notebook);
         } catch (Exception e) {
@@ -97,6 +98,26 @@ public class NotebookController {
         }
     }
 
+    // ✅ Fixed Delete notebook by ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteNotebook(@PathVariable Long id) {
+        try {
+            System.out.println("DELETE request received for notebook ID: " + id);
+            notebookService.deleteNotebook(id);
+            return ResponseEntity.ok("Notebook deleted successfully");
+        } catch (RuntimeException e) {
+            System.err.println("Error deleting notebook " + id + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete notebook: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error deleting notebook " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error occurred");
+        }
+    }
+
+    // ✅ Request classes remain the same
     public static class CreateNotebookRequest {
         private String name;
         private String description;
@@ -122,7 +143,7 @@ public class NotebookController {
         private String description;
         private String colorCode;
         private String tags;
-        private Long folderId;  // Add folderId field
+        private Long folderId;
 
         // Getters and setters
         public String getName() { return name; }
@@ -137,7 +158,7 @@ public class NotebookController {
         public String getTags() { return tags; }
         public void setTags(String tags) { this.tags = tags; }
 
-        public Long getFolderId() { return folderId; }  // Add getter
-        public void setFolderId(Long folderId) { this.folderId = folderId; }  // Add setter
+        public Long getFolderId() { return folderId; }
+        public void setFolderId(Long folderId) { this.folderId = folderId; }
     }
 }

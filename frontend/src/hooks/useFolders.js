@@ -77,11 +77,30 @@ const useFolders = () => {
     }
   };
 
+  const deleteFolder = async (id) => {
+    try {
+      const response = await fetch(`/api/folders/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setFolders(prevFolders => prevFolders.filter(folder => folder.id !== id));
+      } else {
+        throw new Error(`Failed to delete folder: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting folder:', error);
+      throw error;
+    }
+  };
+
   return {
     folders,
     loading,
     createFolder,
-    updateFolder
+    updateFolder,
+    deleteFolder, // ✅ Export delete function
+    refreshFolders: fetchFolders
   };
 };
 

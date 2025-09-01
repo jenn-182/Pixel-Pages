@@ -58,7 +58,7 @@ const NotebookModal = ({
       console.log('Submitting notebook data:', notebookData);
       console.log('Is editing:', isEditing);
       console.log('Existing notebook:', existingNotebook);
-      
+
       if (isEditing) {
         // Pass ID and data separately for editing
         await onSave(existingNotebook.id, notebookData);
@@ -79,7 +79,7 @@ const NotebookModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 pt-16 z-50"
           onClick={onClose}
         >
           <motion.div
@@ -93,7 +93,7 @@ const NotebookModal = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
-            
+
             {/* Header */}
             <div className="flex items-center justify-between mb-6 relative z-10">
               <div className="flex items-center gap-3">
@@ -114,7 +114,7 @@ const NotebookModal = ({
               {/* Name */}
               <div>
                 <label className="block text-sm font-mono font-bold text-cyan-400 mb-2">
-                  COLLECTION NAME *
+                  COLLECTION NAME 
                 </label>
                 <input
                   type="text"
@@ -150,11 +150,11 @@ const NotebookModal = ({
                   onChange={(e) => setNotebookData({ ...notebookData, folderId: e.target.value })}
                   className="w-full px-3 py-2 bg-gray-800 border-2 border-gray-600 text-white font-mono text-sm focus:border-cyan-400 focus:outline-none transition-colors"
                 >
-                  <option value="">No Archive (Root Level)</option>
+                  <option value="">No Archive</option>
                   {folders && folders.length > 0 ? (
                     folders.map(folder => (
                       <option key={folder.id} value={folder.id}>
-                        📁 {folder.name}
+                        {folder.name}
                       </option>
                     ))
                   ) : (
@@ -196,14 +196,13 @@ const NotebookModal = ({
                       key={color}
                       type="button"
                       onClick={() => setNotebookData({ ...notebookData, colorCode: color })}
-                      className={`w-8 h-8 border-2 transition-all ${
-                        notebookData.colorCode === color 
-                          ? 'border-cyan-400 scale-110 shadow-[0_0_10px_rgba(34,211,238,0.5)]' 
+                      className={`w-8 h-8 border-2 transition-all ${notebookData.colorCode === color
+                          ? 'border-cyan-400 scale-110 shadow-[0_0_10px_rgba(34,211,238,0.5)]'
                           : 'border-gray-600 hover:border-gray-400'
-                      }`}
-                      style={{ 
+                        }`}
+                      style={{
                         backgroundColor: color,
-                        boxShadow: notebookData.colorCode === color 
+                        boxShadow: notebookData.colorCode === color
                           ? `0 0 10px ${color}50, 2px 2px 0px 0px rgba(0,0,0,1)`
                           : '2px 2px 0px 0px rgba(0,0,0,1)'
                       }}

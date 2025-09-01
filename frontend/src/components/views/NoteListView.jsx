@@ -14,36 +14,55 @@ const NoteListView = ({
   const [sortBy, setSortBy] = useState('updated'); // updated, created, title
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Filter and sort notes
-  const filteredNotes = notes
-    .filter(note => 
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (note.content && note.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (note.tags && note.tags.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-    .sort((a, b) => {
-      let valueA, valueB;
-      
-      switch (sortBy) {
-        case 'title':
-          valueA = a.title.toLowerCase();
-          valueB = b.title.toLowerCase();
-          break;
-        case 'created':
-          valueA = new Date(a.createdAt || '2020-01-01');
-          valueB = new Date(b.createdAt || '2020-01-01');
-          break;
-        case 'updated':
-        default:
-          valueA = new Date(a.updatedAt || a.createdAt || '2020-01-01');
-          valueB = new Date(b.updatedAt || b.createdAt || '2020-01-01');
-          break;
-      }
+  // Helper function to safely handle tags
+  const getNoteTagsAsString = (tags) => {
+    if (!tags) return '';
+    
+    if (Array.isArray(tags)) {
+      return tags.filter(tag => tag && typeof tag === 'string').join(' ');
+    }
+    
+    if (typeof tags === 'string') {
+      return tags;
+    }
+    
+    return '';
+  };
 
-      if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
-      if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
+  // Filter and sort notes
+  const filteredNotes = notes.filter(note => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    const titleMatch = note.title?.toLowerCase().includes(searchLower) || false;
+    const contentMatch = note.content?.toLowerCase().includes(searchLower) || false;
+    const tagsMatch = getNoteTagsAsString(note.tags).toLowerCase().includes(searchLower);
+    
+    return titleMatch || contentMatch || tagsMatch;
+  }).sort((a, b) => {
+    let valueA, valueB;
+    
+    switch (sortBy) {
+      case 'title':
+        valueA = a.title.toLowerCase();
+        valueB = b.title.toLowerCase();
+        break;
+      case 'created':
+        valueA = new Date(a.createdAt || '2020-01-01');
+        valueB = new Date(b.createdAt || '2020-01-01');
+        break;
+      case 'updated':
+      default:
+        valueA = new Date(a.updatedAt || a.createdAt || '2020-01-01');
+        valueB = new Date(b.updatedAt || b.createdAt || '2020-01-01');
+        break;
+    }
+
+    if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
+    if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   const getTags = (tags) => {
     if (!tags) return [];
@@ -66,7 +85,7 @@ const NoteListView = ({
           >
             <div className="flex items-center gap-2">
               <ArrowLeft size={16} />
-              <span>BACK TO VAULT</span>
+              <span>BACK</span>
             </div>
             <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
           </button>

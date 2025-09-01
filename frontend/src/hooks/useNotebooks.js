@@ -98,11 +98,29 @@ const useNotebooks = () => {
     }
   };
 
+  const deleteNotebook = async (id) => {
+    try {
+      const response = await fetch(`/api/notebooks/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setNotebooks(prevNotebooks => prevNotebooks.filter(notebook => notebook.id !== id));
+      } else {
+        throw new Error(`Failed to delete notebook: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting notebook:', error);
+      throw error;
+    }
+  };
+
   return {
     notebooks,
     loading,
     createNotebook,
-    updateNotebook,  // Add this line
+    updateNotebook,
+    deleteNotebook, // ✅ Export delete function
     refreshNotebooks: fetchNotebooks
   };
 };
