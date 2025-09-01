@@ -1,19 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const TAB_STORAGE_KEY = 'pixelPages_activeTab';
-const DEFAULT_TAB = 'notes';
+const DEFAULT_TAB = 'dashboard'; // Changed from 'notes' to 'dashboard'
 
 export const useTabs = () => {
-  const [activeTab, setActiveTab] = useState(() => {
-    // Load from localStorage on initialization
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Load from localStorage on initialization
+  useEffect(() => {
     try {
       const savedTab = localStorage.getItem(TAB_STORAGE_KEY);
-      return savedTab || DEFAULT_TAB;
+      if (savedTab) {
+        setActiveTab(savedTab);
+      }
     } catch (error) {
       console.warn('Failed to load tab from localStorage:', error);
-      return DEFAULT_TAB;
     }
-  });
+  }, []);
 
   // Save to localStorage whenever tab changes
   useEffect(() => {

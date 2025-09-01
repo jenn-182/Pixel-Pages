@@ -152,15 +152,15 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
         return (
           <div
             key={mission.id}
-            className="bg-gray-900 border border-yellow-400 p-3 relative"
+            className="bg-gray-900 border border-violet-400 p-3 relative"
             style={{
-              boxShadow: '0 0 5px rgba(251, 191, 36, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)'
+              boxShadow: '0 0 5px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Icon size={14} className="text-yellow-400" />
-              <div className="font-mono font-bold text-yellow-400 text-sm">{mission.title}</div>
-              <div className="ml-auto text-yellow-400 font-mono text-xs">{mission.progress}%</div>
+              <Icon size={14} className="text-violet-400" />
+              <div className="font-mono font-bold text-violet-400 text-sm">{mission.title}</div>
+              <div className="ml-auto text-violet-400 font-mono text-xs">{mission.progress}%</div>
             </div>
             
             <div className="w-full bg-gray-700 h-2 border border-gray-600 mb-1">
@@ -179,8 +179,8 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
       
       {activeMissions.length === 0 && (
         <div className="text-center py-4">
-          <Crown size={32} className="text-yellow-400 mx-auto mb-2" />
-          <div className="text-sm font-mono text-yellow-400">All missions complete!</div>
+          <Crown size={32} className="text-violet-400 mx-auto mb-2" />
+          <div className="text-sm font-mono text-violet-400">All missions complete!</div>
         </div>
       )}
     </div>

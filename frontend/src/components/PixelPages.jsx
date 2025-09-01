@@ -11,14 +11,15 @@ import { usePlayer } from '../hooks/usePlayer';
 import { useAchievements } from '../hooks/useAchievements';
 import TabNavigation from './navigation/TabNavigation';
 import { useTabs } from '../hooks/useTabs';
-import '../styles/tabs.css'; // Import the tab styles
-import '../styles/background.css'; // Add this import
+import '../styles/tabs.css';
+import '../styles/background.css';
 import NotesTab from './tabs/NotesTab';
-import TasksTab from './tabs/TasksTab'; // ⭐ ADD THIS
+import TasksTab from './tabs/TasksTab';
 import LibraryTab from './tabs/LibraryTab';
-import FocusTab from './tabs/FocusTab'; // ⭐ ADD THIS
+import FocusTab from './tabs/FocusTab';
 import AchievementsTab from './tabs/AchievementsTab';
 import ProfileTab from './tabs/ProfileTab';
+import DashboardTab from './tabs/DashboardTab';
 
 const PixelPages = () => {
   // Add tab functionality
@@ -34,6 +35,10 @@ const PixelPages = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [activeNote, setActiveNote] = useState(null);
+  
+  // ADD THIS - Navigation parameters state
+  const [navigationParams, setNavigationParams] = useState({});
+  
   const [newNote, setNewNote] = useState({
     title: '',
     content: '',
@@ -53,7 +58,6 @@ const PixelPages = () => {
   ];
 
   // Filter notes based on search
-
   const filteredNotes = searchTerm
     ? notes.filter(note =>
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -63,6 +67,12 @@ const PixelPages = () => {
       ))
     )
     : notes;
+
+  // ADD THIS - Enhanced tab change handler to support navigation parameters
+  const handleTabChange = (tabId, params = {}) => {
+    setNavigationParams(params);
+    changeTab(tabId);
+  };
 
   // Handlers
   const handleCreateNote = async () => {
@@ -157,15 +167,16 @@ const PixelPages = () => {
     setShowAchievements(false);
   };
 
-  // Update the getCurrentTabColor function with the new progressive colors
+  // Update the getCurrentTabColor function
   const getCurrentTabColor = () => {
     const tabs = [
-      { id: 'notes', color: '#22D3EE' }, // Cyan 400 - Bright cyan
-      { id: 'tasks', color: '#0EA5E9' }, // Sky 500 - Cyan-blue bridge
-      { id: 'library', color: '#3B82F6' }, // Blue 500 - True blue
-      { id: 'focus', color: '#6366F1' }, // Indigo 500 - Blue-purple bridge
-      { id: 'achievements', color: '#8B5CF6' }, // Purple 500 - Medium purple
-      { id: 'profile', color: '#A78BFA' } // Purple 400 - Light purple
+      { id: 'dashboard', color: '#67E8F9' },
+      { id: 'notes', color: '#22D3EE' },
+      { id: 'tasks', color: '#0EA5E9' },
+      { id: 'library', color: '#3B82F6' },
+      { id: 'focus', color: '#6366F1' },
+      { id: 'achievements', color: '#8B5CF6' },
+      { id: 'profile', color: '#A78BFA' }
     ];
     
     const currentTab = tabs.find(tab => tab.id === activeTab);
@@ -177,14 +188,16 @@ const PixelPages = () => {
     const tabColor = getCurrentTabColor();
     
     switch (activeTab) {
+      case 'dashboard':
+        return <DashboardTab tabColor={tabColor} onTabChange={handleTabChange} />;
       case 'notes':
         return <NotesTab tabColor={tabColor} />;
       case 'tasks':
-        return <TasksTab tabColor={tabColor} />; // Will need to create this
+        return <TasksTab tabColor={tabColor} />;
       case 'library':
-        return <LibraryTab tabColor={tabColor} />;
+        return <LibraryTab tabColor={tabColor} navigationParams={navigationParams} />;
       case 'focus':
-        return <FocusTab tabColor={tabColor} />; // Will need to create this
+        return <FocusTab tabColor={tabColor} />;
       case 'achievements':
         return <AchievementsTab tabColor={tabColor} />;
       case 'profile':
@@ -212,7 +225,7 @@ const PixelPages = () => {
            }} 
       />
       
-      <TabNavigation activeTab={activeTab} onTabChange={changeTab} />
+      <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
       
       <main className="tab-content-area">
         {renderTabContent()}

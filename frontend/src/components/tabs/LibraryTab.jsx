@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Add useEffect here
 import { motion } from 'framer-motion';
 import { Plus, Folder, BookOpen, FileText, Search, Download, Archive, Eye, Trash2 } from 'lucide-react';
 import PixelButton from '../PixelButton';
@@ -16,7 +16,7 @@ import NotebookListView from '../views/NotebookListView';
 import FolderListView from '../views/FolderListView';
 import { useNotification } from '../../contexts/NotificationContext';
 
-const LibraryTab = ({ tabColor = '#3B82F6' }) => {
+const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add navigationParams prop
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
@@ -222,6 +222,17 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
     const folderNotebooks = notebooks.filter(notebook => notebook.folderId === folderId);
     return folderNotes.length + folderNotebooks.length;
   };
+
+  // Move this useEffect to be right after your useState declarations
+  useEffect(() => {
+    // Handle navigation parameters from dashboard
+    if (navigationParams?.view === 'allNotes') {
+      setCurrentView('allNotes');
+    } else if (navigationParams?.view === 'folder' && navigationParams?.selectedFolder) {
+      setCurrentView('folder');
+      setSelectedFolder(navigationParams.selectedFolder);
+    }
+  }, [navigationParams]);
 
   if (loading) {
     return (
@@ -825,6 +836,10 @@ const LibraryTab = ({ tabColor = '#3B82F6' }) => {
                         </div>
                       )}
                       
+                      <div className="text-xs text-gray-400 mb-2">
+                        {new Date(note.createdAt || note.updatedAt).toLocaleDateString()}
+                      </div>
+
                       <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={(e) => {

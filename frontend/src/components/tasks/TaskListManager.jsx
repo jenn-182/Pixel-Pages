@@ -85,7 +85,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
         >
           <div className="flex items-center">
             <Folder size={16} className="mr-2" />
-            <span className="font-bold">To-Do Missions</span>
+            <span className="font-bold">To-Do</span>
           </div>
         </button>
 
@@ -120,7 +120,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (window.confirm(`Terminate "${list.name}" operation? Missions will be moved to To-Do Mission Operations.`)) {
+                if (window.confirm(`Terminate "${list.name}" operation? Missions will be moved to To-Do Operations.`)) {
                   onDeleteTaskList(list.id);
                 }
               }}

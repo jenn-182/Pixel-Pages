@@ -248,13 +248,13 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   };
 
   const getTaskListName = (taskListId) => {
-    if (!taskListId) return 'To-Do Missions';
+    if (!taskListId) return 'To-Do';
     const list = taskLists.find(l => l.id === taskListId);
     return list ? list.name : 'Unknown Operation';
   };
 
   const getCurrentViewName = () => {
-    if (selectedTaskListId === null) return 'To-Do Missions';
+    if (selectedTaskListId === null) return 'To-Do';
     const list = taskLists.find(l => l.id === selectedTaskListId);
     return list ? list.name : 'Unknown Operation';
   };

@@ -1,15 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Archive, Trophy, User, CheckSquare, Target } from 'lucide-react';
+import { FileText, Archive, Trophy, User, CheckSquare, Clock, LayoutGrid } from 'lucide-react';
 
 const TabNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'notes', label: 'LOGS', icon: FileText, color: '#22D3EE' },        // Cyan 400 - Bright cyan
-    { id: 'tasks', label: 'MISSIONS', icon: CheckSquare, color: '#0EA5E9' },       // Sky 500 - Cyan-blue bridge
-    { id: 'library', label: 'VAULT', icon: Archive, color: '#3B82F6' },         // Blue 500 - True blue  
-    { id: 'focus', label: 'FOCUS', icon: Target, color: '#6366F1' },            // Indigo 500 - Blue-purple bridge
-    { id: 'achievements', label: 'ACHIEVEMENTS', icon: Trophy, color: '#8B5CF6' }, // Purple 500 - Medium purple
-    { id: 'profile', label: 'PROFILE', icon: User, color: '#A78BFA' }           // Purple 400 - Light purple
+    { id: 'dashboard', label: 'DASHBOARD', icon: LayoutGrid, color: '#67E8F9' },
+    { id: 'notes', label: 'LOGS', icon: FileText, color: '#22D3EE' },
+    { id: 'tasks', label: 'MISSIONS', icon: CheckSquare, color: '#0EA5E9' },
+    { id: 'library', label: 'VAULT', icon: Archive, color: '#3B82F6' },
+    { id: 'focus', label: 'FOCUS', icon: Clock, color: '#6366F1' },
+    { id: 'achievements', label: 'ACHIEVEMENTS', icon: Trophy, color: '#8B5CF6' },
+    { id: 'profile', label: 'PROFILE', icon: User, color: '#A78BFA' }
   ];
 
   return (
@@ -23,7 +24,7 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
         <div className="star star-5"></div>
       </div>
       
-      <div className="tab-container">
+      <div className="tab-container justify-start"> {/* Changed from justify-center to justify-start */}
         {tabs.map((tab) => {
           const IconComponent = tab.icon;
           const isActive = activeTab === tab.id;
@@ -47,7 +48,6 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
                 <span className="tab-label">{tab.label}</span>
               </div>
               
-              {/* Enhanced active indicator with starfield theme */}
               {isActive && (
                 <>
                   <motion.div
@@ -56,7 +56,6 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
                     initial={false}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
-                  {/* Add pulsing constellation effect */}
                   <motion.div
                     className="tab-constellation"
                     animate={{ 

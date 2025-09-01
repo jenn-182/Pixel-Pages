@@ -500,7 +500,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                     >
                       <div className="flex items-center justify-center gap-2">
                         <Eye size={16} className="text-cyan-400" />
-                        <span className="text-cyan-400">ACCESS ALL ARCHIVES</span>
+                        <span className="text-cyan-400">ACCESS ALL LOGS</span>
                       </div>
                       <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
                     </button>
