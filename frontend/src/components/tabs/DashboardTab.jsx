@@ -160,7 +160,7 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
 
         {/* Main Dashboard Grid */}
         <div className="space-y-6">
-          {/* 1. Quick Actions Panel - Light Cyan with Gradient */}
+          {/* 1. Quick Actions Panel - Updated button backgrounds */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -170,7 +170,6 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
               boxShadow: '0 0 15px rgba(103, 232, 249, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
             }}
           >
-            {/* Subtle gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
             <div className="absolute inset-0 border-2 border-cyan-300 opacity-30 animate-pulse pointer-events-none" />
             
@@ -180,79 +179,79 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
                 QUICK ACTIONS
               </h2>
               
-              {/* Quick Action Buttons */}
+              {/* Quick Action Buttons - Updated to darker background */}
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                 <button
                   onClick={() => onTabChange && onTabChange('notes')}
-                  className="bg-gray-900 border-2 border-cyan-300 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-200 font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 5px rgba(103, 232, 249, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
+                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-cyan-600/15 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
                     <Plus size={20} className="text-cyan-300" />
                     <span className="text-xs text-cyan-300">NEW LOG</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-300 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
                 </button>
 
                 <button
                   onClick={() => onTabChange && onTabChange('tasks')}
-                  className="bg-gray-900 border-2 border-cyan-300 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-200 font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 5px rgba(103, 232, 249, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
+                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-cyan-600/15 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
                     <Target size={20} className="text-cyan-300" />
                     <span className="text-xs text-cyan-300">NEW MISSION</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-300 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
                 </button>
 
                 <button
                   onClick={() => onTabChange && onTabChange('library')}
-                  className="bg-gray-900 border-2 border-cyan-300 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-200 font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 5px rgba(103, 232, 249, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
+                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-cyan-600/15 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
                     <Folder size={20} className="text-cyan-300" />
                     <span className="text-xs text-cyan-300">BROWSE VAULT</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-300 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
                 </button>
 
                 <button
                   onClick={() => onTabChange && onTabChange('achievements')}
-                  className="bg-gray-900 border-2 border-cyan-300 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-200 font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 5px rgba(103, 232, 249, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
+                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-cyan-600/15 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
                     <Trophy size={20} className="text-cyan-300" />
                     <span className="text-xs text-cyan-300">ACHIEVEMENTS</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-300 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
                 </button>
 
                 <button
                   onClick={() => onTabChange && onTabChange('profile')}
-                  className="bg-gray-900 border-2 border-cyan-300 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-200 font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 5px rgba(103, 232, 249, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
+                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-cyan-600/15 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
                     <User size={20} className="text-cyan-300" />
                     <span className="text-xs text-cyan-300">PLAYER LVL</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-300 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
                 </button>
               </div>
             </div>
           </motion.div>
 
-          {/* 2. Storage Vault & Recent Activity Row - Sky Blue to Blue Gradients */}
+          {/* 2. Storage Vault & Recent Activity Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Storage Vault Section - Sky Blue with Gradient */}
+            {/* Storage Vault Section */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -262,7 +261,6 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
                 boxShadow: '0 0 15px rgba(34, 211, 238, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
               }}
             >
-              {/* Subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-sky-400/15 to-sky-600/20 pointer-events-none" />
               <div className="absolute inset-0 border-2 border-sky-400 opacity-30 animate-pulse pointer-events-none" />
               
@@ -364,24 +362,25 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
                   )}
                 </div>
                 
+                {/* Access Storage Vault Button - Updated background */}
                 <button 
                   onClick={handleGoToStorageVault}
-                  className="w-full bg-gray-900 border-2 border-sky-400 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-sky-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] font-mono font-bold text-sky-400 overflow-hidden"
+                  className="w-full bg-gray-900 border border-sky-400 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-sky-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-sky-400 overflow-hidden"
                   style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-sky-600/15 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-sky-500/8 to-sky-600/12 pointer-events-none" />
                   <div className="relative z-10 flex items-center justify-center gap-2">
                     <ExternalLink size={16} className="text-sky-400" />
                     <span className="text-sky-400">ACCESS STORAGE VAULT</span>
                   </div>
-                  <div className="absolute inset-0 bg-sky-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <div className="absolute inset-0 bg-sky-400 opacity-0 group-hover:opacity-5 transition-opacity" />
                 </button>
               </div>
             </motion.div>
 
-            {/* Recent Activity Section - Blue with Gradient */}
+            {/* Recent Activity Section */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -391,7 +390,6 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
                 boxShadow: '0 0 15px rgba(14, 165, 233, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
               }}
             >
-              {/* Subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/15 to-blue-700/20 pointer-events-none" />
               <div className="absolute inset-0 border-2 border-blue-500 opacity-30 animate-pulse pointer-events-none" />
               
@@ -433,20 +431,21 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
                   )}
                 </div>
 
+                {/* Access All Logs Button - Updated background */}
                 {notes.length > 0 && (
                   <button 
                     onClick={handleAccessAllLogs}
-                    className="w-full bg-gray-900 border-2 border-blue-500 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(14,165,233,0.4)] font-mono font-bold text-blue-500 overflow-hidden"
+                    className="w-full bg-gray-900 border border-blue-500 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-blue-400 hover:shadow-[0_0_8px_rgba(14,165,233,0.4)] font-mono font-bold text-blue-500 overflow-hidden"
                     style={{
-                      boxShadow: '0 0 5px rgba(14, 165, 233, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                      boxShadow: '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
                     }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-blue-700/15 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/8 to-blue-700/12 pointer-events-none" />
                     <div className="relative z-10 flex items-center justify-center gap-2">
                       <ExternalLink size={16} className="text-blue-500" />
                       <span className="text-blue-500">ACCESS ALL LOGS</span>
                     </div>
-                    <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+                    <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 transition-opacity" />
                   </button>
                 )}
               </div>
@@ -481,10 +480,10 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
               <div className="relative z-10">
                 <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
                   <div className="w-4 h-4 bg-violet-500 mr-2" />
-                  ACTIVE MISSIONS
+                  ACTIVE ACHIEVEMENTS
                 </h2>
                 
-                <ActiveMissions notes={notes} compact={true} />
+                <ActiveMissions notes={notes} compact={true} onTabChange={onTabChange} />
               </div>
             </motion.div>
 
@@ -494,7 +493,7 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <SmartSuggestions notes={notes} tasks={tasks} folders={folders} />
+              <SmartSuggestions notes={notes} tasks={tasks} folders={folders} onTabChange={onTabChange} />
             </motion.div>
           </div>
         </div>

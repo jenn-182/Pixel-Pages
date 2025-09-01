@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, Crown, Zap } from 'lucide-react';
+import { Target, Crown, Zap, ExternalLink } from 'lucide-react';
 
-const ActiveMissions = ({ notes = [], compact = false }) => {
+const ActiveMissions = ({ notes = [], compact = false, onTabChange }) => {
   // Calculate level and progress (same logic from AchievementsTab)
   const calculateTotalXP = (notes) => {
     let totalXP = 0;
@@ -70,7 +70,7 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
       current: xpInCurrentLevel,
       target: xpNeededForNextLevel,
       unit: 'XP',
-      color: 'from-cyan-400 to-purple-500',
+      color: 'bg-cyan-400', // Changed to solid cyan
       icon: Crown
     },
     {
@@ -81,7 +81,7 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
       current: thisWeekNotes,
       target: 5,
       unit: 'notes',
-      color: 'from-green-400 to-blue-500',
+      color: 'bg-cyan-400', // Changed to solid cyan
       icon: Target
     },
     {
@@ -92,7 +92,7 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
       current: notesWithTags,
       target: 10,
       unit: 'notes with tags',
-      color: 'from-yellow-400 to-orange-500',
+      color: 'bg-cyan-400', // Changed to solid cyan
       icon: Zap
     }
   ];
@@ -126,7 +126,7 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
               
               <div className="w-full bg-gray-700 h-3 border border-gray-600 mb-2">
                 <div 
-                  className={`h-full bg-gradient-to-r ${mission.color} transition-all duration-700`}
+                  className={`h-full ${mission.color} transition-all duration-700`}
                   style={{ width: `${mission.progress}%` }}
                 />
               </div>
@@ -152,26 +152,30 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
         return (
           <div
             key={mission.id}
-            className="bg-gray-900 border border-violet-400 p-3 relative"
+            className="bg-gray-900 border border-violet-400 p-3 relative overflow-hidden group transition-all duration-300 hover:border-violet-300 hover:shadow-[0_0_8px_rgba(99,102,241,0.4)]"
             style={{
-              boxShadow: '0 0 5px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+              boxShadow: '0 0 3px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
             }}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Icon size={14} className="text-violet-400" />
-              <div className="font-mono font-bold text-violet-400 text-sm">{mission.title}</div>
-              <div className="ml-auto text-violet-400 font-mono text-xs">{mission.progress}%</div>
-            </div>
-            
-            <div className="w-full bg-gray-700 h-2 border border-gray-600 mb-1">
-              <div 
-                className={`h-full bg-gradient-to-r ${mission.color}`}
-                style={{ width: `${mission.progress}%` }}
-              />
-            </div>
-            
-            <div className="text-xs font-mono text-gray-400">
-              {mission.current}/{mission.target} {mission.unit}
+            <div className="absolute inset-0 bg-gradient-to-r from-violet-500/8 to-violet-600/12 pointer-events-none" />
+            <div className="absolute inset-0 bg-violet-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon size={14} className="text-violet-400" />
+                <div className="font-mono font-bold text-violet-400 text-sm">{mission.title}</div>
+                <div className="ml-auto text-violet-400 font-mono text-xs">{mission.progress}%</div>
+              </div>
+              
+              <div className="w-full bg-gray-700 h-2 border border-gray-600 mb-1">
+                <div 
+                  className={`h-full ${mission.color}`}
+                  style={{ width: `${mission.progress}%` }}
+                />
+              </div>
+              
+              <div className="text-xs font-mono text-gray-400">
+                {mission.current}/{mission.target} {mission.unit}
+              </div>
             </div>
           </div>
         );
@@ -183,6 +187,22 @@ const ActiveMissions = ({ notes = [], compact = false }) => {
           <div className="text-sm font-mono text-violet-400">All missions complete!</div>
         </div>
       )}
+
+      {/* Access All Achievements Button */}
+      <button
+        onClick={() => onTabChange && onTabChange('achievements')}
+        className="w-full bg-gray-900 border border-violet-400 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-violet-300 hover:shadow-[0_0_8px_rgba(99,102,241,0.4)] font-mono font-bold text-violet-400 overflow-hidden"
+        style={{
+          boxShadow: '0 0 3px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/8 to-violet-600/12 pointer-events-none" />
+        <div className="relative z-10 flex items-center justify-center gap-2">
+          <ExternalLink size={16} className="text-violet-400" />
+          <span className="text-violet-400">ACCESS ALL ACHIEVEMENTS</span>
+        </div>
+        <div className="absolute inset-0 bg-violet-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+      </button>
     </div>
   );
 };

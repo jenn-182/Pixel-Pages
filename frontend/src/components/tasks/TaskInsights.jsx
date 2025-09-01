@@ -150,29 +150,28 @@ const TaskInsights = ({ tasks, taskLists, onTabChange }) => {
     >
       {/* Subtle gradient overlay - matching other sections */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/15 to-indigo-700/20 pointer-events-none" />
-      <div className="absolute inset-0 border-2 border-indigo-500 opacity-30 animate-pulse pointer-events-none" />
       
       {/* Header with Access Button */}
       <div className="flex items-center justify-between relative z-10">
         <h3 className="text-lg font-mono font-bold text-white flex items-center">
           <div className="w-4 h-4 bg-indigo-500 mr-2" />
-          MISSION INSIGHT DASHBOARD
+          MISSION COMMAND
         </h3>
         
-        {/* Access Missions Button */}
+        {/* Access Missions Button - Updated to match darker background styling */}
         <button
           onClick={() => onTabChange && onTabChange('tasks')}
-          className="bg-gray-900 border-2 border-indigo-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-indigo-300 hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] font-mono font-bold text-indigo-400 overflow-hidden"
+          className="bg-gray-900 border border-indigo-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-indigo-300 hover:shadow-[0_0_8px_rgba(99,102,241,0.4)] font-mono font-bold text-indigo-400 overflow-hidden"
           style={{
-            boxShadow: '0 0 5px rgba(99, 102, 241, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+            boxShadow: '0 0 3px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-indigo-600/15 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/8 to-indigo-600/12 pointer-events-none" />
           <div className="relative z-10 flex items-center gap-2">
             <ExternalLink size={14} className="text-indigo-400" />
             <span className="text-indigo-400 text-sm">ACCESS MISSIONS</span>
           </div>
-          <div className="absolute inset-0 bg-indigo-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+          <div className="absolute inset-0 bg-indigo-400 opacity-0 group-hover:opacity-5 transition-opacity" />
         </button>
       </div>
 
