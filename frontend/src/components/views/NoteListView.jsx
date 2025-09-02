@@ -14,6 +14,9 @@ const NoteListView = ({
   const [sortBy, setSortBy] = useState('updated'); // updated, created, title
   const [sortOrder, setSortOrder] = useState('desc');
 
+  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
+  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
+
   // Helper function to safely handle tags
   const getNoteTagsAsString = (tags) => {
     if (!tags) return '';
@@ -78,26 +81,35 @@ const NoteListView = ({
         <div className="flex items-center gap-4 mb-4">
           <button
             onClick={onBack}
-            className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+            className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
             style={{
-              boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              borderColor: tabColor,
+              color: tabColor,
+              boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
             }}
           >
             <div className="flex items-center gap-2">
               <ArrowLeft size={16} />
               <span>BACK</span>
             </div>
-            <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                 style={{ backgroundColor: tabColor }} />
           </button>
           
           <div className="flex-1">
             <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-              <FileText className="text-cyan-400" size={32} />
+              <div 
+              />
               ALL PLAYER LOGS
             </h1>
-            <p className="text-gray-400 font-mono text-sm">
-              Complete archive of all player log entries ({notes.length} total)
-            </p>
           </div>
         </div>
       </div>
@@ -106,34 +118,55 @@ const NoteListView = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
+        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          borderColor: tabColor,
+          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
         
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between relative z-10">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                    style={{ color: tabColor }} size={20} />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search player logs..."
-              className="w-full bg-gray-900 border-2 border-gray-600 text-white pl-10 pr-4 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400 transition-colors duration-200"
+              className="w-full bg-gray-900 border-2 border-gray-600 text-white pl-10 pr-4 py-2 font-mono text-sm focus:outline-none transition-colors duration-200"
+              style={{ 
+                color: '#fff'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = tabColor;
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#4B5563';
+              }}
             />
           </div>
 
           {/* Sort Controls */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-cyan-400">SORT BY:</span>
+              <span className="text-xs font-mono font-bold" style={{ color: tabColor }}>SORT BY:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-900 border-2 border-gray-600 text-white px-2 py-1 text-xs font-mono focus:outline-none focus:border-cyan-400"
+                className="bg-gray-900 border-2 border-gray-600 text-white px-2 py-1 text-xs font-mono focus:outline-none"
+                style={{
+                  focusBorderColor: tabColor
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = tabColor;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#4B5563';
+                }}
               >
                 <option value="updated">Last Updated</option>
                 <option value="created">Date Created</option>
@@ -143,7 +176,15 @@ const NoteListView = ({
 
             <button
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="text-cyan-400 hover:text-cyan-300 transition-colors duration-200 p-1 border border-cyan-400 hover:border-cyan-300"
+              className="transition-colors duration-200 p-1 border"
+              style={{
+                color: tabColor,
+                borderColor: tabColor
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = tabColor;
+                e.target.style.borderColor = tabColor;
+              }}
               title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
@@ -151,16 +192,27 @@ const NoteListView = ({
 
             <button
               onClick={onCreateNote}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
               style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                color: tabColor,
+                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
               }}
             >
               <div className="flex items-center gap-2">
                 <Plus size={16} />
                 <span>NEW LOG</span>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                   style={{ backgroundColor: tabColor }} />
             </button>
           </div>
         </div>
@@ -171,17 +223,19 @@ const NoteListView = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          borderColor: tabColor,
+          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
         
         <div className="relative z-10">
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
             PLAYER LOG ENTRIES
-            <span className="ml-3 text-sm text-cyan-400">
+            <span className="ml-3 text-sm" style={{ color: tabColor }}>
               [{filteredNotes.length}]
             </span>
           </h3>
@@ -242,7 +296,8 @@ const NoteListView = ({
                         {tagsArray.slice(0, 2).map((tag, tagIndex) => (
                           <span
                             key={tagIndex}
-                            className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
+                            className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono"
+                            style={{ color: tabColor }}
                           >
                             {tag}
                           </span>
@@ -261,7 +316,8 @@ const NoteListView = ({
                         e.stopPropagation();
                         onEditNote(note);
                       }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ color: tabColor }}
                       title="Edit log entry"
                     >
                       <Edit size={14} />

@@ -120,7 +120,7 @@ const useNotebooks = () => {
     loading,
     createNotebook,
     updateNotebook,
-    deleteNotebook, // ✅ Export delete function
+    deleteNotebook, 
     refreshNotebooks: fetchNotebooks
   };
 };

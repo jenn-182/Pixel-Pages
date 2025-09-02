@@ -37,36 +37,35 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
 
   // Filter tasks based on selected list and filters
   useEffect(() => {
-    let filtered = selectedTaskListId === null 
-      ? tasks.filter(task => !task.taskListId)
-      : tasks.filter(task => task.taskListId === selectedTaskListId);
+    let filtered;
+    
+    if (selectedTaskListId === 'all') {
+      // Show ALL tasks from every list and general operations
+      filtered = tasks;
+    } else if (selectedTaskListId === null) {
+      // Show only tasks not in any list (general operations)
+      filtered = tasks.filter(task => !task.taskListId);
+    } else {
+      // Show tasks from specific list
+      filtered = tasks.filter(task => task.taskListId === selectedTaskListId);
+    }
 
-    // Apply priority filter
+    // Apply other filters after getting the base filtered set
     if (filters.priority !== 'all') {
       filtered = filtered.filter(task => task.priority === filters.priority);
     }
-
-    // Apply status filter
-    if (filters.status === 'active') {
-      filtered = filtered.filter(task => !task.completed);
-    } else if (filters.status === 'completed') {
-      filtered = filtered.filter(task => task.completed);
-    } else if (filters.status === 'overdue') {
-      filtered = filtered.filter(task => task.overdue && !task.completed);
-    } else if (filters.status === 'urgent') {
-      filtered = filtered.filter(task => task.dueSoon && !task.completed);
+    
+    if (filters.status !== 'all') {
+      const isCompleted = filters.status === 'completed';
+      filtered = filtered.filter(task => task.completed === isCompleted);
     }
-
-    // Apply tags filter
-    if (filters.tags.trim()) {
-      const searchTags = filters.tags.toLowerCase().split(',').map(tag => tag.trim());
-      filtered = filtered.filter(task => {
-        if (!task.tags) return false;
-        const taskTags = task.tags.toLowerCase().split(',').map(tag => tag.trim());
-        return searchTags.some(searchTag => 
-          taskTags.some(taskTag => taskTag.includes(searchTag))
-        );
-      });
+    
+    if (filters.tags) {
+      filtered = filtered.filter(task => 
+        task.tags && task.tags.some(tag => 
+          tag.toLowerCase().includes(filters.tags.toLowerCase())
+        )
+      );
     }
 
     setFilteredTasks(filtered);
@@ -147,7 +146,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   };
 
   const handleSelectTaskList = (taskListId) => {
-    setSelectedTaskListId(taskListId);
+    setSelectedTaskListId(taskListId); // This should accept 'all', null, or a specific ID
   };
 
   const handleSearchResults = (results) => {
@@ -249,7 +248,8 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   };
 
   const getCurrentViewName = () => {
-    if (selectedTaskListId === null) return 'To-Do';
+    if (selectedTaskListId === 'all') return 'All Operations';
+    if (selectedTaskListId === null) return 'General Operations';
     const list = taskLists.find(l => l.id === selectedTaskListId);
     return list ? list.name : 'Unknown Operation';
   };
@@ -291,10 +291,11 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
           >
             <TaskListManager
               taskLists={taskLists}
-              onCreateTaskList={handleCreateTaskList}
-              onDeleteTaskList={handleDeleteTaskList}
-              onSelectTaskList={handleSelectTaskList}
+              onCreateTaskList={createTaskList}
+              onDeleteTaskList={deleteTaskList}
+              onSelectTaskList={handleSelectTaskList} // Make sure this function is passed
               selectedTaskListId={selectedTaskListId}
+              tabColor={tabColor}
             />
           </motion.div>
         )}
@@ -319,69 +320,117 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+            className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative"
             style={{
-              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+              borderColor: tabColor,
+              boxShadow: `0 0 20px rgba(14, 165, 233, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
             }}
           >
-            <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+            <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none"
+                 style={{ borderColor: tabColor }} />
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{ background: 'linear-gradient(to bottom right, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.2))' }} />
             
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-mono font-bold text-white flex items-center">
-                {getCurrentViewName()}
-              </h2>
-              <div className="flex items-center gap-4">
-                <div className="text-sm font-mono text-gray-400">
-                  {filteredTasks.filter(t => t.completed).length}/{filteredTasks.length} MISSIONS COMPLETE
-                </div>
-                
-                {/* Operations Toggle Button */}
-                <button
-                  onClick={() => setShowOperations(!showOperations)}
-                  className={`bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold ${
-                    showOperations ? 'text-cyan-300' : 'text-cyan-400'
-                  }`}
-                  style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                  title={showOperations ? 'Hide Operations Panel' : 'Show Operations Panel'}
-                >
-                  <div className="flex items-center gap-2">
-                    {showOperations ? <X size={16} /> : <Menu size={16} />}
-                    <span>{showOperations ? 'HIDE OPERATIONS' : 'SHOW OPERATIONS'}</span>
-                  </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-mono font-bold text-white flex items-center">
+                  {selectedTaskListId === 'all' 
+                    ? 'ALL MISSIONS' 
+                    : selectedTaskListId === null 
+                      ? 'TO-DO MISSIONS' 
+                      : `${getCurrentViewName().toUpperCase()} MISSIONS`
+                  }
+                </h2>
+                <div className="flex items-center gap-4">
+                  {/* Operations Toggle Button */}
+                  <button
+                    onClick={() => setShowOperations(!showOperations)}
+                    className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
+                    style={{
+                      borderColor: tabColor,
+                      color: tabColor,
+                      boxShadow: '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.borderColor = tabColor;
+                      e.target.style.boxShadow = '0 0 8px rgba(14, 165, 233, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.borderColor = tabColor;
+                      e.target.style.boxShadow = '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)';
+                    }}
+                  >
+                    <div className="absolute inset-0 pointer-events-none"
+                         style={{ background: 'linear-gradient(to bottom right, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.12))' }} />
+                    <div className="flex items-center gap-2">
+                      {showOperations ? <X size={16} /> : <Menu size={16} />}
+                      <span>{showOperations ? 'HIDE OPERATIONS' : 'SHOW OPERATIONS'}</span>
+                    </div>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                         style={{ backgroundColor: tabColor }} />
+                  </button>
 
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold ${
-                    showFilters ? 'text-cyan-300' : 'text-cyan-400'
-                  }`}
-                  style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <Filter size={16} />
-                    <span>FILTER</span>
-                  </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
-                
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-                  style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <Plus size={16} />
-                    <span>NEW MISSION</span>
-                  </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
+                    style={{
+                      borderColor: tabColor,
+                      color: tabColor,
+                      boxShadow: '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.borderColor = tabColor;
+                      e.target.style.boxShadow = '0 0 8px rgba(14, 165, 233, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.borderColor = tabColor;
+                      e.target.style.boxShadow = '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)';
+                    }}
+                  >
+                    <div className="absolute inset-0 pointer-events-none"
+                         style={{ background: 'linear-gradient(to bottom right, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.12))' }} />
+                    <div className="flex items-center gap-2">
+                      <Filter size={16} />
+                      <span>FILTER</span>
+                    </div>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                         style={{ backgroundColor: tabColor }} />
+                  </button>
+                  
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
+                    style={{
+                      borderColor: tabColor,
+                      color: tabColor,
+                      boxShadow: '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.borderColor = tabColor;
+                      e.target.style.boxShadow = '0 0 8px rgba(14, 165, 233, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.borderColor = tabColor;
+                      e.target.style.boxShadow = '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)';
+                    }}
+                  >
+                    <div className="absolute inset-0 pointer-events-none"
+                         style={{ background: 'linear-gradient(to bottom right, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.12))' }} />
+                    <div className="flex items-center gap-2">
+                      <Plus size={16} />
+                      <span>NEW MISSION</span>
+                    </div>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                         style={{ backgroundColor: tabColor }} />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Add mission stats like in Library */}
+              <div className="mt-4">
+                <div className="text-sm font-mono text-gray-400">
+                  {filteredTasks.filter(t => t.completed).length}/{filteredTasks.length} MISSIONS COMPLETE • {getCurrentViewName()}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -392,63 +441,78 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative space-y-4"
+              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative"
               style={{
-                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                boxShadow: `0 0 20px rgba(14, 165, 233, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
             >
-              <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+              <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none"
+                   style={{ borderColor: tabColor }} />
+              <div className="absolute inset-0 pointer-events-none"
+                   style={{ background: 'linear-gradient(to bottom right, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.2))' }} />
               
-              {/* Advanced Search */}
-              <TaskSearch 
-                tasks={filteredTasks}
-                onFilteredResults={handleSearchResults}
-                onQuickAction={handleQuickAction}
-              />
-              
-              {/* Mission filters */}
-              <div className="bg-gray-900 border border-cyan-400 p-4">
-                <div className="grid grid-cols-3 gap-4">
-                  {/* Priority Filter */}
-                  <div>
-                    <label className="block text-xs font-mono text-gray-400 mb-2">MISSION PRIORITY</label>
-                    <select
-                      value={filters.priority}
-                      onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
-                      className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                    >
-                      <option value="all">All Priorities</option>
-                      <option value="high">HIGH PRIORITY</option>
-                      <option value="medium">MEDIUM PRIORITY</option>
-                      <option value="low">LOW PRIORITY</option>
-                    </select>
-                  </div>
+              <div className="relative z-10">
+                <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+                  MISSION FILTERS
+                </h3>
+                
+                {/* Your existing TaskSearch and filter content */}
+                <TaskSearch 
+                  tasks={filteredTasks}
+                  onFilteredResults={handleSearchResults}
+                  onQuickAction={handleQuickAction}
+                />
+                
+                {/* Update the filter container */}
+                <div className="bg-black border p-4 mt-4"
+                     style={{
+                       borderColor: tabColor,
+                       boxShadow: '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                     }}>
+                  {/* Your existing filter grid */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* Priority Filter */}
+                    <div>
+                      <label className="block text-xs font-mono text-gray-400 mb-2">MISSION PRIORITY</label>
+                      <select
+                        value={filters.priority}
+                        onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
+                        className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                      >
+                        <option value="all">All Priorities</option>
+                        <option value="high">HIGH PRIORITY</option>
+                        <option value="medium">MEDIUM PRIORITY</option>
+                        <option value="low">LOW PRIORITY</option>
+                      </select>
+                    </div>
 
-                  {/* Status Filter */}
-                  <div>
-                    <label className="block text-xs font-mono text-gray-400 mb-2">MISSION STATUS</label>
-                    <select
-                      value={filters.status}
-                      onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                      className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                    >
-                      <option value="all">All Statuses</option>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
-                      <option value="overdue">Overdue</option>
-                    </select>
-                  </div>
+                    {/* Status Filter */}
+                    <div>
+                      <label className="block text-xs font-mono text-gray-400 mb-2">MISSION STATUS</label>
+                      <select
+                        value={filters.status}
+                        onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                        className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                      >
+                        <option value="all">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                        <option value="overdue">Overdue</option>
+                      </select>
+                    </div>
 
-                  {/* Tags Filter */}
-                  <div>
-                    <label className="block text-xs font-mono text-gray-400 mb-2">MISSION TAGS</label>
-                    <input
-                      type="text"
-                      value={filters.tags}
-                      onChange={(e) => setFilters(prev => ({ ...prev, tags: e.target.value }))}
-                      placeholder="to-do, ideas, work..."
-                      className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                    />
+                    {/* Tags Filter */}
+                    <div>
+                      <label className="block text-xs font-mono text-gray-400 mb-2">MISSION TAGS</label>
+                      <input
+                        type="text"
+                        value={filters.tags}
+                        onChange={(e) => setFilters(prev => ({ ...prev, tags: e.target.value }))}
+                        placeholder="to-do, ideas, work..."
+                        className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -460,143 +524,149 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative space-y-3"
+            className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
             style={{
-              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+              borderColor: tabColor,
+              boxShadow: `0 0 20px rgba(14, 165, 233, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
             }}
           >
-            <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+            <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none"
+                 style={{ borderColor: tabColor }} />
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{ background: 'linear-gradient(to bottom right, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.2))' }} />
             
-            <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-              ACTIVE MISSIONS
-              <span className="ml-3 text-sm text-cyan-400">
-                [{filteredTasks.filter(task => !task.completed).length}]
-              </span>
-            </h3>
+            <div className="relative z-10">
+              <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+                ACTIVE MISSIONS
+                <span className="ml-3 text-sm" style={{ color: tabColor }}>
+                  [{filteredTasks.filter(task => !task.completed).length}]
+                </span>
+              </h3>
+              
+              {(searchResults.length > 0 ? searchResults : filteredTasks).filter(task => !task.completed).length === 0 ? (
+                <div className="text-center py-8 text-gray-400 font-mono">
+                  {selectedTaskListId === null 
+                    ? "No active missions. Deploy your first mission above!"
+                    : `No active missions in "${getCurrentViewName()}" operation. Deploy your first mission above!`
+                  }
+                </div>
+              ) : (
+                (searchResults.length > 0 ? searchResults : filteredTasks)
+                  .filter(task => !task.completed)
+                  .map((task, index) => (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`bg-gray-900 border-2 p-4 transition-all duration-200 ${
+                      task.overdue 
+                        ? 'border-red-500' 
+                        : task.dueSoon 
+                          ? 'border-yellow-500' 
+                          : 'border-cyan-400'
+                    }`}
+                    style={{
+                      boxShadow: task.overdue
+                        ? '0 0 10px rgba(239, 68, 68, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                        : task.dueSoon
+                          ? '0 0 10px rgba(245, 158, 11, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                          : '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                    }}
+                  >
+                    <div className="space-y-3">
+                      {/* Main mission row */}
+                      <div className="flex items-center gap-3">
+                        {/* Completion Status */}
+                        <button
+                          onClick={() => handleToggleTask(task.id)}
+                          className="w-6 h-6 border-2 border-gray-500 hover:border-cyan-400 flex items-center justify-center transition-all duration-200"
+                          title="Mark as Complete"
+                        >
+                        </button>
 
-            {(searchResults.length > 0 ? searchResults : filteredTasks).filter(task => !task.completed).length === 0 ? (
-              <div className="text-center py-8 text-gray-400 font-mono">
-                {selectedTaskListId === null 
-                  ? "No active missions. Deploy your first mission above!"
-                  : `No active missions in "${getCurrentViewName()}" operation. Deploy your first mission above!`
-                }
-              </div>
-            ) : (
-              (searchResults.length > 0 ? searchResults : filteredTasks)
-                .filter(task => !task.completed)
-                .map((task, index) => (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`bg-gray-900 border-2 p-4 transition-all duration-200 ${
-                    task.overdue 
-                      ? 'border-red-500' 
-                      : task.dueSoon 
-                        ? 'border-yellow-500' 
-                        : 'border-cyan-400'
-                  }`}
-                  style={{
-                    boxShadow: task.overdue
-                      ? '0 0 10px rgba(239, 68, 68, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
-                      : task.dueSoon
-                        ? '0 0 10px rgba(245, 158, 11, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
-                        : '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <div className="space-y-3">
-                    {/* Main mission row */}
-                    <div className="flex items-center gap-3">
-                      {/* Completion Status */}
-                      <button
-                        onClick={() => handleToggleTask(task.id)}
-                        className="w-6 h-6 border-2 border-gray-500 hover:border-cyan-400 flex items-center justify-center transition-all duration-200"
-                        title="Mark as Complete"
-                      >
-                      </button>
+                        {/* Mission Title */}
+                        <span className="flex-1 font-mono text-white">
+                          {task.title}
+                        </span>
 
-                      {/* Mission Title */}
-                      <span className="flex-1 font-mono text-white">
-                        {task.title}
-                      </span>
+                        {/* Priority Badge */}
+                        <span
+                          className="px-2 py-1 text-xs font-mono font-bold border"
+                          style={{
+                            color: getPriorityColor(task.priority),
+                            borderColor: getPriorityColor(task.priority),
+                            backgroundColor: `${getPriorityColor(task.priority)}20`
+                          }}
+                        >
+                          {getPriorityLabel(task.priority)}
+                        </span>
 
-                      {/* Priority Badge */}
-                      <span
-                        className="px-2 py-1 text-xs font-mono font-bold border"
-                        style={{
-                          color: getPriorityColor(task.priority),
-                          borderColor: getPriorityColor(task.priority),
-                          backgroundColor: `${getPriorityColor(task.priority)}20`
-                        }}
-                      >
-                        {getPriorityLabel(task.priority)}
-                      </span>
+                        {/* Action Buttons */}
+                        <button
+                          onClick={() => handleEditTask(task)}
+                          className="text-blue-400 hover:text-blue-300 p-1 transition-colors duration-200"
+                          title="Modify mission"
+                        >
+                          <Edit size={16} />
+                        </button>
 
-                      {/* Action Buttons */}
-                      <button
-                        onClick={() => handleEditTask(task)}
-                        className="text-blue-400 hover:text-blue-300 p-1 transition-colors duration-200"
-                        title="Modify mission"
-                      >
-                        <Edit size={16} />
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="text-red-400 hover:text-red-300 p-1 transition-colors duration-200"
-                        title="Abort mission"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-
-                    {/* Mission Briefing */}
-                    {task.description && (
-                      <div className="ml-10 text-gray-300 text-sm font-mono flex items-start gap-2">
-                        <FileText size={14} className="mt-0.5 text-gray-500" />
-                        <span>{task.description}</span>
+                        <button
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="text-red-400 hover:text-red-300 p-1 transition-colors duration-200"
+                          title="Abort mission"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
-                    )}
 
-                    {/* Mission Details */}
-                    {(task.dueDate || (task.tags && task.tags.length > 0)) && (
-                      <div className="ml-10 flex items-center gap-4 text-sm">
-                        {/* Mission Deadline */}
-                        {task.dueDate && (
-                          <div className="flex items-center gap-1">
-                            <Calendar size={14} style={{ color: getDueDateColor(task.dueDate, task.completed) }} />
-                            <span
-                              className="font-mono"
-                              style={{ color: getDueDateColor(task.dueDate, task.completed) }}
-                            >
-                              {formatDueDate(task.dueDate)}
-                            </span>
-                          </div>
-                        )}
+                      {/* Mission Briefing */}
+                      {task.description && (
+                        <div className="ml-10 text-gray-300 text-sm font-mono flex items-start gap-2">
+                          <FileText size={14} className="mt-0.5 text-gray-500" />
+                          <span>{task.description}</span>
+                        </div>
+                      )}
 
-                        {/* Mission Tags */}
-                        {task.tags && parseTagsToArray(task.tags).length > 0 && (
-                          <div className="flex items-center gap-2">
-                            <Tag size={14} className="text-gray-500" />
-                            <div className="flex gap-1">
-                              {parseTagsToArray(task.tags).map((tag, tagIndex) => (
-                                <span
-                                  key={tagIndex}
-                                  className="px-2 py-0.5 text-xs font-mono bg-gray-700 text-gray-300 border border-gray-600"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
+                      {/* Mission Details */}
+                      {(task.dueDate || (task.tags && task.tags.length > 0)) && (
+                        <div className="ml-10 flex items-center gap-4 text-sm">
+                          {/* Mission Deadline */}
+                          {task.dueDate && (
+                            <div className="flex items-center gap-1">
+                              <Calendar size={14} style={{ color: getDueDateColor(task.dueDate, task.completed) }} />
+                              <span
+                                className="font-mono"
+                                style={{ color: getDueDateColor(task.dueDate, task.completed) }}
+                              >
+                                {formatDueDate(task.dueDate)}
+                              </span>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))
-            )}
+                          )}
+
+                          {/* Mission Tags */}
+                          {task.tags && parseTagsToArray(task.tags).length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Tag size={14} className="text-gray-500" />
+                              <div className="flex gap-1">
+                                {parseTagsToArray(task.tags).map((tag, tagIndex) => (
+                                  <span
+                                    key={tagIndex}
+                                    className="px-2 py-0.5 text-xs font-mono bg-gray-700 text-gray-300 border border-gray-600"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
           </motion.div>
 
           {/* Completed Missions List */}

@@ -8,7 +8,7 @@ const NotebookView = ({
   onBack, 
   onCreateNote, 
   onEditNote, 
-  onDeleteNotebook, // Add this prop
+  onDeleteNotebook,
   folders, 
   notebooks, 
   notes 
@@ -18,6 +18,9 @@ const NotebookView = ({
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
+  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
 
   useEffect(() => {
     filterNotebookNotes();
@@ -108,32 +111,27 @@ const NotebookView = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
               style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                color: tabColor,
+                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
               }}
             >
               <div className="flex items-center gap-2">
                 <ArrowLeft size={16} />
                 <span>BACK TO LIBRARY</span>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-            </button>
-
-            {/* Delete Button */}
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="bg-gray-900 border-2 border-red-500 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] font-mono font-bold text-red-500"
-              style={{
-                boxShadow: '0 0 5px rgba(239, 68, 68, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-              }}
-              title="Delete Collection"
-            >
-              <div className="flex items-center gap-2">
-                <Trash2 size={16} className="text-red-500" />
-                <span className="text-red-500">DELETE COLLECTION</span>
-              </div>
-              <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                   style={{ backgroundColor: tabColor }} />
             </button>
           </div>
 
@@ -147,16 +145,27 @@ const NotebookView = ({
 
           <button
             onClick={handleCreateNote}
-            className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+            className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
             style={{
-              boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              borderColor: tabColor,
+              color: tabColor,
+              boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
             }}
           >
             <div className="flex items-center gap-2">
               <Plus size={16} />
               <span>NEW LOG</span>
             </div>
-            <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                 style={{ backgroundColor: tabColor }} />
           </button>
         </div>
       </div>
@@ -165,51 +174,56 @@ const NotebookView = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
+        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          borderColor: tabColor,
+          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 p-4" style={{
+            borderColor: tabColor,
+            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-cyan-400 font-bold">TOTAL LOGS</div>
-                <div className="text-2xl font-mono font-bold text-cyan-400">{notebookNotes.length}</div>
+                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>TOTAL LOGS</div>
+                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>{notebookNotes.length}</div>
               </div>
-              <FileText className="text-cyan-400" size={20} />
+              <FileText style={{ color: tabColor }} size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 p-4" style={{
+            borderColor: tabColor,
+            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-cyan-400 font-bold">TOTAL WORDS</div>
-                <div className="text-2xl font-mono font-bold text-cyan-400">
+                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>TOTAL WORDS</div>
+                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>
                   {notebookNotes.reduce((total, note) => total + (note.content ? note.content.split(' ').length : 0), 0)}
                 </div>
               </div>
-              <Edit className="text-cyan-400" size={20} />
+              <Edit style={{ color: tabColor }} size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 p-4" style={{
+            borderColor: tabColor,
+            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-cyan-400 font-bold">UNIQUE TAGS</div>
-                <div className="text-2xl font-mono font-bold text-cyan-400">
+                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>UNIQUE TAGS</div>
+                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>
                   {[...new Set(notebookNotes.flatMap(note => getTags(note.tags)))].length}
                 </div>
               </div>
-              <Tag className="text-cyan-400" size={20} />
+              <Tag style={{ color: tabColor }} size={20} />
             </div>
           </div>
         </div>
@@ -220,17 +234,19 @@ const NotebookView = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          borderColor: tabColor,
+          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
         
         <div className="relative z-10">
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
             LOG ENTRIES
-            <span className="ml-3 text-sm text-cyan-400">
+            <span className="ml-3 text-sm" style={{ color: tabColor }}>
               [{notebookNotes.length}]
             </span>
           </h3>
@@ -291,7 +307,8 @@ const NotebookView = ({
                         {tagsArray.slice(0, 2).map((tag, tagIndex) => (
                           <span
                             key={tagIndex}
-                            className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
+                            className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono"
+                            style={{ color: tabColor }}
                           >
                             {tag}
                           </span>
@@ -310,7 +327,8 @@ const NotebookView = ({
                         e.stopPropagation();
                         handleEditNote(note);
                       }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ color: tabColor }}
                       title="Edit log entry"
                     >
                       <Edit size={14} />
@@ -331,16 +349,27 @@ const NotebookView = ({
               
               <button
                 onClick={handleCreateNote}
-                className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+                className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
                 style={{
-                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  borderColor: tabColor,
+                  color: tabColor,
+                  boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
                 }}
               >
                 <div className="flex items-center gap-2">
                   <FileText size={18} />
                   <span>CREATE FIRST LOG</span>
                 </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                     style={{ backgroundColor: tabColor }} />
               </button>
             </div>
           )}
@@ -386,7 +415,7 @@ const NotebookView = ({
                 <h3 className="font-mono text-xl font-bold text-white mb-2">DELETE COLLECTION</h3>
                 <p className="text-gray-300 font-mono mb-4">
                   Are you sure you want to permanently delete<br />
-                  <span className="text-cyan-400 font-bold">"{notebook.name}"</span>?
+                  <span style={{ color: tabColor }} className="font-bold">"{notebook.name}"</span>?
                 </p>
                 <p className="text-red-400 text-sm font-mono mb-6">
                   All logs in this collection will become unorganized. This action cannot be undone.

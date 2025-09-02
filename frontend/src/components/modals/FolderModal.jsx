@@ -1,224 +1,255 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Folder, Palette, Save, Plus } from 'lucide-react';
-import { useNotification } from '../../contexts/NotificationContext';
+import { Folder, X, Palette, Archive } from 'lucide-react';
 
-const FolderModal = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
-  existingFolder = null 
-}) => {
-  const [folderData, setFolderData] = useState({
-    name: '',
-    description: '',
-    colorCode: '#FFD700'
-  });
+const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [colorCode, setColorCode] = useState('#FFD700');
 
-  const { showNotification } = useNotification();
-  const isEditing = !!existingFolder;
+  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
+  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
 
-  // Color options matching NotebookModal
-  const colors = [
-    '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', 
-    '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF'
+  const predefinedColors = [
+    '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
+    '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE'
   ];
 
   useEffect(() => {
     if (existingFolder) {
-      setFolderData({
-        name: existingFolder.name || '',
-        description: existingFolder.description || '',
-        colorCode: existingFolder.colorCode || '#FFD700'
-      });
+      setName(existingFolder.name || '');
+      setDescription(existingFolder.description || '');
+      setColorCode(existingFolder.colorCode || '#FFD700');
     } else {
-      setFolderData({
-        name: '',
-        description: '',
-        colorCode: '#FFD700'
-      });
+      // Reset form for new folder
+      setName('');
+      setDescription('');
+      setColorCode('#FFD700');
     }
   }, [existingFolder, isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!name.trim()) {
+      alert('Archive name is required');
+      return;
+    }
+
+    const folderData = {
+      name: name.trim(),
+      description: description.trim(),
+      colorCode,
+      parentFolderId: null // For now, we're not supporting nested folders
+    };
+
     try {
-      console.log('Submitting archive data:', folderData);
-      console.log('Is editing:', isEditing);
-      console.log('Existing folder:', existingFolder);
-      
-      if (isEditing) {
-        // Pass ID and data separately for editing
+      if (existingFolder) {
         await onSave(existingFolder.id, folderData);
       } else {
-        // Pass complete data object for creating
         await onSave(folderData);
       }
       onClose();
     } catch (error) {
       console.error('Failed to save archive:', error);
+      alert('Failed to save archive. Please try again.');
     }
   };
 
+  const handleClose = () => {
+    setName('');
+    setDescription('');
+    setColorCode('#FFD700');
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
   return (
     <AnimatePresence>
-      {isOpen && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-16"
+        onClick={handleClose}
+      >
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 pt-16 z-50"
-          onClick={onClose}
+          initial={{ scale: 0.8, opacity: 0, y: -50 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.8, opacity: 0, y: -50 }}
+          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-md relative max-h-[90vh] overflow-y-auto"
+          style={{
+            borderColor: tabColor,
+            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+          }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            className="bg-gray-900 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
-            style={{
-              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
-            
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6 relative z-10">
+          <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+               style={{ borderColor: tabColor }} />
+
+          {/* Header */}
+          <div className="relative z-10 mb-6">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Folder size={24} className="text-cyan-400" />
-                <h2 className="font-mono text-xl font-bold text-white">
-                  {isEditing ? 'MODIFY ARCHIVE' : 'CREATE ARCHIVE'}
-                </h2>
+                <Folder size={24} style={{ color: tabColor }} />
+                <h3 className="font-mono text-xl font-bold text-white">
+                  {existingFolder ? 'MODIFY ARCHIVE' : 'NEW ARCHIVE'}
+                </h3>
               </div>
               <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-cyan-400 transition-colors p-2"
+                onClick={handleClose}
+                className="text-gray-400 hover:text-white transition-colors p-1"
               >
                 <X size={20} />
               </button>
             </div>
+            <p className="text-sm font-mono text-gray-400">
+              {existingFolder ? 'Update archive system parameters' : 'Initialize new archive system for organized storage'}
+            </p>
+          </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-mono font-bold text-cyan-400 mb-2">
-                  ARCHIVE NAME
-                </label>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="relative z-10 space-y-4">
+            {/* Archive Name */}
+            <div>
+              <label className="block text-sm font-mono font-bold mb-2" style={{ color: tabColor }}>
+                <Archive size={16} className="inline mr-1" />
+                ARCHIVE NAME
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter archive name..."
+                className="w-full px-3 py-2 bg-gray-900 border-2 border-gray-600 text-white font-mono text-sm transition-colors focus:outline-none"
+                style={{
+                  color: '#fff'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = tabColor;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#4B5563';
+                }}
+                required
+              />
+              <p className="text-xs text-gray-400 mt-1 font-mono">
+                Unique identifier for this archive system
+              </p>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-mono font-bold mb-2" style={{ color: tabColor }}>
+                ARCHIVE DESCRIPTION
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional archive description..."
+                rows={3}
+                className="w-full px-3 py-2 bg-gray-900 border-2 border-gray-600 text-white font-mono text-sm resize-none transition-colors focus:outline-none"
+                style={{
+                  color: '#fff'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = tabColor;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#4B5563';
+                }}
+              />
+              <p className="text-xs text-gray-400 mt-1 font-mono">
+                Brief description of archive purpose and organization strategy
+              </p>
+            </div>
+
+            {/* Color Selection */}
+            <div>
+              <label className="block text-sm font-mono font-bold mb-2" style={{ color: tabColor }}>
+                <Palette size={16} className="inline mr-1" />
+                ARCHIVE COLOR
+              </label>
+              <div className="grid grid-cols-5 gap-2 mb-2">
+                {predefinedColors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setColorCode(color)}
+                    className={`w-8 h-8 border-2 transition-all duration-200 ${
+                      colorCode === color ? 'border-white scale-110' : 'border-gray-600'
+                    }`}
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
                 <input
-                  type="text"
-                  value={folderData.name}
-                  onChange={(e) => setFolderData({ ...folderData, name: e.target.value })}
-                  placeholder="Enter archive name..."
-                  required
-                  className="w-full px-3 py-2 bg-gray-800 border-2 border-gray-600 text-white font-mono text-sm focus:border-cyan-400 focus:outline-none transition-colors"
-                  style={{ 
-                    color: '#ffffff !important',
-                    WebkitTextFillColor: '#ffffff',
-                    textFillColor: '#ffffff'
-                  }}
-                  autoFocus
+                  type="color"
+                  value={colorCode}
+                  onChange={(e) => setColorCode(e.target.value)}
+                  className="w-6 h-6 border-2 border-gray-600 bg-transparent cursor-pointer"
                 />
+                <span className="text-xs font-mono text-gray-400">Custom</span>
               </div>
+              <p className="text-xs text-gray-400 mt-1 font-mono">
+                Visual identifier for quick archive recognition
+              </p>
+            </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-mono font-bold text-cyan-400 mb-2">
-                  DESCRIPTION
-                </label>
-                <textarea
-                  value={folderData.description}
-                  onChange={(e) => setFolderData({ ...folderData, description: e.target.value })}
-                  placeholder="Describe this archive system..."
-                  className="w-full px-3 py-2 bg-gray-800 border-2 border-gray-600 text-white font-mono text-sm resize-none h-20 focus:border-cyan-400 focus:outline-none transition-colors"
-                  style={{ 
-                    color: '#ffffff !important',
-                    WebkitTextFillColor: '#ffffff',
-                    textFillColor: '#ffffff'
-                  }}
-                />
+            {/* Archive Info */}
+            <div className="bg-gray-900 border border-gray-600 p-3 rounded">
+              <div className="flex items-center gap-2 mb-2">
+                <Archive size={16} style={{ color: tabColor }} />
+                <span className="text-sm font-mono font-bold" style={{ color: tabColor }}>
+                  WHAT IS ARCHIVE 
+                </span>
               </div>
+              <ul className="text-xs font-mono text-gray-400 space-y-1">
+                <li>• Store multiple log collections</li>
+                <li>• Bulk exports</li>
+                <li>• Think of it like your digital file cabinet</li>
+              </ul>
+            </div>
 
-              {/* Color Picker */}
-              <div>
-                <label className="block text-sm font-mono font-bold text-cyan-400 mb-2">
-                  <Palette size={16} className="inline mr-1" />
-                  ARCHIVE COLOR
-                </label>
-                
-                {/* Current Color Display with Custom Picker */}
-                <div className="flex items-center gap-2 mb-3">
-                  <div 
-                    className="w-8 h-6 border-2 border-gray-600"
-                    style={{ backgroundColor: folderData.colorCode }}
-                    title="Current color"
-                  />
-                  <input
-                    type="color"
-                    value={folderData.colorCode}
-                    onChange={(e) => setFolderData({ ...folderData, colorCode: e.target.value })}
-                    className="w-8 h-6 border-2 border-gray-600 bg-transparent cursor-pointer"
-                    title="Custom color picker"
-                  />
-                  <span className="text-xs font-mono text-gray-400">Custom</span>
-                </div>
-
-                {/* Preset Colors */}
-                <div className="flex gap-2 flex-wrap">
-                  {colors.map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setFolderData({ ...folderData, colorCode: color })}
-                      className={`w-8 h-8 border-2 transition-all ${
-                        folderData.colorCode === color 
-                          ? 'border-cyan-400 scale-110 shadow-[0_0_10px_rgba(34,211,238,0.5)]' 
-                          : 'border-gray-600 hover:border-gray-400'
-                      }`}
-                      style={{ 
-                        backgroundColor: color,
-                        boxShadow: folderData.colorCode === color 
-                          ? `0 0 10px ${color}50, 2px 2px 0px 0px rgba(0,0,0,1)`
-                          : '2px 2px 0px 0px rgba(0,0,0,1)'
-                      }}
-                      title={color}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 bg-gray-900 border-2 border-gray-600 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-gray-500 font-mono font-bold text-gray-400"
-                  style={{
-                    boxShadow: '0 0 5px rgba(75, 85, 99, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <span>CANCEL</span>
-                  <div className="absolute inset-0 bg-gray-600 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
-
-                <button
-                  type="submit"
-                  className="flex-1 bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-                  style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    {isEditing ? <Save size={18} /> : <Plus size={18} />}
-                    <span>{isEditing ? 'SAVE CHANGES' : 'CREATE ARCHIVE'}</span>
-                  </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
-              </div>
-            </form>
-          </motion.div>
+            {/* Actions */}
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="flex-1 bg-gray-900 border-2 border-gray-600 px-4 py-2 font-mono text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+              >
+                CANCEL
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
+                style={{
+                  borderColor: tabColor,
+                  color: tabColor,
+                  boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
+                }}
+              >
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                     style={{ backgroundColor: tabColor }} />
+                <span className="relative z-10">
+                  {existingFolder ? 'UPDATE ARCHIVE' : 'CREATE ARCHIVE'}
+                </span>
+              </button>
+            </div>
+          </form>
         </motion.div>
-      )}
+      </motion.div>
     </AnimatePresence>
   );
 };

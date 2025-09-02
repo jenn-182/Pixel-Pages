@@ -6,41 +6,57 @@ const FolderListView = ({
   folders, 
   onBack, 
   onCreateFolder, 
-  onEditFolder,
-  onOpenFolder
+  onOpenFolder,
+  notes = [],
+  notebooks = []
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('updated');
+  const [sortBy, setSortBy] = useState('updated'); // updated, created, name
   const [sortOrder, setSortOrder] = useState('desc');
 
-  const filteredFolders = folders
-    .filter(folder => 
-      folder.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (folder.description && folder.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-    .sort((a, b) => {
-      let valueA, valueB;
-      
-      switch (sortBy) {
-        case 'name':
-          valueA = a.name.toLowerCase();
-          valueB = b.name.toLowerCase();
-          break;
-        case 'created':
-          valueA = new Date(a.createdAt || '2020-01-01');
-          valueB = new Date(b.createdAt || '2020-01-01');
-          break;
-        case 'updated':
-        default:
-          valueA = new Date(a.updatedAt || a.createdAt || '2020-01-01');
-          valueB = new Date(b.updatedAt || b.createdAt || '2020-01-01');
-          break;
-      }
+  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
+  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
 
-      if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
-      if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
+  // Filter and sort folders
+  const filteredFolders = folders.filter(folder => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    const nameMatch = folder.name?.toLowerCase().includes(searchLower) || false;
+    const descMatch = folder.description?.toLowerCase().includes(searchLower) || false;
+    
+    return nameMatch || descMatch;
+  }).sort((a, b) => {
+    let valueA, valueB;
+    
+    switch (sortBy) {
+      case 'name':
+        valueA = a.name.toLowerCase();
+        valueB = b.name.toLowerCase();
+        break;
+      case 'created':
+        valueA = new Date(a.createdAt || '2020-01-01');
+        valueB = new Date(b.createdAt || '2020-01-01');
+        break;
+      case 'updated':
+      default:
+        valueA = new Date(a.updatedAt || a.createdAt || '2020-01-01');
+        valueB = new Date(b.updatedAt || b.createdAt || '2020-01-01');
+        break;
+    }
+
+    if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
+    if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Get content count for a folder
+  const getFolderContentCount = (folderId) => {
+    const noteCount = notes.filter(note => note.folderId === folderId).length;
+    const notebookCount = notebooks.filter(notebook => notebook.folderId === folderId).length;
+    return noteCount + notebookCount;
+  };
 
   return (
     <div className="p-6">
@@ -49,26 +65,35 @@ const FolderListView = ({
         <div className="flex items-center gap-4 mb-4">
           <button
             onClick={onBack}
-            className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+            className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
             style={{
-              boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              borderColor: tabColor,
+              color: tabColor,
+              boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
             }}
           >
             <div className="flex items-center gap-2">
               <ArrowLeft size={16} />
-              <span>BACK TO VAULT</span>
+              <span>BACK</span>
             </div>
-            <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                 style={{ backgroundColor: tabColor }} />
           </button>
           
           <div className="flex-1">
             <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-              <Folder className="text-cyan-400" size={32} />
-              ALL LOG ARCHIVES
+              <div 
+              />
+              ALL ARCHIVES
             </h1>
-            <p className="text-gray-400 font-mono text-sm">
-              Complete archive of all archive systems ({folders.length} total)
-            </p>
           </div>
         </div>
       </div>
@@ -77,32 +102,55 @@ const FolderListView = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
+        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          borderColor: tabColor,
+          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
         
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between relative z-10">
+          {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                    style={{ color: tabColor }} size={20} />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search log archives..."
-              className="w-full bg-gray-900 border-2 border-gray-600 text-white pl-10 pr-4 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400 transition-colors duration-200"
+              placeholder="Search archive systems..."
+              className="w-full bg-gray-900 border-2 border-gray-600 text-white pl-10 pr-4 py-2 font-mono text-sm focus:outline-none transition-colors duration-200"
+              style={{ 
+                color: '#fff'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = tabColor;
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#4B5563';
+              }}
             />
           </div>
 
+          {/* Sort Controls */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-cyan-400">SORT BY:</span>
+              <span className="text-xs font-mono font-bold" style={{ color: tabColor }}>SORT BY:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-900 border-2 border-gray-600 text-white px-2 py-1 text-xs font-mono focus:outline-none focus:border-cyan-400"
+                className="bg-gray-900 border-2 border-gray-600 text-white px-2 py-1 text-xs font-mono focus:outline-none"
+                style={{
+                  focusBorderColor: tabColor
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = tabColor;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#4B5563';
+                }}
               >
                 <option value="updated">Last Updated</option>
                 <option value="created">Date Created</option>
@@ -112,7 +160,15 @@ const FolderListView = ({
 
             <button
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="text-cyan-400 hover:text-cyan-300 transition-colors duration-200 p-1 border border-cyan-400 hover:border-cyan-300"
+              className="transition-colors duration-200 p-1 border"
+              style={{
+                color: tabColor,
+                borderColor: tabColor
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = tabColor;
+                e.target.style.borderColor = tabColor;
+              }}
               title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
@@ -120,37 +176,50 @@ const FolderListView = ({
 
             <button
               onClick={onCreateFolder}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
               style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                color: tabColor,
+                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
               }}
             >
               <div className="flex items-center gap-2">
                 <Plus size={16} />
                 <span>NEW ARCHIVE</span>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                   style={{ backgroundColor: tabColor }} />
             </button>
           </div>
         </div>
       </motion.div>
 
-      {/* Archives Grid */}
+      {/* Folders Grid */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          borderColor: tabColor,
+          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
         
         <div className="relative z-10">
           <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            LOG ARCHIVES
-            <span className="ml-3 text-sm text-cyan-400">
+            ARCHIVE SYSTEMS
+            <span className="ml-3 text-sm" style={{ color: tabColor }}>
               [{filteredFolders.length}]
             </span>
           </h3>
@@ -158,10 +227,18 @@ const FolderListView = ({
           {filteredFolders.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredFolders.map((folder, index) => {
-                const folderColor = folder.colorCode || '#FFD700';
-                const rgbColor = folderColor.startsWith('#') 
-                  ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
-                  : '251, 191, 36';
+                const folderColor = folder.colorCode || folder.color || '#4ADE80';
+                const contentCount = getFolderContentCount(folder.id);
+                
+                const hexToRgb = (hex) => {
+                  if (!hex || !hex.startsWith('#')) return '74, 222, 128';
+                  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                  return result ? 
+                    `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                    '74, 222, 128';
+                };
+                
+                const rgbColor = hexToRgb(folderColor);
                 
                 return (
                   <motion.div
@@ -185,19 +262,34 @@ const FolderListView = ({
                     <div className="flex items-start justify-between mb-3">
                       <Folder size={24} style={{ color: folderColor }} />
                       <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {folder.totalItemCount || 0} ITEMS
+                        {contentCount} ITEMS
                       </div>
                     </div>
-                    <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
-                    <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
+                    <h4 className="font-mono font-bold text-white mb-2 truncate" title={folder.name}>
+                      {folder.name}
+                    </h4>
+                    <p className="text-xs text-gray-400 mb-3">
+                      {folder.description && folder.description.length > 100 
+                        ? `${folder.description.substring(0, 100)}...` 
+                        : folder.description || 'No description available'}
+                    </p>
                     
+                    {/* Archive Info */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono" style={{ color: tabColor }}>
+                        ARCHIVE
+                      </span>
+                    </div>
+                    
+                    {/* Open button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onEditFolder(folder);
+                        onOpenFolder(folder);
                       }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Edit archive"
+                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ color: tabColor }}
+                      title="Open archive"
                     >
                       <Edit size={14} />
                     </button>
@@ -207,7 +299,7 @@ const FolderListView = ({
             </div>
           ) : (
             <div className="text-center py-8 text-gray-400 font-mono">
-              {searchTerm ? 'No archives match your search criteria.' : 'No log archives found.'}
+              {searchTerm ? 'No archive systems match your search criteria.' : 'No archive systems found.'}
             </div>
           )}
         </div>

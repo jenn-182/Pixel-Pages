@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Add useEffect here
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Folder, BookOpen, FileText, Search, Download, Archive, Eye, Trash2 } from 'lucide-react';
 import PixelButton from '../PixelButton';
@@ -16,7 +16,7 @@ import NotebookListView from '../views/NotebookListView';
 import FolderListView from '../views/FolderListView';
 import { useNotification } from '../../contexts/NotificationContext';
 
-const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add navigationParams prop
+const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
@@ -37,7 +37,17 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
 
   const loading = foldersLoading || notebooksLoading || notesLoading;
 
-  // ✅ Define ALL delete handlers at the top level
+  // Convert hex to RGB for dynamic styling
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? 
+      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+      '59, 130, 246'; // fallback for #3B82F6
+  };
+
+  const tabColorRgb = hexToRgb(tabColor);
+
+  // All handlers remain the same...
   const handleDeleteNote = async (noteId) => {
     if (window.confirm('Are you sure you want to delete this log entry? This action cannot be undone.')) {
       try {
@@ -53,12 +63,12 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
   const handleDeleteNotebook = async (notebookId) => {
     if (window.confirm('Are you sure you want to delete this collection? All associated notes will become unorganized.')) {
       try {
-        console.log('Deleting notebook with ID:', notebookId); // Add this for debugging
+        console.log('Deleting notebook with ID:', notebookId);
         await deleteNotebook(notebookId);
         showNotification('Collection deleted successfully!', 'success');
       } catch (error) {
         console.error('Failed to delete notebook:', error);
-        console.error('Error details:', error.message); // Add more detailed error logging
+        console.error('Error details:', error.message);
         showNotification('Failed to delete collection. Please try again.', 'error');
       }
     }
@@ -76,7 +86,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
     }
   };
 
-  // ✅ All other handlers
+  // All other handlers remain the same...
   const handleCreateFolder = async () => {
     try {
       const folderData = {
@@ -223,9 +233,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
     return folderNotes.length + folderNotebooks.length;
   };
 
-  // Move this useEffect to be right after your useState declarations
   useEffect(() => {
-    // Handle navigation parameters from dashboard
     if (navigationParams?.view === 'allNotes') {
       setCurrentView('allNotes');
     } else if (navigationParams?.view === 'folder' && navigationParams?.selectedFolder) {
@@ -243,7 +251,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="inline-block mb-4"
           >
-            <Archive size={32} className="text-cyan-400" />
+            <Archive size={32} style={{ color: tabColor }} />
           </motion.div>
           <div>Accessing intelligence archives...</div>
         </div>
@@ -251,7 +259,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
     );
   }
 
-  // View routing
+  // View routing remains the same but with updated colors...
   if (currentView === 'folder' && selectedFolder) {
     return (
       <div className="library-tab-container p-6">
@@ -278,7 +286,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
           onBack={handleBackToLibrary}
           onCreateNote={handleCreateNoteSubmit}
           onEditNote={handleCreateNoteSubmit}
-          onDeleteNotebook={handleDeleteNotebook} // Add this line
+          onDeleteNotebook={handleDeleteNotebook}
           folders={folders}
           notebooks={notebooks}
           notes={notes}
@@ -329,7 +337,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
             setIsNotebookModalOpen(true);
           }}
           onEditNotebook={handleEditNotebook}
-          onDeleteNotebook={handleDeleteNotebook} // Add this line
+          onDeleteNotebook={handleDeleteNotebook}
           onOpenNotebook={handleOpenNotebook}
           folders={folders}
         />
@@ -378,13 +386,16 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
         </p>
       </div>
       
-      {/* Command Interface - Updated to match dashboard theme */}
-      <div className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative"
+      {/* Command Interface - Updated with tab color */}
+      <div className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative"
            style={{
-             boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+             borderColor: tabColor,
+             boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
            }}>
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
+        <div className="absolute inset-0 pointer-events-none"
+             style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
         
         <div className="relative z-10">
           <div className="flex items-center mb-6">
@@ -400,50 +411,86 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
                 <button
                   onClick={() => setIsCreateNoteModalOpen(true)}
-                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
                   style={{
-                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    borderColor: tabColor,
+                    color: tabColor,
+                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 pointer-events-none"
+                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                   <div className="flex items-center justify-center gap-1 h-full">
                     <Plus size={10} />
                     <FileText size={12} />
                     <span className="text-xs">PLAYER LOG</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                       style={{ backgroundColor: tabColor }} />
                 </button>
 
                 <button
                   onClick={() => setIsNotebookModalOpen(true)}
-                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
                   style={{
-                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    borderColor: tabColor,
+                    color: tabColor,
+                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 pointer-events-none"
+                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                   <div className="flex items-center justify-center gap-1 h-full">
                     <Plus size={10} />
                     <BookOpen size={12} />
                     <span className="text-xs">COLLECTION</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                       style={{ backgroundColor: tabColor }} />
                 </button>
 
                 <button
                   onClick={() => setIsFolderModalOpen(true)}
-                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
                   style={{
-                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    borderColor: tabColor,
+                    color: tabColor,
+                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 pointer-events-none"
+                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                   <div className="flex items-center justify-center gap-1 h-full">
                     <Plus size={10} />
                     <Folder size={12} />
                     <span className="text-xs">ARCHIVE</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                       style={{ backgroundColor: tabColor }} />
                 </button>
 
                 <button
@@ -473,40 +520,63 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
                       showNotification('Export failed. Please try again later.', 'error');
                     }
                   }}
-                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
                   style={{
-                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    borderColor: tabColor,
+                    color: tabColor,
+                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = tabColor;
+                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 pointer-events-none"
+                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                   <div className="flex items-center justify-center gap-1 h-full">
                     <Download size={12} />
                     <span className="text-xs">EXPORT</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                       style={{ backgroundColor: tabColor }} />
                 </button>
               </div>
             </div>
             
-            <div className="bg-gray-900 border border-cyan-400 p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
+            <div className="bg-black border p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
                  style={{
-                   boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                   borderColor: tabColor,
+                   boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
                  }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+              <div className="absolute inset-0 pointer-events-none"
+                   style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-3 h-3 bg-cyan-400" />
-                  <span className="font-mono text-sm text-cyan-400 font-bold">SEARCH PROTOCOL</span>
+                  <div className="w-3 h-3" style={{ backgroundColor: tabColor }} />
+                  <span className="font-mono text-sm font-bold" style={{ color: tabColor }}>SEARCH PROTOCOL</span>
                 </div>
                 
                 <div className="relative mb-3 flex-1 flex flex-col justify-center min-h-0">
-                  <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" />
+                  <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                          style={{ color: tabColor }} />
                   <input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search storage vault..."
-                    className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 text-white font-mono text-sm focus:border-cyan-400 focus:outline-none transition-colors"
-                    style={{ color: '#fff' }}
+                    className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 text-white font-mono text-sm transition-colors"
+                    style={{ 
+                      color: '#fff'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = tabColor;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#4B5563';
+                    }}
                   />
                 </div>
                 
@@ -517,7 +587,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
                       <span>{notebooks.length} COLLECTIONS</span>
                       <span>{notes.length} LOGS</span>
                     </div>
-                    <div className="text-cyan-400">
+                    <div style={{ color: tabColor }}>
                       {searchTerm ? 'SCANNING...' : 'READY'}
                     </div>
                   </div>
@@ -528,19 +598,22 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
         </div>
       </div>
 
-      {/* Content Sections - Updated to match dashboard styling */}
+      {/* Content Sections - Updated with tab color */}
       <div className="space-y-8">
         {/* Archive Systems Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
           style={{
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+            borderColor: tabColor,
+            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
           }}
         >
-          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
+          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none"
+               style={{ borderColor: tabColor }} />
+          <div className="absolute inset-0 pointer-events-none"
+               style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
@@ -554,17 +627,29 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
               </div>
               <button
                 onClick={handleViewAllFolders}
-                className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
                 style={{
-                  boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  borderColor: tabColor,
+                  color: tabColor,
+                  boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                <div className="absolute inset-0 pointer-events-none"
+                     style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
                   <span>VIEW ALL</span>
                 </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                     style={{ backgroundColor: tabColor }} />
               </button>
             </div>
             
@@ -609,7 +694,8 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
                             e.stopPropagation();
                             handleEditFolder(folder);
                           }}
-                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                          style={{ color: tabColor }}
                           title="Modify archive"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -642,18 +728,21 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
           </div>
         </motion.div>
 
-        {/* Log Collections Section - Update similarly */}
+        {/* Log Collections Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
           style={{
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+            borderColor: tabColor,
+            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
           }}
         >
-          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
+          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none"
+               style={{ borderColor: tabColor }} />
+          <div className="absolute inset-0 pointer-events-none"
+               style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
@@ -667,17 +756,29 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
               </div>
               <button
                 onClick={handleViewAllNotebooks}
-                className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
                 style={{
-                  boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  borderColor: tabColor,
+                  color: tabColor,
+                  boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                <div className="absolute inset-0 pointer-events-none"
+                     style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
                   <span>VIEW ALL</span>
                 </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                     style={{ backgroundColor: tabColor }} />
               </button>
             </div>
             
@@ -722,7 +823,8 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
                             e.stopPropagation();
                             handleEditNotebook(notebook);
                           }}
-                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                          style={{ color: tabColor }}
                           title="Edit collection"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -755,18 +857,21 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
           </div>
         </motion.div>
 
-        {/* Player Logs Section - Update similarly */}
+        {/* Player Logs Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
           style={{
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+            borderColor: tabColor,
+            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
           }}
         >
-          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
+          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none"
+               style={{ borderColor: tabColor }} />
+          <div className="absolute inset-0 pointer-events-none"
+               style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
@@ -780,34 +885,40 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
               </div>
               <button
                 onClick={handleViewAllNotes}
-                className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
                 style={{
-                  boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  borderColor: tabColor,
+                  color: tabColor,
+                  boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.borderColor = tabColor;
+                  e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                <div className="absolute inset-0 pointer-events-none"
+                     style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
                   <span>VIEW ALL</span>
                 </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+                     style={{ backgroundColor: tabColor }} />
               </button>
             </div>
             
             {notes.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {notes
-                  .slice() // Create a copy to avoid mutating original array
-                  .sort((a, b) => new Date(b.createdAt || b.updatedAt || 0) - new Date(a.createdAt || a.updatedAt || 0)) // Sort by most recent first
-                  .slice(0, 4) // Take only the first 4 (most recent)
+                  .slice()
+                  .sort((a, b) => new Date(b.createdAt || b.updatedAt || 0) - new Date(a.createdAt || a.updatedAt || 0))
+                  .slice(0, 4)
                   .map((note, index) => {
                     const noteColor = note.color || '#4ADE80';
-                    const hexToRgb = (hex) => {
-                      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                      return result ? 
-                        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-                        '74, 222, 128';
-                    };
                     const rgbColor = hexToRgb(noteColor);
                     const tagsArray = Array.isArray(note.tags) ? note.tags : (note.tags ? note.tags.split(',').map(tag => tag.trim()) : []);
 
@@ -847,7 +958,8 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
                             {tagsArray.slice(0, 2).map((tag, tagIndex) => (
                               <span
                                 key={tagIndex}
-                                className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
+                                className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono"
+                                style={{ color: tabColor }}
                               >
                                 {tag}
                               </span>
@@ -870,7 +982,8 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
                               e.stopPropagation();
                               handleEditNote(note);
                             }}
-                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                            style={{ color: tabColor }}
                             title="Edit log entry"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -878,7 +991,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
                               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                             </svg>
                           </button>
-                          
+
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -939,6 +1052,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
         folders={folders}
       />
     </div>
+
   );
 };
 

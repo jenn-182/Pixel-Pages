@@ -149,7 +149,7 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
           </div>
           
           <div className="space-y-2">
-            <h2 className="text-xl font-mono font-bold text-cyan-400">
+            <h2 className="text-xl font-mono font-bold text-white">
               {currentGreeting.greeting}
             </h2>
             <p className="text-gray-400 font-mono text-sm">

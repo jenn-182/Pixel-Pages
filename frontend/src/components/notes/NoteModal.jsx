@@ -9,7 +9,7 @@ const NoteModal = ({
   isOpen, 
   onClose, 
   onSave, 
-  onDelete, // ✅ Add delete callback
+  onDelete, 
   folders, 
   notebooks, 
   existingNote = null,
@@ -27,7 +27,7 @@ const NoteModal = ({
   });
 
   const [showPreview, setShowPreview] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // ✅ Add delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); 
   const { showNotification } = useNotification();
 
   const isEditing = existingNote !== null;
@@ -115,14 +115,14 @@ const NoteModal = ({
     try {
       console.log('Submitting note data:', noteData);
       await onSave(noteData);
-      onClose(); // ✅ Close modal after successful save
+      onClose(); // Close modal 
     } catch (error) {
       console.error('Failed to save note:', error);
       showNotification('Failed to save note. Please try again.', 'error');
     }
   };
 
-  // ✅ Add delete handler
+  // delete handler
   const handleDelete = async () => {
     try {
       await onDelete(existingNote.id);
@@ -179,7 +179,7 @@ const NoteModal = ({
                 <span>CTRL+ENTER: Save</span>
               </div>
               
-              {/* ✅ Add delete button for editing mode */}
+              {/* delete button for editing mode */}
               {isEditing && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
@@ -588,7 +588,7 @@ Use the toolbar above or keyboard shortcuts:
             </motion.div>
           </div>
 
-          {/* ✅ Delete Confirmation Modal */}
+          {/* Delete Confirmation Modal */}
           {showDeleteConfirm && (
             <motion.div
               initial={{ opacity: 0 }}

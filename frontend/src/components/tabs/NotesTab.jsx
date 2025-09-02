@@ -147,13 +147,13 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     }
   };
 
-  // ✅ Handle fullscreen modal save (for new notes created from form data)
+  //  fullscreen modal save 
   const handleFullscreenSave = async (noteData) => {
     try {
       await createNote(noteData);
       setIsFullscreenModalOpen(false);
       
-      // ✅ Clear the form since we saved via fullscreen
+      
       setQuickTitle('');
       setQuickContent('');
       setQuickTags('');
@@ -169,13 +169,13 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     }
   };
 
-  // ✅ Updated toggleFullscreen to use current form data
+  // toggleFullscreen to use current form data
   const toggleFullscreen = () => {
     console.log('Toggling fullscreen modal with current form data');
     setIsFullscreenModalOpen(!isFullscreenModalOpen);
   };
 
-  // ✅ Handle view all archives
+  // Handle view all archives
   const handleViewAllArchives = () => {
     setShowAllNotes(true);
   };
@@ -186,7 +186,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     setShowAllNotes(false);
   };
 
-  // ✅ Create a draft note object for fullscreen mode with current form data
+  // Create a draft note object for fullscreen mode with current form data
   const draftNote = {
     title: quickTitle,
     content: quickContent,
@@ -196,7 +196,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     notebookId: quickNotebookId || null,
   };
 
-  // ✅ Show all notes view
+  // Show all notes view
   if (showAllNotes) {
     return (
       <>
@@ -298,7 +298,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
           </motion.div>
         )}
 
-        {/* ✅ Updated Split Layout - 70/30 split */}
+        {/* Split Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 min-h-[calc(100vh-300px)]">
           
           {/* Left Side - Quick Entry Terminal (70% width) */}
@@ -415,7 +415,6 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                     />
                   </div>
 
-                  {/* ✅ Reorganized Layout - Color on left, Archive/Collection on right with buttons */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-auto">
                     {/* Left Side - Color Picker */}
                     <div>
@@ -508,7 +507,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                         </div>
                       </div>
 
-                      {/* ✅ Centered Action Buttons under dropdowns */}
+                      {/* Action Buttons under dropdowns */}
                       <div className="flex gap-3 pt-4 justify-center">
                         <button
                           onClick={handleQuickSave}
@@ -629,7 +628,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                       );
                     })}
                     
-                    {/* ✅ Updated View All Button */}
+                    {/*View All Button */}
                     <div className="pt-4 border-t border-gray-600">
                       <button 
                         onClick={handleViewAllArchives}
@@ -659,7 +658,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
           </div>
         </div>
 
-        {/* ✅ Use NoteModal for fullscreen - passes current form data as draft */}
+        {/* Use NoteModal for fullscreen */}
         <NoteModal
           isOpen={isFullscreenModalOpen}
           onClose={() => setIsFullscreenModalOpen(false)}

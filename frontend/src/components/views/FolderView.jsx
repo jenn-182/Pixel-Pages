@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Folder, BookOpen, FileText, Plus, Edit, Trash2 } from 'lucide-react';
 import NoteModal from '../notes/NoteModal';
-import NotebookModal from '../modals/NotebookModal'; // ✅ Add this import
+import NotebookModal from '../modals/NotebookModal';
 import PixelButton from '../PixelButton';
 
 const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, onCreateNotebook, onDeleteNotebook, folders, notebooks, notes }) => {
@@ -10,8 +10,11 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
   const [folderNotebooks, setFolderNotebooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
-  const [isCreateNotebookModalOpen, setIsCreateNotebookModalOpen] = useState(false); // ✅ Add this state
+  const [isCreateNotebookModalOpen, setIsCreateNotebookModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
+
+  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
+  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
 
   useEffect(() => {
     filterFolderContents();
@@ -80,7 +83,7 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
       
       await onCreateNotebook(notebookWithFolder);
       setIsCreateNotebookModalOpen(false);
-      filterFolderContents(); // Refresh the folder contents
+      filterFolderContents();
     } catch (error) {
       console.error('Failed to save notebook:', error);
     }
@@ -115,16 +118,27 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
         <div className="flex items-center gap-4 mb-4">
           <button
             onClick={onBack}
-            className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+            className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
             style={{
-              boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              borderColor: tabColor,
+              color: tabColor,
+              boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = tabColor;
+              e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
             }}
           >
             <div className="flex items-center gap-2">
               <ArrowLeft size={16} />
               <span>BACK TO VAULT</span>
             </div>
-            <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                 style={{ backgroundColor: tabColor }} />
           </button>
           
           <div className="flex items-center gap-3 flex-1">
@@ -138,9 +152,19 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
           <div className="flex gap-3">
             <button
               onClick={handleCreateNote}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
               style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                color: tabColor,
+                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
               }}
             >
               <div className="flex items-center gap-2">
@@ -148,14 +172,25 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
                 <FileText size={16} />
                 <span>NEW LOG</span>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                   style={{ backgroundColor: tabColor }} />
             </button>
 
             <button
               onClick={handleCreateNotebook}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
               style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                color: tabColor,
+                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
               }}
             >
               <div className="flex items-center gap-2">
@@ -163,7 +198,8 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
                 <BookOpen size={16} />
                 <span>NEW COLLECTION</span>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                   style={{ backgroundColor: tabColor }} />
             </button>
           </div>
         </div>
@@ -173,49 +209,54 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
+        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          borderColor: tabColor,
+          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+             style={{ borderColor: tabColor }} />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 p-4" style={{
+            borderColor: tabColor,
+            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-cyan-400 font-bold">COLLECTIONS</div>
-                <div className="text-2xl font-mono font-bold text-cyan-400">{folderNotebooks.length}</div>
+                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>COLLECTIONS</div>
+                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>{folderNotebooks.length}</div>
               </div>
-              <BookOpen className="text-cyan-400" size={20} />
+              <BookOpen style={{ color: tabColor }} size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 p-4" style={{
+            borderColor: tabColor,
+            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-cyan-400 font-bold">LOGS</div>
-                <div className="text-2xl font-mono font-bold text-cyan-400">{folderNotes.length}</div>
+                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>LOGS</div>
+                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>{folderNotes.length}</div>
               </div>
-              <FileText className="text-cyan-400" size={20} />
+              <FileText style={{ color: tabColor }} size={20} />
             </div>
           </div>
           
-          <div className="bg-gray-900 border-2 border-cyan-400 p-4" style={{
-            boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+          <div className="bg-gray-900 border-2 p-4" style={{
+            borderColor: tabColor,
+            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
           }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono text-cyan-400 font-bold">TOTAL ITEMS</div>
-                <div className="text-2xl font-mono font-bold text-cyan-400">
+                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>TOTAL ITEMS</div>
+                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>
                   {folderNotebooks.length + folderNotes.length}
                 </div>
               </div>
-              <Folder className="text-cyan-400" size={20} />
+              <Folder style={{ color: tabColor }} size={20} />
             </div>
           </div>
         </div>
@@ -227,12 +268,14 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
           style={{
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+            borderColor: tabColor,
+            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
           }}
         >
-          <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
+               style={{ borderColor: tabColor }} />
           
           <div className="relative z-10 text-center py-8">
             <Folder size={64} style={{ color: folder.colorCode }} className="mx-auto mb-4" />
@@ -245,16 +288,27 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
             
             <button
               onClick={handleCreateNote}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
               style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                color: tabColor,
+                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = tabColor;
+                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
               }}
             >
               <div className="flex items-center gap-2">
                 <FileText size={18} />
                 <span>CREATE FIRST LOG</span>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                   style={{ backgroundColor: tabColor }} />
             </button>
           </div>
         </motion.div>
@@ -266,18 +320,20 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
               style={{
-                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
             >
-              <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+              <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
+                   style={{ borderColor: tabColor }} />
               
               <div className="relative z-10">
                 <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <BookOpen size={20} className="text-cyan-400 mr-2" />
+                  <BookOpen size={20} style={{ color: tabColor }} className="mr-2" />
                   COLLECTIONS
-                  <span className="ml-3 text-sm text-cyan-400">
+                  <span className="ml-3 text-sm" style={{ color: tabColor }}>
                     [{folderNotebooks.length}]
                   </span>
                 </h3>
@@ -342,7 +398,8 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
                               e.stopPropagation();
                               // Handle edit notebook
                             }}
-                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                            style={{ color: tabColor }}
                             title="Edit collection"
                           >
                             <Edit size={14} />
@@ -375,18 +432,20 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
               style={{
-                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+                borderColor: tabColor,
+                boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
             >
-              <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+              <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
+                   style={{ borderColor: tabColor }} />
               
               <div className="relative z-10">
                 <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
                   <FileText size={20} className="text-green-400 mr-2" />
                   LOG ENTRIES
-                  <span className="ml-3 text-sm text-cyan-400">
+                  <span className="ml-3 text-sm" style={{ color: tabColor }}>
                     [{folderNotes.length}]
                   </span>
                 </h3>
@@ -446,7 +505,8 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
                             {tagsArray.slice(0, 2).map((tag, tagIndex) => (
                               <span
                                 key={tagIndex}
-                                className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
+                                className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono"
+                                style={{ color: tabColor }}
                               >
                                 {tag}
                               </span>
@@ -465,7 +525,8 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
                             e.stopPropagation();
                             handleEditNote(note);
                           }}
-                          className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ color: tabColor }}
                           title="Edit log entry"
                         >
                           <Edit size={14} />

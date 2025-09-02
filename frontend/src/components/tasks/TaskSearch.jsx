@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, X, Filter, SortAsc, SortDesc, Target, Crosshair } from 'lucide-react';
 
-const TaskSearch = ({ tasks, onFilteredResults, onQuickAction }) => {
+const TaskSearch = ({ tasks, onFilteredResults, onQuickAction, onShowAllMissions }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('priority'); // priority, dueDate, created, title
   const [sortOrder, setSortOrder] = useState('desc');
@@ -249,6 +249,36 @@ const TaskSearch = ({ tasks, onFilteredResults, onQuickAction }) => {
             </div>
           </button>
         </div>
+      </div>
+
+      {/* Show All Missions Button */}
+      <div className="mb-4">
+        <button
+          onClick={() => onShowAllMissions && onShowAllMissions()}
+          className="w-full bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
+          style={{
+            borderColor: 'rgb(14 165 233)',
+            color: 'rgb(14 165 233)',
+            boxShadow: `0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.borderColor = 'rgb(14 165 233)';
+            e.target.style.boxShadow = `0 0 8px rgba(14, 165, 233, 0.4)`;
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.borderColor = 'rgb(14 165 233)';
+            e.target.style.boxShadow = `0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
+          }}
+        >
+          <div className="absolute inset-0 pointer-events-none"
+               style={{ background: 'linear-gradient(to bottom right, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.12))' }} />
+          <div className="flex items-center justify-center gap-2">
+            <Target size={16} />
+            <span>ALL MISSIONS</span>
+          </div>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
+               style={{ backgroundColor: 'rgb(14 165 233)' }} />
+        </button>
       </div>
     </motion.div>
   );

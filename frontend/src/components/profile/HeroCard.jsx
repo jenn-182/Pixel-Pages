@@ -472,7 +472,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">UNLOCKED</div>
-                <div className="text-2xl font-mono font-bold text-white">12</div>
+                <div className="text-2xl font-mono font-bold text-white">3</div>
               </div>
             </div>
 
@@ -481,7 +481,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-purple-500/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">COMPLETION</div>
-                <div className="text-2xl font-mono font-bold text-white">24%</div>
+                <div className="text-2xl font-mono font-bold text-white">17%</div>
               </div>
             </div>
 
@@ -490,7 +490,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-purple-700/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">RARE</div>
-                <div className="text-2xl font-mono font-bold text-white">3</div>
+                <div className="text-2xl font-mono font-bold text-white">1</div>
               </div>
             </div>
 
@@ -499,7 +499,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-800/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">LEGENDARY</div>
-                <div className="text-2xl font-mono font-bold text-white">1</div>
+                <div className="text-2xl font-mono font-bold text-white">0</div>
               </div>
             </div>
           </div>

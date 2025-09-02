@@ -258,7 +258,6 @@
   pointer-events: none;
 }
 
-/* Replace it with this targeted approach: */
 .nav-shooting-star {
   display: none !important;
 }
@@ -271,17 +270,15 @@
   display: none !important;
 }
 
-/* Only hide the specific shooting star from the main container */
+/* hide the specific shooting star from the main container */
 .pixel-pages-container::after {
   display: none !important;
 }
 
-/* Preserve the starfield background effects we want */
+/*  starfield background effects */
 .pixel-pages-container::before {
-  /* Keep this for the twinkling stars */
 }
 
-/* Make sure tab effects still work properly */
 .tab-indicator {
   background: var(--tab-color) !important;
   background-image: none !important;
