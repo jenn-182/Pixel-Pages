@@ -176,7 +176,7 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
             <div className="relative z-10">
               <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
                 <div className="w-4 h-4 bg-cyan-300 mr-2" />
-                QUICK ACTIONS
+                QUICK COMMANDS
               </h2>
               
               {/* Quick Action Buttons - Updated to darker background */}
@@ -267,7 +267,7 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
               <div className="relative z-10">
                 <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
                   <div className="w-4 h-4 bg-sky-400 mr-2" />
-                  STORAGE VAULT
+                  STORAGE VAULT OVERVIEW
                 </h2>
                 
                 {/* Archives Stats */}
@@ -396,7 +396,7 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
               <div className="relative z-10">
                 <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
                   <div className="w-4 h-4 bg-blue-500 mr-2" />
-                  RECENT ACTIVITY
+                  RECENT PLAYER LOGS
                 </h2>
                 
                 <div className="space-y-2 mb-4">

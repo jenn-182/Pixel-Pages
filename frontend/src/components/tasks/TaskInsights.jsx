@@ -155,7 +155,7 @@ const TaskInsights = ({ tasks, taskLists, onTabChange }) => {
       <div className="flex items-center justify-between relative z-10">
         <h3 className="text-lg font-mono font-bold text-white flex items-center">
           <div className="w-4 h-4 bg-indigo-500 mr-2" />
-          MISSION COMMAND
+          MISSION CONTROL CENTER
         </h3>
         
         {/* Access Missions Button - Updated to match darker background styling */}

@@ -277,6 +277,8 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
           notebook={selectedNotebook}
           onBack={handleBackToLibrary}
           onCreateNote={handleCreateNoteSubmit}
+          onEditNote={handleCreateNoteSubmit}
+          onDeleteNotebook={handleDeleteNotebook} // Add this line
           folders={folders}
           notebooks={notebooks}
           notes={notes}
@@ -327,6 +329,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
             setIsNotebookModalOpen(true);
           }}
           onEditNotebook={handleEditNotebook}
+          onDeleteNotebook={handleDeleteNotebook} // Add this line
           onOpenNotebook={handleOpenNotebook}
           folders={folders}
         />
@@ -375,139 +378,149 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
         </p>
       </div>
       
-      {/* Command Interface */}
+      {/* Command Interface - Updated to match dashboard theme */}
       <div className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative"
            style={{
              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
            }}>
         <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
         
-        <div className="flex items-center mb-6">
-          <span className="font-mono font-bold text-white text-2xl">COMMAND INTERFACE</span>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start justify-between h-32">
-          <div className="w-full lg:w-1/2 flex flex-col justify-end h-full">
-            <p className="font-mono text-sm text-gray-300 mb-4 font-semibold">
-              Create new player log, collection, or archive system.
-            </p>
-            
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
-              <button
-                onClick={() => setIsCreateNoteModalOpen(true)}
-                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
-                style={{
-                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                }}
-              >
-                <div className="flex items-center justify-center gap-1 h-full">
-                  <Plus size={10} />
-                  <FileText size={12} />
-                  <span className="text-xs">PLAYER LOG</span>
-                </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-              </button>
-
-              <button
-                onClick={() => setIsNotebookModalOpen(true)}
-                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
-                style={{
-                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                }}
-              >
-                <div className="flex items-center justify-center gap-1 h-full">
-                  <Plus size={10} />
-                  <BookOpen size={12} />
-                  <span className="text-xs">COLLECTION</span>
-                </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-              </button>
-
-              <button
-                onClick={() => setIsFolderModalOpen(true)}
-                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
-                style={{
-                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                }}
-              >
-                <div className="flex items-center justify-center gap-1 h-full">
-                  <Plus size={10} />
-                  <Folder size={12} />
-                  <span className="text-xs">ARCHIVE</span>
-                </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-              </button>
-
-              <button
-                onClick={async () => {
-                  try {
-                    console.log('Exporting all intelligence from Archive Terminal');
-                    
-                    const response = await fetch(`/api/notes/export/all?username=user`);
-                    
-                    if (response.ok) {
-                      const blob = await response.blob();
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `intelligence_export_${new Date().toISOString().slice(0, 10)}.md`;
-                      document.body.appendChild(a);
-                      a.click();
-                      window.URL.revokeObjectURL(url);
-                      document.body.removeChild(a);
-                      
-                      showNotification('Intelligence data exported successfully! Check your Downloads folder.', 'success');
-                    } else {
-                      throw new Error('Export failed');
-                    }
-                  } catch (error) {
-                    console.error('Export error:', error);
-                    showNotification('Export failed. Please try again later.', 'error');
-                  }
-                }}
-                className="bg-gray-900 border-2 border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 h-full"
-                style={{
-                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                }}
-              >
-                <div className="flex items-center justify-center gap-1 h-full">
-                  <Download size={12} />
-                  <span className="text-xs">EXPORT</span>
-                </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-              </button>
-            </div>
+        <div className="relative z-10">
+          <div className="flex items-center mb-6">
+            <span className="font-mono font-bold text-white text-2xl">COMMAND INTERFACE</span>
           </div>
-          
-          <div className="bg-gray-900 border border-cyan-400 p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
-               style={{
-                 boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-               }}>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-3 h-3 bg-cyan-400" />
-              <span className="font-mono text-sm text-cyan-400 font-bold">SEARCH PROTOCOL</span>
+
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start justify-between h-32">
+            <div className="w-full lg:w-1/2 flex flex-col justify-end h-full">
+              <p className="font-mono text-sm text-gray-300 mb-4 font-semibold">
+                Create new player log, collection, or archive system.
+              </p>
+              
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
+                <button
+                  onClick={() => setIsCreateNoteModalOpen(true)}
+                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  style={{
+                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="flex items-center justify-center gap-1 h-full">
+                    <Plus size={10} />
+                    <FileText size={12} />
+                    <span className="text-xs">PLAYER LOG</span>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                </button>
+
+                <button
+                  onClick={() => setIsNotebookModalOpen(true)}
+                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  style={{
+                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="flex items-center justify-center gap-1 h-full">
+                    <Plus size={10} />
+                    <BookOpen size={12} />
+                    <span className="text-xs">COLLECTION</span>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                </button>
+
+                <button
+                  onClick={() => setIsFolderModalOpen(true)}
+                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  style={{
+                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="flex items-center justify-center gap-1 h-full">
+                    <Plus size={10} />
+                    <Folder size={12} />
+                    <span className="text-xs">ARCHIVE</span>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                </button>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      console.log('Exporting all intelligence from Archive Terminal');
+                      
+                      const response = await fetch(`/api/notes/export/all?username=user`);
+                      
+                      if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `intelligence_export_${new Date().toISOString().slice(0, 10)}.md`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        showNotification('Intelligence data exported successfully! Check your Downloads folder.', 'success');
+                      } else {
+                        throw new Error('Export failed');
+                      }
+                    } catch (error) {
+                      console.error('Export error:', error);
+                      showNotification('Export failed. Please try again later.', 'error');
+                    }
+                  }}
+                  className="bg-gray-900 border border-cyan-400 px-3 py-0.5 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden h-full"
+                  style={{
+                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="flex items-center justify-center gap-1 h-full">
+                    <Download size={12} />
+                    <span className="text-xs">EXPORT</span>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                </button>
+              </div>
             </div>
             
-            <div className="relative mb-3 flex-1 flex flex-col justify-center min-h-0">
-              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" />
-              <input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search storage vault..."
-                className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 text-white font-mono text-sm focus:border-cyan-400 focus:outline-none transition-colors"
-                style={{ color: '#fff' }}
-              />
-            </div>
-            
-            <div className="text-xs font-mono text-gray-400 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span>{folders.length} ARCHIVES</span>
-                  <span>{notebooks.length} COLLECTIONS</span>
-                  <span>{notes.length} LOGS</span>
+            <div className="bg-gray-900 border border-cyan-400 p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
+                 style={{
+                   boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                 }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-3 h-3 bg-cyan-400" />
+                  <span className="font-mono text-sm text-cyan-400 font-bold">SEARCH PROTOCOL</span>
                 </div>
-                <div className="text-cyan-400">
-                  {searchTerm ? 'SCANNING...' : 'READY'}
+                
+                <div className="relative mb-3 flex-1 flex flex-col justify-center min-h-0">
+                  <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" />
+                  <input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search storage vault..."
+                    className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 text-white font-mono text-sm focus:border-cyan-400 focus:outline-none transition-colors"
+                    style={{ color: '#fff' }}
+                  />
+                </div>
+                
+                <div className="text-xs font-mono text-gray-400 flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span>{folders.length} ARCHIVES</span>
+                      <span>{notebooks.length} COLLECTIONS</span>
+                      <span>{notes.length} LOGS</span>
+                    </div>
+                    <div className="text-cyan-400">
+                      {searchTerm ? 'SCANNING...' : 'READY'}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -515,7 +528,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
         </div>
       </div>
 
-      {/* Content Sections */}
+      {/* Content Sections - Updated to match dashboard styling */}
       <div className="space-y-8">
         {/* Archive Systems Section */}
         <motion.div
@@ -527,105 +540,109 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
           }}
         >
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
           
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-mono font-bold text-white flex items-center">
-                ARCHIVES ({folders.length})
-              </h3>
-              <p className="text-sm font-mono text-gray-400">
-                Archive systems for organizing multiple collections and logs.
-              </p>
-            </div>
-            <button
-              onClick={handleViewAllFolders}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-              style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Eye size={16} />
-                <span>VIEW ALL</span>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                  ARCHIVES ({folders.length})
+                </h3>
+                <p className="text-sm font-mono text-gray-400">
+                  Archive systems for organizing multiple collections and logs.
+                </p>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-            </button>
-          </div>
-          
-          {folders.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {folders.slice(0, 4).map(folder => {
-                const folderColor = folder.colorCode || '#FFD700';
-                const rgbColor = folderColor.startsWith('#') 
-                  ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
-                  : '251, 191, 36';
+              <button
+                onClick={handleViewAllFolders}
+                className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+                style={{
+                  boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                <div className="flex items-center gap-2">
+                  <Eye size={16} />
+                  <span>VIEW ALL</span>
+                </div>
+                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+              </button>
+            </div>
+            
+            {folders.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {folders.slice(0, 4).map(folder => {
+                  const folderColor = folder.colorCode || '#FFD700';
+                  const rgbColor = folderColor.startsWith('#') 
+                    ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
+                    : '251, 191, 36';
                 
-                const itemCount = getFolderItemCount(folder.id);
+                  const itemCount = getFolderItemCount(folder.id);
                 
-                return (
-                  <motion.div
-                    key={folder.id}
-                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                    style={{
-                      borderColor: folderColor,
-                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                    }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      y: -2,
-                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleOpenFolder(folder)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <Folder size={24} style={{ color: folderColor }} />
-                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {itemCount} ITEMS
+                  return (
+                    <motion.div
+                      key={folder.id}
+                      className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                      style={{
+                        borderColor: folderColor,
+                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                      }}
+                      whileHover={{ 
+                        scale: 1.02, 
+                        y: -2,
+                        boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleOpenFolder(folder)}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <Folder size={24} style={{ color: folderColor }} />
+                        <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                          {itemCount} ITEMS
+                        </div>
                       </div>
-                    </div>
-                    <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
-                    <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
+                      <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
+                      <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
                     
-                    <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditFolder(folder);
-                        }}
-                        className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
-                        title="Modify archive"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </button>
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditFolder(folder);
+                          }}
+                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                          title="Modify archive"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </button>
                       
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteFolder(folder.id);
-                        }}
-                        className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
-                        title="Delete archive"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
-              <Folder size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No archive systems found. Initialize first archive storage.</p>
-            </div>
-          )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteFolder(folder.id);
+                          }}
+                          className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                          title="Delete archive"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+                <Folder size={48} className="text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400 font-mono">No archive systems found. Initialize first archive storage.</p>
+              </div>
+            )}
+          </div>
         </motion.div>
 
-        {/* Log Collections Section */}
+        {/* Log Collections Section - Update similarly */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -636,105 +653,109 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
           }}
         >
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
           
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-mono font-bold text-white flex items-center">
-                COLLECTIONS ({notebooks.length})
-              </h3>
-              <p className="text-sm font-mono text-gray-400">
-                Organized collections for grouping logs by subject, project or types.
-              </p>
-            </div>
-            <button
-              onClick={handleViewAllNotebooks}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-              style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Eye size={16} />
-                <span>VIEW ALL</span>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                  COLLECTIONS ({notebooks.length})
+                </h3>
+                <p className="text-sm font-mono text-gray-400">
+                  Organized collections for grouping logs by subject, project or types.
+                </p>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-            </button>
-          </div>
-          
-          {notebooks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {notebooks.slice(0, 4).map(notebook => {
-                const notebookColor = notebook.colorCode || '#60A5FA';
-                const rgbColor = notebookColor.startsWith('#') 
-                  ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
-                  : '96, 165, 250';
+              <button
+                onClick={handleViewAllNotebooks}
+                className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+                style={{
+                  boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                <div className="flex items-center gap-2">
+                  <Eye size={16} />
+                  <span>VIEW ALL</span>
+                </div>
+                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+              </button>
+            </div>
+            
+            {notebooks.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {notebooks.slice(0, 4).map(notebook => {
+                  const notebookColor = notebook.colorCode || '#60A5FA';
+                  const rgbColor = notebookColor.startsWith('#') 
+                    ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
+                    : '96, 165, 250';
                 
-                const noteCount = getNotebookNoteCount(notebook.id);
+                  const noteCount = getNotebookNoteCount(notebook.id);
                 
-                return (
-                  <motion.div
-                    key={notebook.id}
-                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                    style={{
-                      borderColor: notebookColor,
-                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                    }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      y: -2,
-                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleOpenNotebook(notebook)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <BookOpen size={24} style={{ color: notebookColor }} />
-                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {noteCount} LOGS
+                  return (
+                    <motion.div
+                      key={notebook.id}
+                      className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                      style={{
+                        borderColor: notebookColor,
+                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                      }}
+                      whileHover={{ 
+                        scale: 1.02, 
+                        y: -2,
+                        boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleOpenNotebook(notebook)}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <BookOpen size={24} style={{ color: notebookColor }} />
+                        <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                          {noteCount} LOGS
+                        </div>
                       </div>
-                    </div>
-                    <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
-                    <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
+                      <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
+                      <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
                     
-                    <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditNotebook(notebook);
-                        }}
-                        className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
-                        title="Edit collection"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </button>
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditNotebook(notebook);
+                          }}
+                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                          title="Edit collection"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </button>
                       
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteNotebook(notebook.id);
-                        }}
-                        className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
-                        title="Delete collection"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
-              <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No log collections found. Deploy first collection to begin.</p>
-            </div>
-          )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNotebook(notebook.id);
+                          }}
+                          className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                          title="Delete collection"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+                <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400 font-mono">No log collections found. Deploy first collection to begin.</p>
+              </div>
+            )}
+          </div>
         </motion.div>
 
-        {/* Player Logs Section */}
+        {/* Player Logs Section - Update similarly */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -745,137 +766,141 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => { // Add
           }}
         >
           <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
           
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-mono font-bold text-white flex items-center">
-                LOG ENTRIES ({notes.length})
-              </h3>
-              <p className="text-sm font-mono text-gray-400">
-                Individual log entries for storing notes, thoughts and ideas.
-              </p>
-            </div>
-            <button
-              onClick={handleViewAllNotes}
-              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-              style={{
-                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Eye size={16} />
-                <span>VIEW ALL</span>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                  LOG ENTRIES ({notes.length})
+                </h3>
+                <p className="text-sm font-mono text-gray-400">
+                  Individual log entries for storing notes, thoughts and ideas.
+                </p>
               </div>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-            </button>
+              <button
+                onClick={handleViewAllNotes}
+                className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+                style={{
+                  boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                <div className="flex items-center gap-2">
+                  <Eye size={16} />
+                  <span>VIEW ALL</span>
+                </div>
+                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+              </button>
+            </div>
+            
+            {notes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {notes
+                  .slice() // Create a copy to avoid mutating original array
+                  .sort((a, b) => new Date(b.createdAt || b.updatedAt || 0) - new Date(a.createdAt || a.updatedAt || 0)) // Sort by most recent first
+                  .slice(0, 4) // Take only the first 4 (most recent)
+                  .map((note, index) => {
+                    const noteColor = note.color || '#4ADE80';
+                    const hexToRgb = (hex) => {
+                      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                      return result ? 
+                        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                        '74, 222, 128';
+                    };
+                    const rgbColor = hexToRgb(noteColor);
+                    const tagsArray = Array.isArray(note.tags) ? note.tags : (note.tags ? note.tags.split(',').map(tag => tag.trim()) : []);
+
+                    return (
+                      <motion.div
+                        key={note.id}
+                        className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                        style={{
+                          borderColor: noteColor,
+                          boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                        }}
+                        whileHover={{ 
+                          scale: 1.02, 
+                          y: -2,
+                          boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleEditNote(note)}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <FileText size={24} style={{ color: noteColor }} />
+                          <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
+                            {tagsArray.length} TAGS
+                          </div>
+                        </div>
+                        <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
+                          {note.title}
+                        </h4>
+                        <p className="text-xs text-gray-400 mb-3">
+                          {note.content && note.content.length > 100 
+                            ? `${note.content.substring(0, 100)}...` 
+                            : note.content}
+                        </p>
+                      
+                        {tagsArray.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {tagsArray.slice(0, 2).map((tag, tagIndex) => (
+                              <span
+                                key={tagIndex}
+                                className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {tagsArray.length > 2 && (
+                              <span className="text-xs text-gray-500 font-mono px-2 py-1">
+                                +{tagsArray.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      
+                        <div className="text-xs text-gray-400 mb-2">
+                          {new Date(note.createdAt || note.updatedAt).toLocaleDateString()}
+                        </div>
+
+                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditNote(note);
+                            }}
+                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                            title="Edit log entry"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                          </button>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteNote(note.id);
+                            }}
+                            className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                            title="Delete log entry"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+                <FileText size={48} className="text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400 font-mono">No log entries found. Initialize first player log to begin.</p>
+              </div>
+            )}
           </div>
-          
-          {notes.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {notes
-                .slice() // Create a copy to avoid mutating original array
-                .sort((a, b) => new Date(b.createdAt || b.updatedAt || 0) - new Date(a.createdAt || a.updatedAt || 0)) // Sort by most recent first
-                .slice(0, 4) // Take only the first 4 (most recent)
-                .map((note, index) => {
-                  const noteColor = note.color || '#4ADE80';
-                  const hexToRgb = (hex) => {
-                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                    return result ? 
-                      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-                      '74, 222, 128';
-                  };
-                  const rgbColor = hexToRgb(noteColor);
-                  const tagsArray = Array.isArray(note.tags) ? note.tags : (note.tags ? note.tags.split(',').map(tag => tag.trim()) : []);
-
-                  return (
-                    <motion.div
-                      key={note.id}
-                      className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                      style={{
-                        borderColor: noteColor,
-                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                      }}
-                      whileHover={{ 
-                        scale: 1.02, 
-                        y: -2,
-                        boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleEditNote(note)}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <FileText size={24} style={{ color: noteColor }} />
-                        <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                          {tagsArray.length} TAGS
-                        </div>
-                      </div>
-                      <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
-                        {note.title}
-                      </h4>
-                      <p className="text-xs text-gray-400 mb-3">
-                        {note.content && note.content.length > 100 
-                          ? `${note.content.substring(0, 100)}...` 
-                          : note.content}
-                      </p>
-                      
-                      {tagsArray.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {tagsArray.slice(0, 2).map((tag, tagIndex) => (
-                            <span
-                              key={tagIndex}
-                              className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono text-cyan-400"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {tagsArray.length > 2 && (
-                            <span className="text-xs text-gray-500 font-mono px-2 py-1">
-                              +{tagsArray.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      
-                      <div className="text-xs text-gray-400 mb-2">
-                        {new Date(note.createdAt || note.updatedAt).toLocaleDateString()}
-                      </div>
-
-                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditNote(note);
-                          }}
-                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
-                          title="Edit log entry"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                        </button>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNote(note.id);
-                          }}
-                          className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
-                          title="Delete log entry"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-            </div>
-          ) : (
-            <div className="bg-gray-900 border border-gray-600 p-6 text-center">
-              <FileText size={48} className="text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-400 font-mono">No log entries found. Initialize first player log to begin.</p>
-            </div>
-          )}
         </motion.div>
       </div>
 

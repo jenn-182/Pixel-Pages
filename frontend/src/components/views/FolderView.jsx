@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Folder, BookOpen, FileText, Plus, Edit } from 'lucide-react';
+import { ArrowLeft, Folder, BookOpen, FileText, Plus, Edit, Trash2 } from 'lucide-react';
 import NoteModal from '../notes/NoteModal';
 import NotebookModal from '../modals/NotebookModal'; // ✅ Add this import
 import PixelButton from '../PixelButton';
 
-const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, onCreateNotebook, folders, notebooks, notes }) => {
+const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, onCreateNotebook, onDeleteNotebook, folders, notebooks, notes }) => {
   const [folderNotes, setFolderNotes] = useState([]);
   const [folderNotebooks, setFolderNotebooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -334,6 +334,33 @@ const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, 
                         <p className="text-xs text-gray-400 mb-3">
                           {notebook.description || 'Access collection contents'}
                         </p>
+
+                        {/* Action buttons for edit and delete */}
+                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Handle edit notebook
+                            }}
+                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                            title="Edit collection"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Are you sure you want to delete "${notebook.name}"?`)) {
+                                onDeleteNotebook(notebook.id);
+                              }
+                            }}
+                            className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                            title="Delete collection"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </motion.div>
                     );
                   })}

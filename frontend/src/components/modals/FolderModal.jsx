@@ -145,6 +145,25 @@ const FolderModal = ({
                   <Palette size={16} className="inline mr-1" />
                   ARCHIVE COLOR
                 </label>
+                
+                {/* Current Color Display with Custom Picker */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div 
+                    className="w-8 h-6 border-2 border-gray-600"
+                    style={{ backgroundColor: folderData.colorCode }}
+                    title="Current color"
+                  />
+                  <input
+                    type="color"
+                    value={folderData.colorCode}
+                    onChange={(e) => setFolderData({ ...folderData, colorCode: e.target.value })}
+                    className="w-8 h-6 border-2 border-gray-600 bg-transparent cursor-pointer"
+                    title="Custom color picker"
+                  />
+                  <span className="text-xs font-mono text-gray-400">Custom</span>
+                </div>
+
+                {/* Preset Colors */}
                 <div className="flex gap-2 flex-wrap">
                   {colors.map(color => (
                     <button

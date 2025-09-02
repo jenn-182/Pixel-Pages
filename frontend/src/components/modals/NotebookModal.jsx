@@ -190,16 +190,36 @@ const NotebookModal = ({
                   <Palette size={16} className="inline mr-1" />
                   COLLECTION COLOR
                 </label>
+                
+                {/* Current Color Display with Custom Picker */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div 
+                    className="w-8 h-6 border-2 border-gray-600"
+                    style={{ backgroundColor: notebookData.colorCode }}
+                    title="Current color"
+                  />
+                  <input
+                    type="color"
+                    value={notebookData.colorCode}
+                    onChange={(e) => setNotebookData({ ...notebookData, colorCode: e.target.value })}
+                    className="w-8 h-6 border-2 border-gray-600 bg-transparent cursor-pointer"
+                    title="Custom color picker"
+                  />
+                  <span className="text-xs font-mono text-gray-400">Custom</span>
+                </div>
+
+                {/* Preset Colors */}
                 <div className="flex gap-2 flex-wrap">
                   {colors.map(color => (
                     <button
                       key={color}
                       type="button"
                       onClick={() => setNotebookData({ ...notebookData, colorCode: color })}
-                      className={`w-8 h-8 border-2 transition-all ${notebookData.colorCode === color
+                      className={`w-8 h-8 border-2 transition-all ${
+                        notebookData.colorCode === color
                           ? 'border-cyan-400 scale-110 shadow-[0_0_10px_rgba(34,211,238,0.5)]'
                           : 'border-gray-600 hover:border-gray-400'
-                        }`}
+                      }`}
                       style={{
                         backgroundColor: color,
                         boxShadow: notebookData.colorCode === color

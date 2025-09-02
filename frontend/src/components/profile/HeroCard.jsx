@@ -40,8 +40,8 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
   const getRankNameForLevel = (level) => {
     switch (level) {
       case 1: return "Novice Scribe";
-      case 2: return "Apprentice Writer";
-      case 3: return "Skilled Chronicler";
+      case 2: return "Skilled Chronicler";
+      case 3: return "Apprentice Writer";
       case 4: return "Expert Documentarian";
       case 5: return "Master Archivist";
       case 6: return "Elite Wordsmith";
@@ -115,7 +115,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-pink-500/8 to-pink-600/12 pointer-events-none" />
               <div className="relative z-10 flex items-center gap-2">
                 <Palette size={14} className="text-pink-400" />
-                <span className="text-pink-400 text-xs">PROFILE STYLE</span>
+                <span className="text-pink-400 text-xs">PROFILE THEME</span>
                 <ChevronDown 
                   size={12} 
                   className={`text-pink-400 transition-transform duration-200 ${showStyleDropdown ? 'rotate-180' : ''}`} 
@@ -143,16 +143,16 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     {/* Style Options */}
                     <div className="space-y-2">
                       <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-pink-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-pink-400">
-                        CYBER PINK
+                        CYBER PINK HEARTS
                       </button>
                       <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-cyan-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-cyan-400">
-                        NEON CYAN
+                        NEON CYAN DEFAULT
                       </button>
                       <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-purple-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-purple-400">
-                        COSMIC PURPLE
+                        RETRO GREEN TERMINAL
                       </button>
                       <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-indigo-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-indigo-400">
-                        DIGITAL BLUE
+                        DIGITAL RED MATRIX
                       </button>
                     </div>
                   </div>
@@ -169,20 +169,40 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                  style={{
                    boxShadow: '0 0 10px rgba(139, 92, 246, 0.3), 6px 6px 0px 0px rgba(0,0,0,1)'
                  }}>
-              {/* Custom Pixel Profile Image - unchanged */}
+
+              {/* Custom Pixel Profile Image */}
               <img 
                 src={PixelPageJenn} 
                 alt="Pixel Profile Avatar"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover relative z-10"
                 style={{ 
                   imageRendering: 'pixelated',
                   imageRendering: '-moz-crisp-edges',
                   imageRendering: 'crisp-edges'
                 }}
               />
+
+              {/* Shimmer Overlay */}
+              <div 
+                className="absolute inset-0 opacity-20 z-20 pointer-events-none"
+                style={{
+                  background: `linear-gradient(
+                    90deg,
+                    transparent 0%,
+                    transparent 40%,
+                    rgba(255, 255, 255, 0.6) 45%,
+                    rgba(255, 255, 255, 0.6) 50%,
+                    rgba(255, 255, 255, 0.6) 55%,
+                    transparent 60%,
+                    transparent 100%
+                  )`,
+                  animation: 'shimmer-slide 5s ease-in-out infinite',
+                  backgroundSize: '200% 100%'
+                }}
+              />
               
-              {/* Level decorations overlay - unchanged */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              {/* Level decorations overlay */}
+              <div className="absolute inset-0 flex items-center justify-center z-30">
                 {/* Crown for high levels */}
                 {currentLevel >= 8 && (
                   <Crown size={20} className="absolute -top-4 -right-3 text-yellow-400 drop-shadow-lg" />
@@ -196,9 +216,9 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 )}
               </div>
               
-              {/* Level ring around avatar for high levels - updated with purple theme */}
+              {/* Level ring around avatar for high levels */}
               {currentLevel >= 5 && (
-                <div className="absolute inset-0 border-2 border-purple-400 opacity-60 animate-pulse" />
+                <div className="absolute inset-0 border-2 border-purple-400 opacity-60 animate-pulse z-40" />
               )}
             </div>
             
@@ -260,13 +280,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                         )
                       `
                     }}
-                  />
-                  {/* Shiny sweep effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-300 to-transparent opacity-40 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1500" />
-                  {/* Additional shine layers */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-200/30 via-transparent to-pink-400/30 animate-pulse" />
-                  <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-white/10 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
-                  
+                  />           
                   <p className="text-lg lg:text-xl font-mono font-bold text-pink-300 relative z-10">
                     {playerTitle}
                   </p>
@@ -408,7 +422,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-800/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">STREAK</div>
-                <div className="text-2xl font-mono font-bold text-white">7d</div>
+                <div className="text-2xl font-mono font-bold text-white">7 days</div>
               </div>
             </div>
           </div>
@@ -506,14 +520,14 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-gray-800 border-2 border-purple-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 max-w-md mx-4 relative"
+              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 max-w-md mx-4 relative"
               style={{
                 boxShadow: '0 0 20px rgba(147, 51, 234, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
               }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Animated border */}
-              <div className="absolute inset-0 border-2 border-purple-400 opacity-50 animate-pulse pointer-events-none" />
+              <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
               
               {/* Close button */}
               <button
@@ -530,14 +544,14 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                   animate={{ rotate: 360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 >
-                  <Trophy size={64} className="text-purple-400 mx-auto" />
+                  <Trophy size={64} className="text-cyan-400 mx-auto" />
                 </motion.div>
 
                 <h2 className="text-2xl font-mono font-bold text-white mb-2">
                   EASTER EGG ACHIEVEMENTS
                 </h2>
                 
-                <p className="text-purple-400 font-mono text-sm mb-6">
+                <p className="text-cyan-400 font-mono text-sm mb-6">
                   You found the hidden easter egg level!
                 </p>
 
@@ -545,26 +559,26 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="bg-gray-900 border border-purple-400 p-4 mb-6"
+                  className="bg-gray-900 border border-cyan-400 p-4 mb-6"
                 >
-                  <h3 className="text-xl font-mono font-bold text-purple-400 mb-4">
+                  <h3 className="text-xl font-mono font-bold text-cyan-400 mb-4">
                     COMING SOON
                   </h3>
                 </motion.div>
 
                 <div className="flex items-center justify-center gap-1">
                   <motion.div
-                    className="w-2 h-2 bg-purple-400 rounded-full"
+                    className="w-2 h-2 bg-cyan-400 rounded-full"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
                   />
                   <motion.div
-                    className="w-2 h-2 bg-purple-400 rounded-full"
+                    className="w-2 h-2 bg-cyan-400 rounded-full"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
                   />
                   <motion.div
-                    className="w-2 h-2 bg-purple-400 rounded-full"
+                    className="w-2 h-2 bg-cyan-400 rounded-full"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
                   />
@@ -574,6 +588,23 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Add this style block to your component */}
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes shimmer-slide {
+          0% {
+            background-position: -200% 0%;
+          }
+          100% {
+            background-position: 200% 0%;
+          }
+        }
+      `}</style>
     </div>
   );
 };

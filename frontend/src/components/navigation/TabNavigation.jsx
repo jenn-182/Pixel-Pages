@@ -24,55 +24,112 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
         <div className="star star-5"></div>
       </div>
       
-      <div className="tab-container justify-start"> {/* Changed from justify-center to justify-start */}
-        {tabs.map((tab) => {
-          const IconComponent = tab.icon;
-          const isActive = activeTab === tab.id;
-          
-          return (
-            <motion.button
-              key={tab.id}
-              className={`pixel-tab ${isActive ? 'active' : ''}`}
-              onClick={() => onTabChange(tab.id)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                '--tab-color': tab.color,
-                '--tab-shadow': isActive 
-                  ? `0 0 25px ${tab.color}80, 0 0 50px ${tab.color}40, 0 8px 16px rgba(0, 0, 50, 0.4)` 
-                  : `0 0 5px ${tab.color}30`
-              }}
-            >
-              <div className="tab-content">
-                <IconComponent size={16} className="tab-icon" />
-                <span className="tab-label">{tab.label}</span>
-              </div>
-              
-              {isActive && (
-                <>
-                  <motion.div
-                    className="tab-indicator"
-                    layoutId="activeTab"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                  <motion.div
-                    className="tab-constellation"
-                    animate={{ 
-                      opacity: [0.3, 0.8, 0.3],
-                      scale: [1, 1.1, 1]
-                    }}
-                    transition={{ 
-                      duration: 3, 
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                </>
-              )}
-            </motion.button>
-          );
-        })}
+      {/* ✅ Updated container to justify space between tabs and logo */}
+      <div className="tab-container justify-between items-center">
+        {/* Left side - Navigation tabs */}
+        <div className="flex">
+          {tabs.map((tab) => {
+            const IconComponent = tab.icon;
+            const isActive = activeTab === tab.id;
+            
+            return (
+              <motion.button
+                key={tab.id}
+                className={`pixel-tab ${isActive ? 'active' : ''}`}
+                onClick={() => onTabChange(tab.id)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  '--tab-color': tab.color,
+                  '--tab-shadow': isActive 
+                    ? `0 0 25px ${tab.color}80, 0 0 50px ${tab.color}40, 0 8px 16px rgba(0, 0, 50, 0.4)` 
+                    : `0 0 5px ${tab.color}30`
+                }}
+              >
+                <div className="tab-content">
+                  <IconComponent size={16} className="tab-icon" />
+                  <span className="tab-label">{tab.label}</span>
+                </div>
+                
+                {isActive && (
+                  <>
+                    <motion.div
+                      className="tab-indicator"
+                      layoutId="activeTab"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                    <motion.div
+                      className="tab-constellation"
+                      animate={{ 
+                        opacity: [0.3, 0.8, 0.3],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        duration: 3, 
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  </>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* ✅ Right side - App Logo - Higher and more centered */}
+        <motion.div 
+          className="app-logo-container"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          style={{
+            position: 'absolute',
+            right: '50px',
+            top: '0px',
+            zIndex: 20
+          }}
+        >
+          <img 
+            src="/PixelPageSingleHeaderDraft.png"
+            alt="Pixel Pages Logo" 
+            className="app-logo"
+            style={{
+              height: '65px',
+              width: 'auto',
+              maxWidth: '250px',
+              filter: 'brightness(1.1) contrast(1.1)',
+              opacity: 0.9,
+              display: 'block',
+              objectFit: 'contain'
+            }}
+            onLoad={() => {
+              console.log('Image loaded successfully! Dimensions:', 
+                document.querySelector('.app-logo').naturalWidth, 'x', 
+                document.querySelector('.app-logo').naturalHeight);
+            }}
+            onError={(e) => {
+              console.log('Image failed to load:', e.target.src);
+              // Show fallback text if image fails
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'block';
+            }}
+          />
+          {/* Fallback text */}
+          <div 
+            style={{ 
+              display: 'none',
+              color: '#22D3EE',
+              fontFamily: 'monospace',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              textShadow: '0 0 10px rgba(34, 211, 238, 0.5)'
+            }}
+          >
+            📖 PIXEL PAGES
+          </div>
+        </motion.div>
       </div>
       
       {/* Add shooting star across navigation */}

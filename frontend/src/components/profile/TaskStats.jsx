@@ -127,7 +127,7 @@ const TaskStats = ({ tasks, taskLists }) => {
           <div className="relative z-10">
             <div className="text-xs font-mono text-gray-400">MISSION STREAK</div>
             <div className="text-2xl font-mono font-bold text-white">
-              {stats.streakDays}
+              {stats.streakDays} days
             </div>
           </div>
         </div>
@@ -138,7 +138,7 @@ const TaskStats = ({ tasks, taskLists }) => {
           <div className="relative z-10">
             <div className="text-xs font-mono text-gray-400">COMPLETION SPEED</div>
             <div className="text-2xl font-mono font-bold text-white">
-              {stats.averageCompletionTime > 0 ? `${stats.averageCompletionTime}d` : 'N/A'}
+              {stats.averageCompletionTime > 0 ? `${stats.averageCompletionTime} days` : 'N/A'}
             </div>
           </div>
         </div>

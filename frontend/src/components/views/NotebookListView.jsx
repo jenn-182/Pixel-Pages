@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, ArrowLeft, Search, Plus, Edit } from 'lucide-react';
+import { BookOpen, ArrowLeft, Search, Plus, Edit, Trash2 } from 'lucide-react';
 
 const NotebookListView = ({ 
   notebooks, 
   onBack, 
   onCreateNotebook, 
   onEditNotebook,
-  onOpenNotebook
+  onOpenNotebook,
+  onDeleteNotebook
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('updated');
@@ -191,16 +192,32 @@ const NotebookListView = ({
                     <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
                     <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
                     
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditNotebook(notebook);
-                      }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Edit collection"
-                    >
-                      <Edit size={14} />
-                    </button>
+                    <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditNotebook(notebook);
+                        }}
+                        className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded text-cyan-400 transition-colors"
+                        title="Edit collection"
+                      >
+                        <Edit size={14} />
+                      </button>
+                      
+                      {/* Add Delete Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Are you sure you want to delete "${notebook.name}"? All logs in this collection will become unorganized.`)) {
+                            onDeleteNotebook(notebook.id);
+                          }
+                        }}
+                        className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                        title="Delete collection"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </motion.div>
                 );
               })}

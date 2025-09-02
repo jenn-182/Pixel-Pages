@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, FileText, Plus, Edit, Tag } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, BookOpen, FileText, Plus, Edit, Tag, Trash2 } from 'lucide-react';
 import NoteModal from '../notes/NoteModal';
 
-const NotebookView = ({ notebook, onBack, onCreateNote, onEditNote, folders, notebooks, notes }) => {
+const NotebookView = ({ 
+  notebook, 
+  onBack, 
+  onCreateNote, 
+  onEditNote, 
+  onDeleteNotebook, // Add this prop
+  folders, 
+  notebooks, 
+  notes 
+}) => {
   const [notebookNotes, setNotebookNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     filterNotebookNotes();
@@ -57,6 +67,17 @@ const NotebookView = ({ notebook, onBack, onCreateNote, onEditNote, folders, not
     }
   };
 
+  const handleDeleteNotebook = async () => {
+    try {
+      await onDeleteNotebook(notebook.id);
+      setShowDeleteConfirm(false);
+      onBack(); // Navigate back to library after deletion
+    } catch (error) {
+      console.error('Failed to delete collection:', error);
+      alert('Failed to delete collection. Please try again.');
+    }
+  };
+
   const getTags = (tags) => {
     if (!tags) return [];
     if (Array.isArray(tags)) return tags;
@@ -84,20 +105,38 @@ const NotebookView = ({ notebook, onBack, onCreateNote, onEditNote, folders, not
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={onBack}
-            className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-            style={{
-              boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-            }}
-          >
-            <div className="flex items-center gap-2">
-              <ArrowLeft size={16} />
-              <span>BACK TO VAULT</span>
-            </div>
-            <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-          </button>
-          
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onBack}
+              className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
+              style={{
+                boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <ArrowLeft size={16} />
+                <span>BACK TO LIBRARY</span>
+              </div>
+              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </button>
+
+            {/* Delete Button */}
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="bg-gray-900 border-2 border-red-500 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] font-mono font-bold text-red-500"
+              style={{
+                boxShadow: '0 0 5px rgba(239, 68, 68, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+              }}
+              title="Delete Collection"
+            >
+              <div className="flex items-center gap-2">
+                <Trash2 size={16} className="text-red-500" />
+                <span className="text-red-500">DELETE COLLECTION</span>
+              </div>
+              <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </button>
+          </div>
+
           <div className="flex items-center gap-3 flex-1">
             <BookOpen size={32} style={{ color: notebook.colorCode || '#87CEEB' }} />
             <div>
@@ -321,6 +360,57 @@ const NotebookView = ({ notebook, onBack, onCreateNote, onEditNote, folders, not
         existingNote={editingNote}
         defaultNotebookId={notebook.id}
       />
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-gray-800 border-2 border-red-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-md mx-4 relative"
+              style={{
+                boxShadow: '0 0 20px rgba(239, 68, 68, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <Trash2 size={48} className="text-red-500 mx-auto mb-4" />
+                <h3 className="font-mono text-xl font-bold text-white mb-2">DELETE COLLECTION</h3>
+                <p className="text-gray-300 font-mono mb-4">
+                  Are you sure you want to permanently delete<br />
+                  <span className="text-cyan-400 font-bold">"{notebook.name}"</span>?
+                </p>
+                <p className="text-red-400 text-sm font-mono mb-6">
+                  All logs in this collection will become unorganized. This action cannot be undone.
+                </p>
+                
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="bg-gray-900 border border-gray-600 px-4 py-2 font-mono text-gray-400 hover:text-white transition-colors"
+                  >
+                    CANCEL
+                  </button>
+                  <button
+                    onClick={handleDeleteNotebook}
+                    className="bg-gray-900 border-2 border-red-500 px-4 py-2 font-mono text-red-500 hover:bg-red-900 transition-colors"
+                  >
+                    DELETE COLLECTION
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

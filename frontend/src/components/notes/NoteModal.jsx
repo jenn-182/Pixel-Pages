@@ -422,6 +422,25 @@ Use the toolbar above or keyboard shortcuts:
                           <Palette size={12} className="inline mr-1" />
                           COLOR
                         </label>
+                        
+                        {/* Current Color Display */}
+                        <div className="flex items-center gap-2 mb-2">
+                          <div 
+                            className="w-6 h-4 border-2 border-gray-600"
+                            style={{ backgroundColor: noteData.color }}
+                            title="Current color"
+                          />
+                          <input
+                            type="color"
+                            value={noteData.color}
+                            onChange={(e) => setNoteData({ ...noteData, color: e.target.value })}
+                            className="w-6 h-4 border-2 border-gray-600 bg-transparent cursor-pointer"
+                            title="Custom color picker"
+                          />
+                          <span className="text-xs font-mono text-gray-400">Custom</span>
+                        </div>
+
+                        {/* Preset Colors Grid */}
                         <div className="grid grid-cols-2 gap-1">
                           {colors.map(color => {
                             const hexToRgb = (hex) => {

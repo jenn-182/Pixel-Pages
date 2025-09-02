@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Plus, Clock, AlertTriangle, Trash2, Edit, Calendar, Tag, FileText, Filter, BarChart3, Check } from 'lucide-react';
+import { Target, Plus, Clock, AlertTriangle, Trash2, Edit, Calendar, Tag, FileText, Filter, Check, Menu, X } from 'lucide-react';
 import useTasks from '../../hooks/useTasks';
 import TaskModal from '../modals/TaskModal';
 import TaskListManager from '../tasks/TaskListManager';
 import TaskSearch from '../tasks/TaskSearch';
-import TaskInsights from '../tasks/TaskInsights';
 
 const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   const { 
@@ -27,14 +26,14 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   const [selectedTaskListId, setSelectedTaskListId] = useState(null);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [showOperations, setShowOperations] = useState(true); // New state for operations sidebar
   const [filters, setFilters] = useState({
     priority: 'all',
-    status: 'all', // all, active, completed, overdue, urgent
+    status: 'all',
     tags: ''
   });
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const [showInsights, setShowInsights] = useState(false);
 
   // Filter tasks based on selected list and filters
   useEffect(() => {
@@ -75,7 +74,6 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
 
   const handleCreateTask = async (taskData) => {
     try {
-      // Set the task list ID if one is selected
       const taskWithList = {
         ...taskData,
         taskListId: selectedTaskListId
@@ -159,7 +157,6 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   const handleQuickAction = (action) => {
     switch (action) {
       case 'markAllComplete':
-        // Complete all active missions
         searchResults.forEach(task => {
           if (!task.completed) {
             handleToggleTask(task.id);
@@ -167,14 +164,12 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
         });
         break;
       case 'deleteCompleted':
-        // Archive all completed missions
         const completedTasks = filteredTasks.filter(t => t.completed);
         completedTasks.forEach(task => {
           handleDeleteTask(task.id);
         });
         break;
       case 'addToProject':
-        // Bulk assign to operation
         console.log('Bulk assign to operation');
         break;
     }
@@ -237,9 +232,9 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
     const diffTime = taskDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays < 0) return '#EF4444'; // Overdue - red
-    if (diffDays <= 1) return '#F59E0B'; // Urgent - yellow
-    return '#10B981'; // On track - green
+    if (diffDays < 0) return '#EF4444';
+    if (diffDays <= 1) return '#F59E0B';
+    return '#10B981';
   };
 
   const parseTagsToArray = (tags) => {
@@ -285,16 +280,24 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
   return (
     <>
       <div className="flex h-full">
-        {/* Left Sidebar - Operations */}
-        <div className="w-80 p-4 border-r border-gray-600">
-          <TaskListManager
-            taskLists={taskLists}
-            onCreateTaskList={handleCreateTaskList}
-            onDeleteTaskList={handleDeleteTaskList}
-            onSelectTaskList={handleSelectTaskList}
-            selectedTaskListId={selectedTaskListId}
-          />
-        </div>
+        {/* Left Sidebar - Operations (Toggleable) */}
+        {showOperations && (
+          <motion.div
+            initial={{ x: -320, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -320, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="w-80 p-4 border-r border-gray-600"
+          >
+            <TaskListManager
+              taskLists={taskLists}
+              onCreateTaskList={handleCreateTaskList}
+              onDeleteTaskList={handleDeleteTaskList}
+              onSelectTaskList={handleSelectTaskList}
+              selectedTaskListId={selectedTaskListId}
+            />
+          </motion.div>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 p-6 space-y-6">
@@ -331,6 +334,25 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                 <div className="text-sm font-mono text-gray-400">
                   {filteredTasks.filter(t => t.completed).length}/{filteredTasks.length} MISSIONS COMPLETE
                 </div>
+                
+                {/* Operations Toggle Button */}
+                <button
+                  onClick={() => setShowOperations(!showOperations)}
+                  className={`bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold ${
+                    showOperations ? 'text-cyan-300' : 'text-cyan-400'
+                  }`}
+                  style={{
+                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
+                  title={showOperations ? 'Hide Operations Panel' : 'Show Operations Panel'}
+                >
+                  <div className="flex items-center gap-2">
+                    {showOperations ? <X size={16} /> : <Menu size={16} />}
+                    <span>{showOperations ? 'HIDE OPERATIONS' : 'SHOW OPERATIONS'}</span>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                </button>
+
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className={`bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold ${
@@ -346,6 +368,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                   </div>
                   <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
                 </button>
+                
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
@@ -356,21 +379,6 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
                   <div className="flex items-center gap-2">
                     <Plus size={16} />
                     <span>NEW MISSION</span>
-                  </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
-                </button>
-                <button
-                  onClick={() => setShowInsights(!showInsights)}
-                  className={`bg-gray-900 border-2 border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold ${
-                    showInsights ? 'text-purple-300' : 'text-cyan-400'
-                  }`}
-                  style={{
-                    boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <BarChart3 size={16} />
-                    <span>INSIGHT</span>
                   </div>
                   <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
                 </button>
@@ -713,18 +721,6 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
               ))}
             </motion.div>
           )}
-
-          {/* Mission Intelligence Dashboard */}
-          {showInsights && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <TaskInsights tasks={tasks} taskLists={taskLists} />
-            </motion.div>
-          )}
-
         </div>
       </div>
 
