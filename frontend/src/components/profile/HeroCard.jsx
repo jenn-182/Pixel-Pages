@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, Zap, Target, Star, Trophy, X } from 'lucide-react';
+import { Crown, Zap, Target, Star, Trophy, X, ChevronDown, Palette } from 'lucide-react';
 import PixelPageJenn from '../../assets/icons/PixelPageJenn.PNG';
 import TaskStats from './TaskStats';
 
 const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [showStyleDropdown, setShowStyleDropdown] = useState(false);
 
   // Calculate XP and level (matching your GameUtilities.java logic)
   const calculateTotalXP = (notes) => {
@@ -89,26 +90,86 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
 
   return (
     <div className="space-y-6">
-      {/* Main Profile Section */}
+      {/* Main Profile Section - Updated with purple theme to match LOG STATS */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 relative"
+        className="bg-gray-900 border border-purple-400 p-8 relative overflow-hidden"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          boxShadow: '0 0 3px rgba(139, 92, 246, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
         }}
       >
-        {/* Animated border glow */}
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+        {/* Gradient overlay with purple theme to match LOG STATS */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-400/15 to-purple-600/20 pointer-events-none" />
         
-        <div className="flex items-start gap-8 lg:gap-12">
-          {/* Avatar and Level Badge section */}
+        {/* Profile Style Button - Top Right - Updated to pink theme */}
+        <div className="absolute top-4 right-4 z-20">
+          <div className="relative">
+            <button
+              onClick={() => setShowStyleDropdown(!showStyleDropdown)}
+              className="bg-gray-900 border border-pink-400 px-3 py-2 relative group cursor-pointer transition-all duration-300 hover:border-pink-300 hover:shadow-[0_0_8px_rgba(244,114,182,0.4)] font-mono font-bold text-pink-400 overflow-hidden flex items-center gap-2"
+              style={{
+                boxShadow: '0 0 3px rgba(244, 114, 182, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/8 to-pink-600/12 pointer-events-none" />
+              <div className="relative z-10 flex items-center gap-2">
+                <Palette size={14} className="text-pink-400" />
+                <span className="text-pink-400 text-xs">PROFILE STYLE</span>
+                <ChevronDown 
+                  size={12} 
+                  className={`text-pink-400 transition-transform duration-200 ${showStyleDropdown ? 'rotate-180' : ''}`} 
+                />
+              </div>
+              <div className="absolute inset-0 bg-pink-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+            </button>
+
+            {/* Dropdown Menu - Updated to pink theme */}
+            <AnimatePresence>
+              {showStyleDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full right-0 mt-2 bg-gray-900 border border-pink-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] min-w-[200px] z-30"
+                  style={{
+                    boxShadow: '0 0 10px rgba(244, 114, 182, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/8 to-pink-600/12 pointer-events-none" />
+                  <div className="relative z-10 p-3">
+                    <div className="text-xs font-mono text-pink-400 font-bold mb-2">CHOOSE THEME:</div>
+                    
+                    {/* Style Options */}
+                    <div className="space-y-2">
+                      <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-pink-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-pink-400">
+                        CYBER PINK
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-cyan-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-cyan-400">
+                        NEON CYAN
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-purple-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-purple-400">
+                        COSMIC PURPLE
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-xs font-mono text-gray-400 hover:text-indigo-400 hover:bg-gray-800 transition-colors border border-gray-600 hover:border-indigo-400">
+                        DIGITAL BLUE
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+        
+        <div className="relative z-10 flex items-start gap-8 lg:gap-12">
+          {/* Avatar and Level Badge section - Updated with purple theme */}
           <div className="flex-shrink-0">
-            <div className="w-32 h-32 lg:w-40 lg:h-40 border-2 border-cyan-400 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center relative overflow-hidden bg-gray-700"
+            <div className="w-32 h-32 lg:w-40 lg:h-40 border-2 border-purple-400 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center relative overflow-hidden bg-gray-700"
                  style={{
-                   boxShadow: '0 0 10px rgba(34, 211, 238, 0.3), 6px 6px 0px 0px rgba(0,0,0,1)'
+                   boxShadow: '0 0 10px rgba(139, 92, 246, 0.3), 6px 6px 0px 0px rgba(0,0,0,1)'
                  }}>
-              {/* Custom Pixel Profile Image */}
+              {/* Custom Pixel Profile Image - unchanged */}
               <img 
                 src={PixelPageJenn} 
                 alt="Pixel Profile Avatar"
@@ -120,7 +181,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 }}
               />
               
-              {/* Level decorations overlay */}
+              {/* Level decorations overlay - unchanged */}
               <div className="absolute inset-0 flex items-center justify-center">
                 {/* Crown for high levels */}
                 {currentLevel >= 8 && (
@@ -135,23 +196,26 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 )}
               </div>
               
-              {/* Level ring around avatar for high levels */}
+              {/* Level ring around avatar for high levels - updated with purple theme */}
               {currentLevel >= 5 && (
-                <div className="absolute inset-0 border-2 border-cyan-400 opacity-60 animate-pulse" />
+                <div className="absolute inset-0 border-2 border-purple-400 opacity-60 animate-pulse" />
               )}
             </div>
             
-            {/* Level Badge */}
+            {/* Level Badge - updated with pink theme and shiny effects */}
             <div className="mt-4 relative">
-              <div className="bg-gray-900 border-2 border-cyan-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center px-4 py-2 relative overflow-hidden group"
+              <div className="bg-gray-900 border-2 border-pink-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center px-4 py-2 relative overflow-hidden group"
                    style={{
-                     boxShadow: '0 0 10px rgba(34, 211, 238, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
+                     boxShadow: '0 0 10px rgba(244, 114, 182, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
                    }}>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-30 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                <span className="font-mono font-bold text-lg text-cyan-400 relative z-10">LVL {currentLevel}</span>
+                {/* Shiny sweep animation */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-400 to-transparent opacity-30 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                {/* Additional shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-300/20 via-transparent to-pink-500/20 animate-pulse" />
+                <span className="font-mono font-bold text-lg text-pink-400 relative z-10">LVL {currentLevel}</span>
               </div>
               
-              {/* Online Status Indicator - Now with hidden easter egg button */}
+              {/* Online Status Indicator - unchanged */}
               <div className="mt-2 flex items-center justify-center gap-2 bg-gray-900 border border-gray-600 px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <button
                   onClick={() => setShowEasterEgg(true)}
@@ -166,75 +230,82 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
             </div>
           </div>
 
-          {/* Player Info */}
+          {/* Player Info - updated with purple theme */}
           <div className="flex-1 min-w-0">
             <div className="mb-2">
-              <span className="text-lg font-mono text-cyan-400 block">USERNAME:</span>
+              <span className="text-lg font-mono text-purple-400 block">USERNAME:</span>
               <h2 className="text-3xl lg:text-4xl font-bold font-mono text-white break-words">
                 {currentPlayer.username}
               </h2>
             </div>
             
-            {/* Player Title section */}
+            {/* Player Title section - updated with pink shiny rank badge */}
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <div className="relative">
-                <div className="bg-gray-900 border-4 border-cyan-400 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] px-5 py-3 relative overflow-hidden"
+                <div className="bg-gray-900 border-4 border-pink-400 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] px-5 py-3 relative overflow-hidden group"
                      style={{
-                       boxShadow: '0 0 10px rgba(34, 211, 238, 0.3), 6px 6px 0px 0px rgba(0,0,0,1)'
+                       boxShadow: '0 0 15px rgba(244, 114, 182, 0.4), 6px 6px 0px 0px rgba(0,0,0,1)'
                      }}>
+                  {/* Shiny striped background */}
                   <div 
-                    className="absolute inset-0 opacity-20"
+                    className="absolute inset-0 opacity-25"
                     style={{
                       background: `
                         repeating-linear-gradient(
                           45deg,
-                          #22d3ee,
-                          #22d3ee 2px,
+                          #f472b6,
+                          #f472b6 2px,
                           transparent 2px,
                           transparent 4px
                         )
                       `
                     }}
                   />
-                  <p className="text-lg lg:text-xl font-mono font-bold text-cyan-300 relative z-10">
+                  {/* Shiny sweep effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-300 to-transparent opacity-40 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1500" />
+                  {/* Additional shine layers */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-200/30 via-transparent to-pink-400/30 animate-pulse" />
+                  <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-white/10 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+                  
+                  <p className="text-lg lg:text-xl font-mono font-bold text-pink-300 relative z-10">
                     {playerTitle}
                   </p>
                 </div>
-                {/* Corner decoration */}
-                <div className="absolute -top-2 -left-2">
-                  <div className="relative w-5 h-5">
-                    <span className="absolute top-0 left-1 text-purple-400 text-sm animate-pulse font-bold">✦</span>
-                    <span className="absolute top-1 left-3 text-purple-300 text-xs animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
-                    <span className="absolute top-3 left-0 text-purple-500 text-xs animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
+                {/* Corner decorations - BIGGER stars with mixed theme colors */}
+                <div className="absolute -top-3 -left-3">
+                  <div className="relative w-8 h-8">
+                    <span className="absolute top-0 left-2 text-white-400 text-xl animate-pulse font-bold">✦</span>
+                    <span className="absolute top-2 left-5 text-purple-300 text-lg animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
+                    <span className="absolute top-5 left-0 text-cyan-500 text-lg animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
                   </div>
                 </div>
-                <div className="absolute -top-2 -right-2">
-                  <div className="relative w-5 h-5">
-                    <span className="absolute top-0 right-1 text-purple-400 text-sm animate-pulse font-bold">✦</span>
-                    <span className="absolute top-1 right-3 text-purple-300 text-xs animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
-                    <span className="absolute top-3 right-0 text-purple-500 text-xs animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
+                <div className="absolute -top-3 -right-3">
+                  <div className="relative w-8 h-8">
+                    <span className="absolute top-0 right-2 text-white-400 text-xl animate-pulse font-bold">✦</span>
+                    <span className="absolute top-2 right-5 text-purple-300 text-lg animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
+                    <span className="absolute top-5 right-0 text-cyan-500 text-lg animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
                   </div>
                 </div>
               </div>
               {currentLevel >= 8 && (
-                <div className="bg-cyan-400 text-black px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <div className="bg-pink-400 text-black px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                   <span className="font-mono font-bold text-sm">ELITE</span>
                 </div>
               )}
             </div>
 
-            {/* Next Rank */}
+            {/* Next Rank - updated to pink */}
             <div className="mb-6">
               <span className="font-mono text-gray-400 flex items-center text-sm">
                 <Target size={14} className="inline mr-1" />
-                Next Rank: <span className="text-purple-400 ml-1">{nextLevelTitle}</span>
+                Next Rank: <span className="text-pink-400 ml-1">{nextLevelTitle}</span>
               </span>
             </div>
 
-            {/* XP Progress Bar */}
+            {/* XP Progress Bar - updated with purple/pink to cyan gradient */}
             <div className="space-y-3">
               <div className="relative">
-                <div className="w-full h-10 bg-gray-900 border border-cyan-400 relative overflow-hidden"
+                <div className="w-full h-10 bg-gray-900 border border-purple-400 relative overflow-hidden"
                      style={{
                        clipPath: 'polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%)'
                      }}>
@@ -242,15 +313,18 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercentage}%` }}
                     transition={{ duration: 2, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 relative"
+                    className="h-full bg-gradient-to-r from-purple-500 via-pink-400 to-cyan-400 relative"
                   >
+                    {/* Animated shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white to-transparent opacity-20"
                          style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                    {/* Additional sparkle effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-30 -skew-x-12 animate-pulse" />
                   </motion.div>
                   
-                  <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-400" />
-                  <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-400" />
-                  <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-400" />
+                  <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-purple-400" />
+                  <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-purple-400" />
+                  <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-purple-400" />
                 </div>
                 
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -277,70 +351,148 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
         </div>
       </motion.div>
 
-      {/* Quick Stats Section */}
+      {/* LOG STATS Section - Updated with purple theme */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+        className="bg-gray-900 border border-purple-400 p-6 relative overflow-hidden"
         style={{
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
+          boxShadow: '0 0 3px rgba(139, 92, 246, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
         }}
       >
-        <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+        {/* Gradient overlay with purple theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-400/15 to-purple-600/20 pointer-events-none" />
         
-        <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-          <div className="w-4 h-4 bg-purple-400 mr-2" />
-          LOG STATS
-        </h3>
-        
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Notes */}
-          <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-               style={{
-                 boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-               }}>
-            <div className="text-xs font-mono text-gray-400">LOGS</div>
-            <div className="text-2xl font-mono font-bold text-white">{notes.length}</div>
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
-          </div>
+        <div className="relative z-10">
+          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+            <span className="text-pink-400 mr-2 text-xl">♥</span>
+            LOG STATS
+          </h3>
+          
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Notes */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">LOGS</div>
+                <div className="text-2xl font-mono font-bold text-white">{notes.length}</div>
+              </div>
+            </div>
 
-          {/* Total XP */}
-          <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-               style={{
-                 boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-               }}>
-            <div className="text-xs font-mono text-gray-400">TOTAL XP</div>
-            <div className="text-2xl font-mono font-bold text-white">{totalXP.toLocaleString()}</div>
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
-          </div>
+            {/* Total XP */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-purple-500/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">TOTAL XP</div>
+                <div className="text-2xl font-mono font-bold text-white">{totalXP.toLocaleString()}</div>
+              </div>
+            </div>
 
-          {/* Total Tasks */}
-          <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-               style={{
-                 boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-               }}>
-            <div className="text-xs font-mono text-gray-400">QUESTS</div>
-            <div className="text-2xl font-mono font-bold text-white">{tasks.length}</div>
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
-          </div>
+            {/* Total Words - Updated from QUESTS */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-purple-700/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">WORDS</div>
+                <div className="text-2xl font-mono font-bold text-white">
+                  {notes.reduce((total, note) => {
+                    const wordCount = note.content ? note.content.split(/\s+/).length : 0;
+                    return total + wordCount;
+                  }, 0).toLocaleString()}
+                </div>
+              </div>
+            </div>
 
-          {/* Days Active */}
-          <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-               style={{
-                 boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-               }}>
-            <div className="text-xs font-mono text-gray-400">STREAK</div>
-            <div className="text-2xl font-mono font-bold text-white">7</div>
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
+            {/* Days Active - Updated with 'd' suffix */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-800/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">STREAK</div>
+                <div className="text-2xl font-mono font-bold text-white">7d</div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Task Statistics Section */}
-      <TaskStats tasks={tasks} taskLists={taskLists} />
+      {/* MISSION STATS Section - Updated to match LOG STATS theme (cyan -> purple) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="bg-gray-900 border border-purple-400 p-6 relative overflow-hidden"
+        style={{
+          boxShadow: '0 0 3px rgba(139, 92, 246, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+        }}
+      >
+        {/* Gradient overlay with purple theme to match LOG STATS */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-400/15 to-purple-600/20 pointer-events-none" />
+        
+        <div className="relative z-10">
+          <TaskStats tasks={tasks} taskLists={taskLists} />
+        </div>
+      </motion.div>
 
-      {/* Easter Egg Modal */}
+      {/* ACHIEVEMENT STATS Section - Updated stats and removed badges */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-gray-900 border border-purple-400 p-6 relative overflow-hidden"
+        style={{
+          boxShadow: '0 0 3px rgba(139, 92, 246, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+        }}
+      >
+        {/* Gradient overlay with purple theme to match other sections */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-400/15 to-purple-600/20 pointer-events-none" />
+        
+        <div className="relative z-10">
+          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+            <span className="text-pink-400 mr-2 text-xl">♥</span>
+            ACHIEVEMENT STATS
+          </h3>
+          
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Unlocked Achievements */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">UNLOCKED</div>
+                <div className="text-2xl font-mono font-bold text-white">12</div>
+              </div>
+            </div>
+
+            {/* Completion Rate */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-purple-500/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">COMPLETION</div>
+                <div className="text-2xl font-mono font-bold text-white">24%</div>
+              </div>
+            </div>
+
+            {/* Rare Achievements */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-purple-700/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">RARE</div>
+                <div className="text-2xl font-mono font-bold text-white">3</div>
+              </div>
+            </div>
+
+            {/* Legendary Achievements */}
+            <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-800/15 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="text-xs font-mono text-gray-400">LEGENDARY</div>
+                <div className="text-2xl font-mono font-bold text-white">1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Easter Egg Modal - unchanged */}
       <AnimatePresence>
         {showEasterEgg && (
           <motion.div
@@ -371,7 +523,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 <X size={20} />
               </button>
 
-              {/* Content */}
+              {/* Content - unchanged */}
               <div className="text-center">
                 <motion.div
                   className="mb-6"
@@ -382,11 +534,11 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 </motion.div>
 
                 <h2 className="text-2xl font-mono font-bold text-white mb-2">
-                  SECRET ACHIEVEMENTS
+                  EASTER EGG ACHIEVEMENTS
                 </h2>
                 
                 <p className="text-purple-400 font-mono text-sm mb-6">
-                  You found the hidden section!
+                  You found the hidden easter egg level!
                 </p>
 
                 <motion.div

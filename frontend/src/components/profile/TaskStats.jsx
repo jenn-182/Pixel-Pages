@@ -91,101 +91,56 @@ const TaskStats = ({ tasks, taskLists }) => {
   const speedRank = getSpeedRank(stats.averageCompletionTime);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-      style={{
-        boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-      }}
-    >
-      <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
+    <>
+<h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+  <span className="text-pink-400 mr-2 text-xl">♥</span>
+  MISSION STATS
+</h3>
       
-      <h3 className="text-lg font-mono font-bold text-white flex items-center mb-6">
-        <div className="w-4 h-4 bg-purple-400 mr-2" />
-        MISSION STATS
-      </h3>
-      
+      {/* Rest of TaskStats content without wrapper border */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Tasks */}
-        <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-             style={{
-               boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-             }}>
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <div className="text-xs font-mono text-gray-400">TOTAL MISSIONS</div>
-              <div className="text-2xl font-mono font-bold text-white">
-                {stats.totalTasks}
-              </div>
+        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+          <div className="relative z-10">
+            <div className="text-xs font-mono text-gray-400">TOTAL MISSIONS</div>
+            <div className="text-2xl font-mono font-bold text-white">
+              {stats.totalTasks}
             </div>
-            <CheckSquare className="text-cyan-400" size={24} />
           </div>
-          <div className="text-xs font-mono font-bold px-2 py-1 border border-cyan-400 bg-cyan-400 bg-opacity-20 text-cyan-400">
-            {stats.completedTasks} COMPLETE
-          </div>
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
         </div>
 
         {/* Completion Rate */}
-        <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-             style={{
-               boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-             }}>
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <div className="text-xs font-mono text-gray-400">COMPLETION RATE</div>
-              <div className="text-2xl font-mono font-bold text-white">
-                {stats.completionRate}%
-              </div>
+        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+          <div className="relative z-10">
+            <div className="text-xs font-mono text-gray-400">COMPLETION RATE</div>
+            <div className="text-2xl font-mono font-bold text-white">
+              {stats.completionRate}%
             </div>
-            <Target className="text-cyan-400" size={24} />
           </div>
-          <div className="text-xs font-mono font-bold px-2 py-1 border border-cyan-400 bg-cyan-400 bg-opacity-20 text-cyan-400">
-            {completionRank.rank}
-          </div>
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
         </div>
 
         {/* Streak */}
-        <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-             style={{
-               boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-             }}>
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <div className="text-xs font-mono text-gray-400">MISSION STREAK</div>
-              <div className="text-2xl font-mono font-bold text-white">
-                {stats.streakDays}
-              </div>
+        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+          <div className="relative z-10">
+            <div className="text-xs font-mono text-gray-400">MISSION STREAK</div>
+            <div className="text-2xl font-mono font-bold text-white">
+              {stats.streakDays}
             </div>
-            <TrendingUp className="text-cyan-400" size={24} />
           </div>
-          <div className="text-xs font-mono font-bold px-2 py-1 border border-cyan-400 bg-cyan-400 bg-opacity-20 text-cyan-400">
-            {streakRank.rank}
-          </div>
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
         </div>
 
         {/* Average Time */}
-        <div className="bg-gray-900 border border-cyan-400 p-4 relative"
-             style={{
-               boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-             }}>
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <div className="text-xs font-mono text-gray-400">COMPLETION SPEED</div>
-              <div className="text-2xl font-mono font-bold text-white">
-                {stats.averageCompletionTime > 0 ? `${stats.averageCompletionTime}d` : 'N/A'}
-              </div>
+        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+          <div className="relative z-10">
+            <div className="text-xs font-mono text-gray-400">COMPLETION SPEED</div>
+            <div className="text-2xl font-mono font-bold text-white">
+              {stats.averageCompletionTime > 0 ? `${stats.averageCompletionTime}d` : 'N/A'}
             </div>
-            <Clock className="text-cyan-400" size={24} />
           </div>
-          <div className="text-xs font-mono font-bold px-2 py-1 border border-cyan-400 bg-cyan-400 bg-opacity-20 text-cyan-400">
-            {speedRank.rank}
-          </div>
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400" />
         </div>
       </div>
 
@@ -219,7 +174,7 @@ const TaskStats = ({ tasks, taskLists }) => {
           </div>
         )}
       </div>
-    </motion.div>
+    </>
   );
 };
 
