@@ -59,14 +59,14 @@ const apiService = {
     return await response.json();
   },
 
-  // Player API calls
-  async getPlayerStats(username) {
-    const response = await fetch(`${API_BASE}/players/${username}`);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    return response.json();
-  },
+  // // Player API calls
+  // async getPlayerStats(username) {
+  //   const response = await fetch(`${API_BASE}/players/${username}`);
+  //   if (!response.ok) {
+  //     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  //   }
+  //   return response.json();
+  // },
 
   async getTasks(username) {
     const response = await fetch(`${API_BASE}/tasks?username=${username}`);
@@ -327,7 +327,118 @@ const apiService = {
     return await response.json();
   },
 
-  // ...existing code...
+  // Add this method:
+  async getAchievements(username) {
+    try {
+      const response = await fetch(`${API_BASE}/achievements?username=${username || 'user'}`);
+      if (!response.ok) {
+        // Return mock data if API fails
+        return {
+          achievements: [],
+          summary: { completed: 0, inProgress: 0, locked: 0 }
+        };
+      }
+      return response.json();
+    } catch (error) {
+      console.warn('Achievements API not available, using mock data');
+      return {
+        achievements: [],
+        summary: { completed: 0, inProgress: 0, locked: 0 }
+      };
+    }
+  },
+
+  // Fix this method:
+  async getPlayerStats(username) {
+    if (!username || username === 'undefined') {
+      console.warn('No username provided for player stats');
+      return { level: 1, xp: 0, totalNotes: 0, totalTasks: 0 };
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE}/players/${username}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return { level: 1, xp: 0, totalNotes: 0, totalTasks: 0 };
+        }
+        throw new Error('Failed to fetch player stats');
+      }
+      return response.json();
+    } catch (error) {
+      console.warn('Player stats API not available, using defaults');
+      return { level: 1, xp: 0, totalNotes: 0, totalTasks: 0 };
+    }
+  },
+
+  // =================== FOCUS CATEGORIES API ===================
+  
+  // Save focus session with category
+  async saveFocusSessionWithCategory(sessionData) {
+    const response = await fetch(`${API_BASE}/focus/sessions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...sessionData,
+        // Ensure category is included in the session data
+        category: sessionData.category || 'OTHER'
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
+
+  // Get categories with XP totals
+  async getFocusCategories(username) {
+    try {
+      // First try to get from backend
+      const response = await fetch(`${API_BASE}/focus/sessions/stats?username=${username}`);
+      if (!response.ok) {
+        throw new Error('Backend not available');
+      }
+      
+      const stats = await response.json();
+      
+      // Convert backend stats to category format
+      const categories = [];
+      if (stats.categoryBreakdown) {
+        Object.entries(stats.categoryBreakdown).forEach(([categoryName, minutes]) => {
+          categories.push({
+            id: categoryName.toLowerCase(),
+            name: categoryName,
+            xp: minutes,
+            iconName: this.getCategoryIcon(categoryName)
+          });
+        });
+      }
+      
+      return categories;
+    } catch (error) {
+      console.warn('Using localStorage categories as fallback');
+      // Fallback to localStorage
+      const saved = localStorage.getItem('focusCategories');
+      return saved ? JSON.parse(saved) : [];
+    }
+  },
+
+  // Helper method to get icon for category
+  getCategoryIcon(categoryName) {
+    const iconMap = {
+      'WORK': 'Briefcase',
+      'STUDY': 'BookOpen',
+      'LEARNING': 'BookOpen',
+      'CODE': 'Code',
+      'CREATE': 'Palette',
+      'CREATIVE': 'Palette',
+      'PERSONAL': 'User',
+      'HEALTH': 'User',
+      'OTHER': 'User'
+    };
+    return iconMap[categoryName.toUpperCase()] || 'User';
+  },
 };
 
 export default apiService;

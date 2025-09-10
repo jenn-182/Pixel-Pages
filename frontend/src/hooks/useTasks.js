@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import achievementService from '../services/achievementService';
 
 const useTasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -46,21 +47,15 @@ const useTasks = () => {
     }
   };
 
-  // Create new task with enhanced fields
+  // Create new task
   const createTask = async (taskData) => {
     try {
-      // Format due date for backend if provided
-      const formattedTask = {
-        ...taskData,
-        dueDate: taskData.dueDate ? new Date(taskData.dueDate).toISOString() : null
-      };
-
       const response = await fetch(`${API_BASE}?username=user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formattedTask),
+        body: JSON.stringify(taskData),
       });
 
       if (!response.ok) {
@@ -69,6 +64,12 @@ const useTasks = () => {
 
       const newTask = await response.json();
       setTasks(prevTasks => [...prevTasks, newTask]);
+      
+      // Check achievements after task creation
+      setTimeout(() => {
+        checkTaskAchievements();
+      }, 100);
+      
       return newTask;
     } catch (err) {
       console.error('Failed to create task:', err);
@@ -77,21 +78,15 @@ const useTasks = () => {
     }
   };
 
-  // Update task with enhanced fields
+  // Update task
   const updateTask = async (taskId, updates) => {
     try {
-      // Format due date for backend if provided
-      const formattedUpdates = {
-        ...updates,
-        dueDate: updates.dueDate ? new Date(updates.dueDate).toISOString() : null
-      };
-
       const response = await fetch(`${API_BASE}/${taskId}?username=user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formattedUpdates),
+        body: JSON.stringify(updates),
       });
 
       if (!response.ok) {
@@ -99,11 +94,15 @@ const useTasks = () => {
       }
 
       const updatedTask = await response.json();
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId ? updatedTask : task
-        )
+      setTasks(prevTasks => 
+        prevTasks.map(task => task.id === taskId ? updatedTask : task)
       );
+      
+      // Check achievements after task update
+      setTimeout(() => {
+        checkTaskAchievements();
+      }, 100);
+      
       return updatedTask;
     } catch (err) {
       console.error('Failed to update task:', err);
@@ -135,17 +134,23 @@ const useTasks = () => {
   const toggleTask = async (taskId) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      await updateTask(taskId, { ...task, completed: !task.completed });
+      const updatedTask = { ...task, completed: !task.completed };
+      if (updatedTask.completed) {
+        updatedTask.completedAt = new Date().toISOString();
+      }
+      await updateTask(taskId, updatedTask);
     }
   };
-
-  // 🆕 NEW METHODS FOR ENHANCED FEATURES
 
   // Get overdue tasks
   const getOverdueTasks = async () => {
     try {
       const response = await fetch(`${API_BASE}/overdue?username=user`);
-      if (!response.ok) throw new Error('Failed to fetch overdue tasks');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch overdue tasks');
+      }
+      
       return await response.json();
     } catch (err) {
       console.error('Failed to fetch overdue tasks:', err);
@@ -157,28 +162,21 @@ const useTasks = () => {
   const getDueSoonTasks = async () => {
     try {
       const response = await fetch(`${API_BASE}/due-soon?username=user`);
-      if (!response.ok) throw new Error('Failed to fetch due soon tasks');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks due soon');
+      }
+      
       return await response.json();
     } catch (err) {
-      console.error('Failed to fetch due soon tasks:', err);
+      console.error('Failed to fetch tasks due soon:', err);
       return [];
     }
   };
 
   // Get tasks by list
-  const getTasksByList = async (taskListId = null) => {
-    try {
-      const url = taskListId 
-        ? `${API_BASE}/by-list?username=user&taskListId=${taskListId}`
-        : `${API_BASE}/by-list?username=user`;
-      
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch tasks by list');
-      return await response.json();
-    } catch (err) {
-      console.error('Failed to fetch tasks by list:', err);
-      return [];
-    }
+  const getTasksByList = (taskListId) => {
+    return tasks.filter(task => task.taskListId === taskListId);
   };
 
   // Create task list
@@ -238,6 +236,117 @@ const useTasks = () => {
       overdue,
       dueSoon,
       completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
+    };
+  };
+
+  // Achievement checking
+  const checkTaskAchievements = () => {
+    const userStats = calculateTaskStats(tasks);
+    const newAchievements = achievementService.checkAchievements(userStats);
+    
+    if (newAchievements.length > 0) {
+      console.log(`✅ Task achievements unlocked: ${newAchievements.map(a => a.name).join(', ')}`);
+    }
+    
+    return newAchievements;
+  };
+
+  // Helper function for week start
+  const getWeekStart = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day;
+    return new Date(d.setDate(diff));
+  };
+
+  // Helper function for task streak calculation
+  const calculateTaskStreak = (completedTasks) => {
+    if (completedTasks.length === 0) return 0;
+    
+    const dates = [...new Set(completedTasks.map(t => new Date(t.completedAt).toDateString()))].sort();
+    let streak = 1;
+    let currentStreak = 1;
+    
+    for (let i = 1; i < dates.length; i++) {
+      const prevDate = new Date(dates[i - 1]);
+      const currentDate = new Date(dates[i]);
+      const dayDiff = (currentDate - prevDate) / (1000 * 60 * 60 * 24);
+      
+      if (dayDiff === 1) {
+        currentStreak++;
+        streak = Math.max(streak, currentStreak);
+      } else {
+        currentStreak = 1;
+      }
+    }
+    
+    return streak;
+  };
+
+  const calculateTaskStats = (tasks) => {
+    const now = new Date();
+    const today = now.toDateString();
+    const thisWeek = getWeekStart(now);
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    const completedTasks = tasks.filter(task => task.completed);
+    const totalTasks = completedTasks.length;
+    const tasksCreated = tasks.length;
+    const activeTasks = tasks.filter(task => !task.completed).length;
+    
+    // Today's completed tasks
+    const tasksToday = completedTasks.filter(task => 
+      task.completedAt && new Date(task.completedAt).toDateString() === today
+    ).length;
+    
+    // Week tasks
+    const tasksThisWeek = completedTasks.filter(task => 
+      task.completedAt && new Date(task.completedAt) >= thisWeek
+    ).length;
+    
+    // Month tasks
+    const tasksThisMonth = completedTasks.filter(task => 
+      task.completedAt && new Date(task.completedAt) >= thisMonth
+    ).length;
+    
+    // Priority-based tasks
+    const highPriorityTasks = completedTasks.filter(task => 
+      task.priority === 'high'
+    ).length;
+    
+    const urgentTasks = completedTasks.filter(task => 
+      task.priority === 'urgent'
+    ).length;
+    
+    // Early completions (completed before due date)
+    const earlyCompletions = completedTasks.filter(task => {
+      if (!task.dueDate || !task.completedAt) return false;
+      return new Date(task.completedAt) < new Date(task.dueDate);
+    }).length;
+    
+    // Task categories
+    const taskCategories = new Set(tasks.map(task => task.category).filter(Boolean)).size;
+    
+    // Task streak (simplified)
+    const taskStreak = calculateTaskStreak(completedTasks);
+    
+    // Completion rate
+    const completionRate = tasksCreated > 0 ? totalTasks / tasksCreated : 0;
+    
+    return {
+      totalTasks,
+      tasksCreated,
+      activeTasks,
+      completedTasks: totalTasks,
+      tasksToday,
+      tasksThisWeek,
+      tasksThisMonth,
+      highPriorityTasks,
+      urgentTasks,
+      earlyCompletions,
+      taskCategories,
+      taskStreak,
+      completionRate
     };
   };
 

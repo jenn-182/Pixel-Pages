@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, Square, Timer, Clock } from 'lucide-react';
+import { Play, Pause, Square, Timer, Clock, Coffee, Brain, Zap, Target, BookOpen, Code } from 'lucide-react';
 import { useFocusTimer } from '../../hooks/useFocusTimer';
 import CircularProgress from '../focus/CircularProgress';
-import SaveSessionModal from '../focus/SaveSessionModal';
+import SaveSessionModal from '../modals/SaveSessionModal';
 
 const FocusTab = ({ username = 'Jroc_182', tabColor = '#8B5CF6' }) => {
   const [selectedDuration, setSelectedDuration] = useState(null);
@@ -38,6 +38,64 @@ const FocusTab = ({ username = 'Jroc_182', tabColor = '#8B5CF6' }) => {
 
   const tabColorRgb = hexToRgb(tabColor);
 
+  // Quick Start Templates
+  const quickStartTemplates = [
+    {
+      id: 'pomodoro',
+      name: 'POMODORO',
+      description: '25min + 5min break',
+      duration: 25,
+      icon: Target,
+      color: '#EF4444',
+      gradient: 'from-red-500 to-red-600'
+    },
+    {
+      id: 'deep-work',
+      name: 'DEEP WORK',
+      description: '90min focused work',
+      duration: 90,
+      icon: Brain,
+      color: '#8B5CF6',
+      gradient: 'from-purple-500 to-purple-600'
+    },
+    {
+      id: 'quick-focus',
+      name: 'QUICK FOCUS',
+      description: '15min sprint',
+      duration: 15,
+      icon: Zap,
+      color: '#F59E0B',
+      gradient: 'from-yellow-500 to-orange-500'
+    },
+    {
+      id: 'micro-break',
+      name: 'MICRO BREAK',
+      description: '5min recharge',
+      duration: 5,
+      icon: Coffee,
+      color: '#10B981',
+      gradient: 'from-green-500 to-emerald-500'
+    },
+    {
+      id: 'study-block',
+      name: 'STUDY BLOCK',
+      description: '45min learning',
+      duration: 45,
+      icon: BookOpen,
+      color: '#3B82F6',
+      gradient: 'from-blue-500 to-blue-600'
+    },
+    {
+      id: 'code-session',
+      name: 'CODE SESSION',
+      description: '60min programming',
+      duration: 60,
+      icon: Code,
+      color: '#06B6D4',
+      gradient: 'from-cyan-500 to-teal-500'
+    }
+  ];
+
   // Handle duration selection
   const handleDurationSelect = (minutes) => {
     if (minutes === 'custom') {
@@ -47,6 +105,12 @@ const FocusTab = ({ username = 'Jroc_182', tabColor = '#8B5CF6' }) => {
       setSelectedDuration(minutes);
       setShowCustomInput(false);
     }
+  };
+
+  // Handle template selection
+  const handleTemplateSelect = (template) => {
+    setSelectedDuration(template.duration);
+    setShowCustomInput(false);
   };
 
   // Start timer with selected duration
@@ -253,7 +317,7 @@ const FocusTab = ({ username = 'Jroc_182', tabColor = '#8B5CF6' }) => {
         </div>
       </motion.div>
 
-      {/* Gaming Stats Preview */}
+      {/* Quick Start Templates */}
       {!isActive && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -269,15 +333,88 @@ const FocusTab = ({ username = 'Jroc_182', tabColor = '#8B5CF6' }) => {
                style={{ borderColor: tabColor }} />
           
           <div className="relative z-10">
-            <h3 className="text-lg font-mono font-bold text-white mb-4 flex items-center gap-2">
-              <Clock size={20} />
-              FOCUS CATEGORIES
+            <h3 className="text-lg font-mono font-bold text-white mb-6 flex items-center gap-2">
+              <Zap size={20} style={{ color: tabColor }} />
+              QUICK START TEMPLATES
             </h3>
             
-            <div className="text-center text-gray-400 font-mono text-sm">
-              Complete focus sessions to gain XP in different categories.
-              <br />
-              Track your progress in Study, Work, Code, Create, and more!
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {quickStartTemplates.map(template => {
+                const IconComponent = template.icon;
+                return (
+                  <motion.button
+                    key={template.id}
+                    onClick={() => handleTemplateSelect(template)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`bg-gray-900 border-2 p-4 relative overflow-hidden transition-all duration-300 hover:shadow-lg group ${
+                      selectedDuration === template.duration
+                        ? 'border-purple-400 bg-purple-500 bg-opacity-20'
+                        : 'border-gray-600 hover:border-gray-500'
+                    }`}
+                    style={{
+                      boxShadow: selectedDuration === template.duration 
+                        ? `0 0 15px rgba(139, 92, 246, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)`
+                        : '2px 2px 0px 0px rgba(0,0,0,1)'
+                    }}
+                  >
+                    {/* Gradient Background */}
+                    <div 
+                      className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-br ${template.gradient}`}
+                    />
+                    
+                    <div className="relative z-10 text-left">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div 
+                          className="w-10 h-10 border-2 border-gray-600 flex items-center justify-center group-hover:border-opacity-80 transition-colors"
+                          style={{ 
+                            backgroundColor: `${template.color}20`,
+                            borderColor: selectedDuration === template.duration ? template.color : '#4B5563'
+                          }}
+                        >
+                          <IconComponent 
+                            size={20} 
+                            style={{ color: template.color }}
+                          />
+                        </div>
+                        <div>
+                          <div className="font-mono font-bold text-white text-sm">
+                            {template.name}
+                          </div>
+                          <div className="text-xs text-gray-400 font-mono">
+                            {template.description}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div 
+                          className="inline-block px-2 py-1 text-xs font-mono font-bold border"
+                          style={{
+                            color: template.color,
+                            borderColor: selectedDuration === template.duration ? template.color : '#4B5563',
+                            backgroundColor: selectedDuration === template.duration ? `${template.color}20` : 'transparent'
+                          }}
+                        >
+                          {template.duration} MIN
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hover effect */}
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300"
+                      style={{ backgroundColor: template.color }}
+                    />
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 text-center">
+              <div className="text-sm font-mono text-gray-400">
+                Click a template to select it, then hit START FOCUS
+              </div>
             </div>
           </div>
         </motion.div>
@@ -294,8 +431,9 @@ const FocusTab = ({ username = 'Jroc_182', tabColor = '#8B5CF6' }) => {
           discardSession();
           setShowSavePrompt(false);
         }}
-        timeSpent={totalTimeSpent}
+        timeSpent={Math.floor(totalTimeSpent / 60)}
         sessionType={duration && timeRemaining <= 0 ? 'session' : 'partial'}
+        username={username}
       />
     </div>
   );

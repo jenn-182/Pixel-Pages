@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Zap, Target, Star, Trophy, X, ChevronDown, Palette } from 'lucide-react';
 import PixelPageJenn from '../../assets/icons/PixelPageJenn.PNG';
 import TaskStats from './TaskStats';
+import { playerRanks, getRankByXP, getNextRank, getRankByLevel } from '../../data/ranks';
+import achievementService from '../../services/achievementService';
 
 const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
@@ -37,33 +39,32 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
     return Math.floor(Math.sqrt(totalXP / 50.0)) + 1;
   };
 
-  const getRankNameForLevel = (level) => {
-    switch (level) {
-      case 1: return "Novice Scribe";
-      case 2: return "Skilled Chronicler";
-      case 3: return "Apprentice Writer";
-      case 4: return "Expert Documentarian";
-      case 5: return "Master Archivist";
-      case 6: return "Elite Wordsmith";
-      case 7: return "Distinguished Author";
-      case 8: return "Legendary Scribe";
-      case 9: return "Mythical Chronicler";
-      case 10: return "Grandmaster of Words";
-      default: return level < 15 ? `Ascended Writer` : `Transcendent Scribe`;
-    }
+  const getCurrentRankInfo = (level, totalXP) => {
+    // Get rank by XP (more accurate than by level)
+    const currentRank = getRankByXP(totalXP);
+    const nextRank = getNextRank(currentRank.level);
+    
+    return {
+      current: currentRank,
+      next: nextRank
+    };
   };
 
   // Calculate player stats
-  const totalXP = calculateTotalXP(notes);
+  const achievementStats = achievementService.getStats();
+  const totalXP = achievementStats.totalXP || calculateTotalXP(notes); // Use achievement XP if available
   const currentLevel = calculateLevelFromXP(totalXP);
-  const currentLevelBaseXP = Math.pow(currentLevel - 1, 2) * 50;
-  const nextLevelXP = Math.pow(currentLevel, 2) * 50;
-  const xpInCurrentLevel = totalXP - currentLevelBaseXP;
-  const xpNeededForNextLevel = nextLevelXP - currentLevelBaseXP;
-  const progressPercentage = Math.floor((xpInCurrentLevel / xpNeededForNextLevel) * 100);
+  const rankInfo = getCurrentRankInfo(currentLevel, totalXP);
 
-  const playerTitle = getRankNameForLevel(currentLevel);
-  const nextLevelTitle = getRankNameForLevel(currentLevel + 1);
+  // XP progress calculation for current rank
+  const currentRankXP = rankInfo.current.minXP;
+  const nextRankXP = rankInfo.next ? rankInfo.next.minXP : currentRankXP + 1000;
+  const xpInCurrentRank = totalXP - currentRankXP;
+  const xpNeededForNextRank = nextRankXP - currentRankXP;
+  const progressPercentage = Math.floor((xpInCurrentRank / xpNeededForNextRank) * 100);
+
+  const playerTitle = rankInfo.current.name;
+  const nextLevelTitle = rankInfo.next ? rankInfo.next.name : 'Max Rank Achieved!';
 
   // Generate pixel avatar based on username
   const generatePixelAvatar = (username) => {
@@ -259,75 +260,98 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               </h2>
             </div>
             
-            {/* Player Title section - updated with pink shiny rank badge */}
+            {/* Player Title section - Enhanced with new rank system */}
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <div className="relative">
                 <div className="bg-gray-900 border-4 border-pink-400 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] px-5 py-3 relative overflow-hidden group"
                      style={{
-                       boxShadow: '0 0 15px rgba(244, 114, 182, 0.4), 6px 6px 0px 0px rgba(0,0,0,1)'
+                       boxShadow: `0 0 15px ${rankInfo.current.color}40, 6px 6px 0px 0px rgba(0,0,0,1)`,
+                       borderColor: rankInfo.current.color
                      }}>
-                  {/* Shiny striped background */}
+                  {/* Shiny striped background with rank color */}
                   <div 
                     className="absolute inset-0 opacity-25"
                     style={{
                       background: `
                         repeating-linear-gradient(
                           45deg,
-                          #f472b6,
-                          #f472b6 2px,
+                          ${rankInfo.current.color},
+                          ${rankInfo.current.color} 2px,
                           transparent 2px,
                           transparent 4px
                         )
                       `
                     }}
                   />           
-                  <p className="text-lg lg:text-xl font-mono font-bold text-pink-300 relative z-10">
-                    {playerTitle}
+                  <p className="text-lg lg:text-xl font-mono font-bold relative z-10"
+                     style={{ color: rankInfo.current.color }}>
+                    {rankInfo.current.icon} {rankInfo.current.name}
                   </p>
                 </div>
-                {/* Corner decorations - BIGGER stars with mixed theme colors */}
+                
+                {/* Enhanced corner decorations with rank-appropriate colors */}
                 <div className="absolute -top-3 -left-3">
                   <div className="relative w-8 h-8">
-                    <span className="absolute top-0 left-2 text-white-400 text-xl animate-pulse font-bold">✦</span>
-                    <span className="absolute top-2 left-5 text-purple-300 text-lg animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
-                    <span className="absolute top-5 left-0 text-cyan-500 text-lg animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
+                    <span className="absolute top-0 left-2 text-white text-xl animate-pulse font-bold">✦</span>
+                    <span className="absolute top-2 left-5 text-lg animate-pulse font-bold" 
+                          style={{ color: rankInfo.current.color, animationDelay: '0.5s' }}>★</span>
+                    <span className="absolute top-5 left-0 text-cyan-500 text-lg animate-pulse font-bold" 
+                          style={{ animationDelay: '1s' }}>✧</span>
                   </div>
                 </div>
                 <div className="absolute -top-3 -right-3">
                   <div className="relative w-8 h-8">
-                    <span className="absolute top-0 right-2 text-white-400 text-xl animate-pulse font-bold">✦</span>
-                    <span className="absolute top-2 right-5 text-purple-300 text-lg animate-pulse font-bold" style={{ animationDelay: '0.5s' }}>★</span>
-                    <span className="absolute top-5 right-0 text-cyan-500 text-lg animate-pulse font-bold" style={{ animationDelay: '1s' }}>✧</span>
+                    <span className="absolute top-0 right-2 text-white text-xl animate-pulse font-bold">✦</span>
+                    <span className="absolute top-2 right-5 text-lg animate-pulse font-bold" 
+                          style={{ color: rankInfo.current.color, animationDelay: '0.5s' }}>★</span>
+                    <span className="absolute top-5 right-0 text-cyan-500 text-lg animate-pulse font-bold" 
+                          style={{ animationDelay: '1s' }}>✧</span>
                   </div>
                 </div>
               </div>
-              {currentLevel >= 8 && (
-                <div className="bg-pink-400 text-black px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                  <span className="font-mono font-bold text-sm">ELITE</span>
+              
+              {/* Elite badge for high-level players */}
+              {currentLevel >= 10 && (
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-mono font-bold text-sm">
+                  ELITE
+                </div>
+              )}
+              
+              {/* Legendary badge for max-level players */}
+              {currentLevel >= 15 && (
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-mono font-bold text-sm">
+                  LEGENDARY
                 </div>
               )}
             </div>
 
-            {/* Next Rank - updated to pink */}
+            {/* Next Rank - updated with new rank system */}
             <div className="mb-6">
               <span className="font-mono text-gray-400 flex items-center text-sm">
                 <Target size={14} className="inline mr-1" />
-                Next Rank: <span className="text-pink-400 ml-1">{nextLevelTitle}</span>
+                Next Rank: 
+                <span className="ml-1" style={{ color: rankInfo.next?.color || '#9CA3AF' }}>
+                  {rankInfo.next ? `${rankInfo.next.icon} ${rankInfo.next.name}` : 'Max Rank Achieved!'}
+                </span>
               </span>
             </div>
 
-            {/* XP Progress Bar - updated with purple/pink to cyan gradient */}
+            {/* Enhanced XP Progress Bar with rank colors */}
             <div className="space-y-3">
               <div className="relative">
-                <div className="w-full h-10 bg-gray-900 border border-purple-400 relative overflow-hidden"
+                <div className="w-full h-10 bg-gray-900 border-2 relative overflow-hidden"
                      style={{
-                       clipPath: 'polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%)'
+                       clipPath: 'polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%)',
+                       borderColor: rankInfo.current.color
                      }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercentage}%` }}
                     transition={{ duration: 2, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-purple-500 via-pink-400 to-cyan-400 relative"
+                    className="h-full relative"
+                    style={{
+                      background: `linear-gradient(90deg, ${rankInfo.current.color}, ${rankInfo.next?.color || rankInfo.current.color})`
+                    }}
                   >
                     {/* Animated shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white to-transparent opacity-20"
@@ -336,9 +360,13 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-30 -skew-x-12 animate-pulse" />
                   </motion.div>
                   
-                  <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-purple-400" />
-                  <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-purple-400" />
-                  <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-purple-400" />
+                  {/* Corner decorations with rank color */}
+                  <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2" 
+                       style={{ borderColor: rankInfo.current.color }} />
+                  <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2" 
+                       style={{ borderColor: rankInfo.current.color }} />
+                  <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2" 
+                       style={{ borderColor: rankInfo.current.color }} />
                 </div>
                 
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -357,7 +385,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                   Experience Points
                 </span>
                 <span className="text-base font-mono text-white bg-gray-700 px-3 py-1 border border-gray-600">
-                  {xpInCurrentLevel}/{xpNeededForNextLevel} XP
+                  {xpInCurrentRank}/{xpNeededForNextRank} XP
                 </span>
               </div>
             </div>
@@ -447,7 +475,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
         </div>
       </motion.div>
 
-      {/* ACHIEVEMENT STATS Section - Updated stats and removed badges */}
+      {/* ACHIEVEMENT STATS Section - Updated with real data */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -472,7 +500,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">UNLOCKED</div>
-                <div className="text-2xl font-mono font-bold text-white">3</div>
+                <div className="text-2xl font-mono font-bold text-white">{achievementStats.unlocked || 0}</div>
               </div>
             </div>
 
@@ -481,7 +509,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-purple-500/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">COMPLETION</div>
-                <div className="text-2xl font-mono font-bold text-white">17%</div>
+                <div className="text-2xl font-mono font-bold text-white">{achievementStats.percentage || 0}%</div>
               </div>
             </div>
 
@@ -490,7 +518,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-purple-700/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">RARE</div>
-                <div className="text-2xl font-mono font-bold text-white">1</div>
+                <div className="text-2xl font-mono font-bold text-white">{achievementStats.byTier?.rare || 0}</div>
               </div>
             </div>
 
@@ -499,7 +527,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-800/15 pointer-events-none" />
               <div className="relative z-10">
                 <div className="text-xs font-mono text-gray-400">LEGENDARY</div>
-                <div className="text-2xl font-mono font-bold text-white">0</div>
+                <div className="text-2xl font-mono font-bold text-white">{achievementStats.byTier?.legendary || 0}</div>
               </div>
             </div>
           </div>

@@ -1,39 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Trash2, Plus, Trophy, Code, BookOpen, Briefcase, Palette, User } from 'lucide-react';
+import apiService from '../../services/api';
+import achievementService from '../../services/achievementService';
 
 const SaveSessionModal = ({ 
   isOpen, 
   onSave, 
   onDiscard, 
   timeSpent, 
-  sessionType = 'session' // 'session' or 'partial'
+  sessionType = 'session',
+  username = 'Jroc_182' // Add username prop
 }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customCategoryName, setCustomCategoryName] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [savedCategories, setSavedCategories] = useState([]);
 
-  // Default categories with gaming theme
-  const defaultCategories = [
-    { id: 'study', name: 'Study', icon: BookOpen, color: '#3B82F6', xp: 0 },
-    { id: 'work', name: 'Work', icon: Briefcase, color: '#10B981', xp: 0 },
-    { id: 'read', name: 'Read', icon: BookOpen, color: '#8B5CF6', xp: 0 },
-    { id: 'create', name: 'Create', icon: Palette, color: '#F59E0B', xp: 0 },
-    { id: 'code', name: 'Code', icon: Code, color: '#EF4444', xp: 0 }
-  ];
+  // Icon mapping function
+  const getIconComponent = (iconName) => {
+    const iconMap = {
+      'BookOpen': BookOpen,
+      'Briefcase': Briefcase,
+      'Palette': Palette,
+      'Code': Code,
+      'User': User
+    };
+    return iconMap[iconName] || User;
+  };
 
-  // Load saved categories from localStorage
+  // Load categories from localStorage only
   useEffect(() => {
-    const saved = localStorage.getItem('focusCategories');
-    if (saved) {
-      setSavedCategories(JSON.parse(saved));
-    } else {
-      // Initialize with defaults
-      localStorage.setItem('focusCategories', JSON.stringify(defaultCategories));
-      setSavedCategories(defaultCategories);
+    const loadCategories = async () => {
+      // Default categories
+      const defaultCategories = [
+        { id: 'study', name: 'Study', iconName: 'BookOpen', color: '#3B82F6', xp: 0 },
+        { id: 'work', name: 'Work', iconName: 'Briefcase', color: '#10B981', xp: 0 },
+        { id: 'read', name: 'Read', iconName: 'BookOpen', color: '#8B5CF6', xp: 0 },
+        { id: 'create', name: 'Create', iconName: 'Palette', color: '#F59E0B', xp: 0 },
+        { id: 'code', name: 'Code', iconName: 'Code', color: '#EF4444', xp: 0 }
+      ];
+
+      // Get categories from localStorage
+      const saved = localStorage.getItem('focusCategories');
+      if (saved) {
+        setSavedCategories(JSON.parse(saved));
+      } else {
+        // Initialize with defaults
+        localStorage.setItem('focusCategories', JSON.stringify(defaultCategories));
+        setSavedCategories(defaultCategories);
+      }
+    };
+
+    if (isOpen) {
+      loadCategories();
     }
-  }, []);
+  }, [isOpen, username]);
 
   // Handle category selection
   const handleCategorySelect = (categoryId) => {
@@ -48,8 +70,8 @@ const SaveSessionModal = ({
     setSelectedCategory('custom');
   };
 
-  // Save session with category
-  const handleSave = () => {
+  // Save session with category to localStorage
+  const handleSave = async () => {
     let finalCategory = selectedCategory;
     
     if (selectedCategory === 'custom' && customCategoryName.trim()) {
@@ -57,7 +79,7 @@ const SaveSessionModal = ({
       const newCategory = {
         id: customCategoryName.toLowerCase().replace(/\s+/g, '_'),
         name: customCategoryName.trim(),
-        icon: User,
+        iconName: 'User',
         color: '#6B7280',
         xp: 0,
         isCustom: true
@@ -71,7 +93,7 @@ const SaveSessionModal = ({
     }
     
     if (finalCategory && finalCategory !== 'custom') {
-      // Update XP for selected category
+      // Update local XP tracking
       const updatedCategories = savedCategories.map(cat => 
         cat.id === finalCategory 
           ? { ...cat, xp: (cat.xp || 0) + timeSpent }
@@ -80,6 +102,33 @@ const SaveSessionModal = ({
       setSavedCategories(updatedCategories);
       localStorage.setItem('focusCategories', JSON.stringify(updatedCategories));
       
+      // Save individual session for history tracking
+      const sessions = JSON.parse(localStorage.getItem('focusSessions') || '[]');
+      const newSession = {
+        id: Date.now(),
+        username,
+        category: finalCategory,
+        timeSpent,
+        sessionType,
+        createdAt: new Date().toISOString(),
+        date: new Date().toDateString()
+      };
+      sessions.push(newSession);
+      localStorage.setItem('focusSessions', JSON.stringify(sessions));
+      
+      // 🎮 CHECK ACHIEVEMENTS AFTER SAVING SESSION
+      const userStats = calculateFocusStats(sessions, updatedCategories);
+      const newAchievements = achievementService.checkAchievements(userStats);
+      
+      if (newAchievements.length > 0) {
+        console.log(`🎉 Unlocked ${newAchievements.length} achievement(s)!`);
+        // Show achievement notifications in UI
+        newAchievements.forEach(achievement => {
+          showAchievementToast(achievement);
+        });
+      }
+      
+      console.log(`💾 Saved ${timeSpent} minutes to ${finalCategory} category`);
       onSave(finalCategory);
     }
   };
@@ -134,7 +183,8 @@ const SaveSessionModal = ({
             <div className="text-sm font-mono text-gray-300 mb-3">SELECT CATEGORY:</div>
             <div className="grid grid-cols-2 gap-2 mb-3">
               {savedCategories.map(category => {
-                const IconComponent = category.icon;
+                // Fix: Get the icon component dynamically
+                const IconComponent = getIconComponent(category.iconName || category.icon);
                 return (
                   <button
                     key={category.id}
@@ -238,3 +288,118 @@ const SaveSessionModal = ({
 };
 
 export default SaveSessionModal;
+
+// Add helper function to calculate focus stats
+const calculateFocusStats = (sessions, categories) => {
+  const now = new Date();
+  const today = now.toDateString();
+  const thisWeek = getWeekStart(now);
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  
+  // Calculate focus statistics
+  const totalSessions = sessions.length;
+  const totalFocusTime = sessions.reduce((sum, session) => sum + session.timeSpent, 0);
+  const maxSessionDuration = Math.max(...sessions.map(s => s.timeSpent), 0);
+  
+  // Sessions by duration
+  const sessionsByDuration = {};
+  sessions.forEach(session => {
+    sessionsByDuration[session.timeSpent] = (sessionsByDuration[session.timeSpent] || 0) + 1;
+  });
+  
+  // Category statistics
+  const categorySessions = {};
+  const categoryTime = {};
+  sessions.forEach(session => {
+    categorySessions[session.category] = (categorySessions[session.category] || 0) + 1;
+    categoryTime[session.category] = (categoryTime[session.category] || 0) + session.timeSpent;
+  });
+  
+  // Time-based sessions
+  const sessionsByTime = {};
+  sessions.forEach(session => {
+    const hour = new Date(session.createdAt).getHours();
+    sessionsByTime[hour] = (sessionsByTime[hour] || 0) + 1;
+  });
+  
+  // Streaks (simplified - you may want more sophisticated streak calculation)
+  const focusStreak = calculateFocusStreak(sessions);
+  
+  // Today's sessions
+  const todaySessions = sessions.filter(s => 
+    new Date(s.createdAt).toDateString() === today
+  ).length;
+  
+  // Week sessions
+  const weekSessions = sessions.filter(s => 
+    new Date(s.createdAt) >= thisWeek
+  ).length;
+  
+  // Month sessions
+  const monthSessions = sessions.filter(s => 
+    new Date(s.createdAt) >= thisMonth
+  ).length;
+  
+  // Long sessions (90+ minutes)
+  const sessionsOver90Min = sessions.filter(s => s.timeSpent >= 90).length;
+  
+  // Break sessions (5-15 minutes)
+  const breakSessions = sessions.filter(s => s.timeSpent >= 5 && s.timeSpent <= 15).length;
+  
+  return {
+    totalSessions,
+    totalFocusTime,
+    maxSessionDuration,
+    sessionsByDuration,
+    categorySessions,
+    categoryTime,
+    sessionsByTime,
+    focusStreak,
+    todaySessions,
+    weekSessions,
+    monthSessions,
+    sessionsOver90Min,
+    breakSessions,
+    uniqueCategories: Object.keys(categorySessions).length
+  };
+};
+
+// Helper function for focus streak calculation
+const calculateFocusStreak = (sessions) => {
+  if (sessions.length === 0) return 0;
+  
+  const dates = [...new Set(sessions.map(s => new Date(s.createdAt).toDateString()))].sort();
+  let streak = 1;
+  let currentStreak = 1;
+  
+  for (let i = 1; i < dates.length; i++) {
+    const prevDate = new Date(dates[i - 1]);
+    const currentDate = new Date(dates[i]);
+    const dayDiff = (currentDate - prevDate) / (1000 * 60 * 60 * 24);
+    
+    if (dayDiff === 1) {
+      currentStreak++;
+      streak = Math.max(streak, currentStreak);
+    } else {
+      currentStreak = 1;
+    }
+  }
+  
+  return streak;
+};
+
+// Helper function for week start
+const getWeekStart = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day;
+  return new Date(d.setDate(diff));
+};
+
+// Add achievement toast notification function
+const showAchievementToast = (achievement) => {
+  // You can integrate with react-toastify or create custom notification
+  console.log(`🏆 Achievement Unlocked: ${achievement.name}!`);
+  // Example with custom notification (you'll need to implement this component)
+  // toast.success(`🏆 ${achievement.name} unlocked! +${achievement.xpReward} XP`);
+};

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { apiService } from '../services/api';
 
 export const useFocusTimer = (username) => {
   // Timer state
@@ -122,7 +121,7 @@ export const useFocusTimer = (username) => {
     setShowSavePrompt(true);
   };
 
-  // Save session to tracker
+  // Save session to tracker - simplified API call
   const saveSession = async (category) => {
     try {
       console.log(`💾 Saving ${totalTimeSpent} minutes to category: ${category}`);
@@ -142,10 +141,22 @@ export const useFocusTimer = (username) => {
         isManualEntry: false
       };
 
-      await apiService.createFocusEntry(entryData);
+      // Direct API call
+      const response = await fetch('http://localhost:8080/api/focus/entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(entryData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save entry');
+      }
+
       console.log('✅ Session saved successfully');
       
-      // Show success message (you can add a toast notification here)
+      // Show success message
       alert(`🎮 +${totalTimeSpent} XP added to ${category}!`);
       
       resetTimer();

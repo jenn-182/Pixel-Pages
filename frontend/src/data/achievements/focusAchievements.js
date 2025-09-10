@@ -1,0 +1,437 @@
+export const focusAchievements = [
+  // COMMON TIER (8 achievements)
+  {
+    id: 'focused_initiate',
+    name: 'FOCUSED INITIATE',
+    description: 'Complete your first focus session',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Target',
+    requirement: {
+      type: 'session_count',
+      target: 1
+    },
+    xpReward: 100,
+    color: '#10B981'
+  },
+  {
+    id: 'micro_master',
+    name: 'MICRO MASTER',
+    description: 'Complete 3 micro sessions (5-15 min)',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Clock',
+    requirement: {
+      type: 'session_duration_range',
+      minDuration: 5,
+      maxDuration: 15,
+      target: 3
+    },
+    xpReward: 150,
+    color: '#10B981'
+  },
+  {
+    id: 'hour_apprentice',
+    name: 'HOUR APPRENTICE',
+    description: 'Spend 1 hour total in focus',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Clock',
+    requirement: {
+      type: 'total_time',
+      target: 60 // minutes
+    },
+    xpReward: 200,
+    color: '#10B981'
+  },
+  {
+    id: 'quick_burst',
+    name: 'QUICK BURST',
+    description: 'Complete a 5-minute session',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Zap',
+    requirement: {
+      type: 'single_session_duration',
+      target: 5
+    },
+    xpReward: 75,
+    color: '#10B981'
+  },
+  {
+    id: 'pomodoro_starter',
+    name: 'POMODORO STARTER',
+    description: 'Complete your first 25-minute session',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Target',
+    requirement: {
+      type: 'single_session_duration',
+      target: 25
+    },
+    xpReward: 150,
+    color: '#10B981'
+  },
+  {
+    id: 'break_taker',
+    name: 'BREAK TAKER',
+    description: 'Take a 5-minute focus break',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Coffee',
+    requirement: {
+      type: 'break_session',
+      target: 5
+    },
+    xpReward: 50,
+    color: '#10B981'
+  },
+  {
+    id: 'morning_focus',
+    name: 'MORNING FOCUS',
+    description: 'Complete a session before 10 AM',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Sun',
+    requirement: {
+      type: 'time_before',
+      hour: 10
+    },
+    xpReward: 100,
+    color: '#10B981'
+  },
+  {
+    id: 'category_explorer',
+    name: 'CATEGORY EXPLORER',
+    description: 'Try 2 different focus categories',
+    tier: 'common',
+    category: 'focus',
+    icon: 'Compass',
+    requirement: {
+      type: 'unique_categories',
+      target: 2
+    },
+    xpReward: 100,
+    color: '#10B981'
+  },
+
+  // UNCOMMON TIER (10 achievements)
+  {
+    id: 'pomodoro_warrior',
+    name: 'POMODORO WARRIOR',
+    description: 'Complete 10 Pomodoro sessions',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Target',
+    requirement: {
+      type: 'pomodoro_count',
+      target: 10
+    },
+    xpReward: 300,
+    color: '#3B82F6'
+  },
+  {
+    id: 'focus_streak',
+    name: 'FOCUS STREAK',
+    description: 'Complete sessions 3 days in a row',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Calendar',
+    requirement: {
+      type: 'daily_streak',
+      target: 3
+    },
+    xpReward: 400,
+    color: '#3B82F6'
+  },
+  {
+    id: 'deep_diver',
+    name: 'DEEP DIVER',
+    description: 'Complete a 60+ minute session',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Brain',
+    requirement: {
+      type: 'single_session_duration',
+      target: 60
+    },
+    xpReward: 350,
+    color: '#3B82F6'
+  },
+  {
+    id: 'dedication_keeper',
+    name: 'DEDICATION KEEPER',
+    description: 'Spend 5 hours total in focus',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Clock',
+    requirement: {
+      type: 'total_time',
+      target: 300
+    },
+    xpReward: 500,
+    color: '#3B82F6'
+  },
+  {
+    id: 'evening_scholar',
+    name: 'EVENING SCHOLAR',
+    description: 'Complete 5 sessions after 6 PM',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Moon',
+    requirement: {
+      type: 'time_after',
+      hour: 18,
+      target: 5
+    },
+    xpReward: 250,
+    color: '#3B82F6'
+  },
+  {
+    id: 'study_buddy',
+    name: 'STUDY BUDDY',
+    description: 'Complete 10 study-category sessions',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'BookOpen',
+    requirement: {
+      type: 'category_sessions',
+      category: 'study',
+      target: 10
+    },
+    xpReward: 300,
+    color: '#3B82F6'
+  },
+  {
+    id: 'code_ninja',
+    name: 'CODE NINJA',
+    description: 'Complete 10 code-category sessions',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Code',
+    requirement: {
+      type: 'category_sessions',
+      category: 'code',
+      target: 10
+    },
+    xpReward: 300,
+    color: '#3B82F6'
+  },
+  {
+    id: 'work_horse',
+    name: 'WORK HORSE',
+    description: 'Complete 10 work-category sessions',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Briefcase',
+    requirement: {
+      type: 'category_sessions',
+      category: 'work',
+      target: 10
+    },
+    xpReward: 300,
+    color: '#3B82F6'
+  },
+  {
+    id: 'creative_soul',
+    name: 'CREATIVE SOUL',
+    description: 'Complete 10 creative-category sessions',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Palette',
+    requirement: {
+      type: 'category_sessions',
+      category: 'create',
+      target: 10
+    },
+    xpReward: 300,
+    color: '#3B82F6'
+  },
+  {
+    id: 'session_variety',
+    name: 'SESSION VARIETY',
+    description: 'Complete sessions in 5 different durations',
+    tier: 'uncommon',
+    category: 'focus',
+    icon: 'Shuffle',
+    requirement: {
+      type: 'duration_variety',
+      target: 5
+    },
+    xpReward: 250,
+    color: '#3B82F6'
+  },
+
+  // RARE TIER (8 achievements)
+  {
+    id: 'concentration_king',
+    name: 'CONCENTRATION KING',
+    description: 'Complete 50 focus sessions',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Crown',
+    requirement: {
+      type: 'session_count',
+      target: 50
+    },
+    xpReward: 1000,
+    color: '#8B5CF6'
+  },
+  {
+    id: 'flow_state_master',
+    name: 'FLOW STATE MASTER',
+    description: 'Complete sessions 7 days in a row',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Waves',
+    requirement: {
+      type: 'daily_streak',
+      target: 7
+    },
+    xpReward: 800,
+    color: '#8B5CF6'
+  },
+  {
+    id: 'marathon_mind',
+    name: 'MARATHON MIND',
+    description: 'Spend 20 hours total in focus',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Brain',
+    requirement: {
+      type: 'total_time',
+      target: 1200
+    },
+    xpReward: 1200,
+    color: '#8B5CF6'
+  },
+  {
+    id: 'category_crusher',
+    name: 'CATEGORY CRUSHER',
+    description: 'Reach 10 hours in any focus category',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Target',
+    requirement: {
+      type: 'category_time',
+      target: 600
+    },
+    xpReward: 800,
+    color: '#8B5CF6'
+  },
+  {
+    id: 'deep_work_legend',
+    name: 'DEEP WORK LEGEND',
+    description: 'Complete 5 sessions of 90+ minutes',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Brain',
+    requirement: {
+      type: 'long_sessions',
+      duration: 90,
+      target: 5
+    },
+    xpReward: 1000,
+    color: '#8B5CF6'
+  },
+  {
+    id: 'monthly_warrior',
+    name: 'MONTHLY WARRIOR',
+    description: 'Complete 30 sessions in one month',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Calendar',
+    requirement: {
+      type: 'monthly_sessions',
+      target: 30
+    },
+    xpReward: 800,
+    color: '#8B5CF6'
+  },
+  {
+    id: 'super_streaker',
+    name: 'SUPER STREAKER',
+    description: 'Complete sessions 14 days in a row',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Flame',
+    requirement: {
+      type: 'daily_streak',
+      target: 14
+    },
+    xpReward: 1200,
+    color: '#8B5CF6'
+  },
+  {
+    id: 'time_optimizer',
+    name: 'TIME OPTIMIZER',
+    description: 'Complete sessions at 6 different times of day',
+    tier: 'rare',
+    category: 'focus',
+    icon: 'Clock',
+    requirement: {
+      type: 'time_variety',
+      target: 6
+    },
+    xpReward: 700,
+    color: '#8B5CF6'
+  },
+
+  // LEGENDARY TIER (4 achievements)
+  {
+    id: 'focus_legend',
+    name: 'FOCUS LEGEND',
+    description: 'Complete 200 focus sessions',
+    tier: 'legendary',
+    category: 'focus',
+    icon: 'Crown',
+    requirement: {
+      type: 'session_count',
+      target: 200
+    },
+    xpReward: 3000,
+    color: '#F59E0B'
+  },
+  {
+    id: 'zen_master',
+    name: 'ZEN MASTER',
+    description: 'Complete sessions 30 days in a row',
+    tier: 'legendary',
+    category: 'focus',
+    icon: 'Lotus',
+    requirement: {
+      type: 'daily_streak',
+      target: 30
+    },
+    xpReward: 5000,
+    color: '#F59E0B'
+  },
+  {
+    id: 'time_lord',
+    name: 'TIME LORD',
+    description: 'Spend 100 hours total in focus',
+    tier: 'legendary',
+    category: 'focus',
+    icon: 'Clock',
+    requirement: {
+      type: 'total_time',
+      target: 6000
+    },
+    xpReward: 4000,
+    color: '#F59E0B'
+  },
+  {
+    id: 'omnifocus_sage',
+    name: 'OMNIFOCUS SAGE',
+    description: 'Reach 20 hours in all focus categories',
+    tier: 'legendary',
+    category: 'focus',
+    icon: 'Star',
+    requirement: {
+      type: 'all_categories_time',
+      target: 1200
+    },
+    xpReward: 6000,
+    color: '#F59E0B'
+  }
+];

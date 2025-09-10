@@ -23,8 +23,12 @@ import AchievementsTab from './tabs/AchievementsTab';
 import ProfileTab from './tabs/ProfileTab';
 import DashboardTab from './tabs/DashboardTab';
 import TrackerTab from './tabs/TrackerTab';
+import apiService from '../services/api';
+import AchievementNotification from './ui/AchievementNotification'; // Fixed path
 
 const PixelPages = () => {
+  const username = 'Jroc_182'; // Add this line near the top
+
   // Add tab functionality
   const { activeTab, changeTab } = useTabs();
   
@@ -196,7 +200,7 @@ const PixelPages = () => {
     
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardTab username="Jroc_182"tabColor={tabColor} onTabChange={handleTabChange} />;
+        return <DashboardTab username={username} tabColor={tabColor} onTabChange={handleTabChange} />;
       case 'notes':
         return <NotesTab tabColor={tabColor} />;
       case 'tasks':
@@ -204,13 +208,13 @@ const PixelPages = () => {
       case 'library':
         return <LibraryTab tabColor={tabColor} navigationParams={navigationParams} />;
       case 'focus':
-        return <FocusTab tabColor={tabColor} />;
+        return <FocusTab username={username} tabColor={tabColor} />;
       case 'achievements':
-        return <AchievementsTab tabColor={tabColor} />;
+        return <AchievementsTab username={username} tabColor={tabColor} />;
       case 'profile':
-        return <ProfileTab tabColor={tabColor} />;
+        return <ProfileTab username={username} tabColor={tabColor} />;
       case 'tracker':
-        return <TrackerTab tabColor={tabColor} />;
+        return <TrackerTab username={username} tabColor={tabColor} />;
       default:
         return <div>Tab not found</div>;
     }
@@ -547,6 +551,9 @@ const PixelPages = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Achievement notifications - add this anywhere in your app */}
+      <AchievementNotification />
     </div>
   );
 };

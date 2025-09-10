@@ -13,9 +13,7 @@ import { useTabs } from '../../hooks/useTabs';
 import { useModal } from '../../hooks/useModal';
 import { useNavigation } from '../../hooks/useNavigation';
 
-const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
-  const username = 'Jroc_182'; // Add this line
-
+const DashboardTab = ({ username = 'Jroc_182', tabColor = '#67E8F9', onTabChange }) => {
   // Get data from hooks
   const { folders } = useFolders();
   const { notebooks } = useNotebooks(); 
