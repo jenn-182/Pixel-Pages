@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Archive, Trophy, User, CheckSquare, Clock, LayoutGrid } from 'lucide-react';
+import { FileText, Archive, Trophy, User, CheckSquare, Clock, LayoutGrid, Timer, BarChart3 } from 'lucide-react';
 
 const TabNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
@@ -8,7 +8,8 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
     { id: 'notes', label: 'LOGS', icon: FileText, color: '#22D3EE' },
     { id: 'tasks', label: 'MISSIONS', icon: CheckSquare, color: '#0EA5E9' },
     { id: 'library', label: 'VAULT', icon: Archive, color: '#3B82F6' },
-    { id: 'focus', label: 'FOCUS', icon: Clock, color: '#6366F1' },
+    { id: 'focus', label: 'FOCUS', icon: Timer, color: '#8B5CF6' },        // ADD THIS
+    { id: 'tracker', label: 'TRACKER', icon: BarChart3, color: '#F59E0B' }, // ADD THIS
     { id: 'achievements', label: 'ACHIEVEMENTS', icon: Trophy, color: '#8B5CF6' },
     { id: 'profile', label: 'PROFILE', icon: User, color: '#A78BFA' }
   ];

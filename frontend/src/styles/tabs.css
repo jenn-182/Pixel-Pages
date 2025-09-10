@@ -389,3 +389,22 @@
     opacity: 0.1; 
   }
 }
+
+/* daily activity grid in TrackerTab */
+.grid-cols-15 {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-cols-15 {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-15 {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}

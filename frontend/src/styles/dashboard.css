@@ -1,0 +1,156 @@
+/* Add these dashboard-specific styles at the end of your existing CSS */
+
+/* Dashboard Integration Styles */
+.dashboard-focus-timer {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  max-width: none !important;
+  min-height: auto !important;
+}
+
+.dashboard-focus-timer .focus-timer-widget {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Update colors to match dashboard theme */
+.dashboard-focus-timer .timer-idle h3 {
+  color: #d8b4fe !important; /* Purple-300 */
+  font-family: 'monospace' !important;
+  font-size: 1.1em !important;
+  margin-bottom: 16px !important;
+}
+
+.dashboard-focus-timer .timer-idle p {
+  color: #a78bfa !important; /* Purple-400 */
+  font-family: 'monospace' !important;
+  font-size: 0.85em !important;
+}
+
+.dashboard-focus-timer .quick-presets h4,
+.dashboard-focus-timer .existing-sessions h4,
+.dashboard-focus-timer .selector-header h4 {
+  color: #c4b5fd !important; /* Purple-300 */
+  font-family: 'monospace' !important;
+  font-size: 0.9em !important;
+  font-weight: bold !important;
+}
+
+/* Update preset buttons to match dashboard style */
+.dashboard-focus-timer .preset-btn {
+  background: #1f2937 !important; /* Gray-800 */
+  border: 1px solid #9333ea !important; /* Purple-600 */
+  color: #c4b5fd !important; /* Purple-300 */
+  font-family: 'monospace' !important;
+  font-weight: bold !important;
+  font-size: 0.75em !important;
+  box-shadow: 0 0 3px rgba(147, 51, 234, 0.3), 1px 1px 0px 0px rgba(0,0,0,1) !important;
+  transition: all 0.3s !important;
+}
+
+.dashboard-focus-timer .preset-btn:hover {
+  border-color: #a855f7 !important; /* Purple-500 */
+  box-shadow: 0 0 8px rgba(147, 51, 234, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.dashboard-focus-timer .preset-name {
+  color: #c4b5fd !important; /* Purple-300 */
+}
+
+.dashboard-focus-timer .preset-duration {
+  color: #9ca3af !important; /* Gray-400 */
+}
+
+/* Update session selector button */
+.dashboard-focus-timer .show-sessions-btn {
+  background: #1f2937 !important; /* Gray-800 */
+  border: 1px solid #9333ea !important; /* Purple-600 */
+  color: #c4b5fd !important; /* Purple-300 */
+  font-family: 'monospace' !important;
+  font-weight: bold !important;
+  font-size: 0.8em !important;
+  box-shadow: 0 0 3px rgba(147, 51, 234, 0.3), 1px 1px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.dashboard-focus-timer .show-sessions-btn:hover {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 8px rgba(147, 51, 234, 0.4) !important;
+}
+
+/* Active timer styles */
+.dashboard-focus-timer .timer-active .session-name {
+  color: #d8b4fe !important; /* Purple-300 */
+  font-family: 'monospace' !important;
+  font-size: 1.1em !important;
+}
+
+.dashboard-focus-timer .timer-active .session-meta {
+  color: #a78bfa !important; /* Purple-400 */
+  font-family: 'monospace' !important;
+  font-size: 0.8em !important;
+}
+
+.dashboard-focus-timer .time-remaining {
+  color: #e9d5ff !important; /* Purple-200 */
+  font-family: 'Courier New', monospace !important;
+  font-size: 2.2em !important;
+}
+
+.dashboard-focus-timer .progress-fill {
+  stroke: #9333ea !important; /* Purple-600 */
+}
+
+.dashboard-focus-timer .control-btn {
+  font-family: 'monospace' !important;
+  font-size: 0.8em !important;
+  padding: 8px 16px !important;
+  min-width: 80px !important;
+}
+
+/* Session list items */
+.dashboard-focus-timer .session-item {
+  background: #1f2937 !important; /* Gray-800 */
+  border: 1px solid #6b7280 !important; /* Gray-500 */
+  color: #c4b5fd !important; /* Purple-300 */
+}
+
+.dashboard-focus-timer .session-item.selected {
+  border-color: #9333ea !important; /* Purple-600 */
+  background: #312e81 !important; /* Purple-900 */
+}
+
+.dashboard-focus-timer .session-name {
+  color: #d8b4fe !important; /* Purple-300 */
+  font-family: 'monospace' !important;
+}
+
+.dashboard-focus-timer .session-details {
+  color: #9ca3af !important; /* Gray-400 */
+  font-family: 'monospace' !important;
+}
+
+.dashboard-focus-timer .session-category {
+  color: #6b7280 !important; /* Gray-500 */
+  font-family: 'monospace' !important;
+}
+
+.dashboard-focus-timer .start-selected-btn {
+  background: #9333ea !important; /* Purple-600 */
+  font-family: 'monospace' !important;
+  font-weight: bold !important;
+}
+
+.dashboard-focus-timer .start-selected-btn:hover:not(:disabled) {
+  background: #7c3aed !important; /* Purple-700 */
+}
+
+/* Loading state */
+.dashboard-focus-timer .loading-spinner {
+  color: #a78bfa !important; /* Purple-400 */
+  font-family: 'monospace' !important;
+}

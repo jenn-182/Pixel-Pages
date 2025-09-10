@@ -7,6 +7,8 @@ import PixelInput, { PixelTextarea } from './PixelInput';
 import NoteCard from './notes/NoteCard';
 import AchievementCard from './AchievementCard';
 import useNotes from '../hooks/useNotes';
+import useTasks from '../hooks/useTasks';           
+import useTaskLists from '../hooks/useTaskLists';                    
 import { usePlayer } from '../hooks/usePlayer';
 import { useAchievements } from '../hooks/useAchievements';
 import TabNavigation from './navigation/TabNavigation';
@@ -20,12 +22,16 @@ import FocusTab from './tabs/FocusTab';
 import AchievementsTab from './tabs/AchievementsTab';
 import ProfileTab from './tabs/ProfileTab';
 import DashboardTab from './tabs/DashboardTab';
+import TrackerTab from './tabs/TrackerTab';
 
 const PixelPages = () => {
   // Add tab functionality
   const { activeTab, changeTab } = useTabs();
   
   const { notes, loading, error, createNote, updateNote, deleteNote, searchNotes, refreshNotes } = useNotes();
+  const { tasks, taskLists, loading: tasksLoading } = useTasks();
+  const { loading: taskListsLoading } = useTaskLists();
+
   const { playerStats, loading: playerLoading } = usePlayer();
   const { achievements, summary, loading: achievementsLoading } = useAchievements();
 
@@ -174,7 +180,8 @@ const PixelPages = () => {
       { id: 'notes', color: '#22D3EE' },
       { id: 'tasks', color: '#0EA5E9' },
       { id: 'library', color: '#3B82F6' },
-      { id: 'focus', color: '#6366F1' },
+      { id: 'focus', color: '#8B5CF6' },        // ADD THIS
+      { id: 'tracker', color: '#F59E0B' },      // ADD THIS
       { id: 'achievements', color: '#8B5CF6' },
       { id: 'profile', color: '#A78BFA' }
     ];
@@ -189,7 +196,7 @@ const PixelPages = () => {
     
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardTab tabColor={tabColor} onTabChange={handleTabChange} />;
+        return <DashboardTab username="Jroc_182"tabColor={tabColor} onTabChange={handleTabChange} />;
       case 'notes':
         return <NotesTab tabColor={tabColor} />;
       case 'tasks':
@@ -202,6 +209,8 @@ const PixelPages = () => {
         return <AchievementsTab tabColor={tabColor} />;
       case 'profile':
         return <ProfileTab tabColor={tabColor} />;
+      case 'tracker':
+        return <TrackerTab tabColor={tabColor} />;
       default:
         return <div>Tab not found</div>;
     }

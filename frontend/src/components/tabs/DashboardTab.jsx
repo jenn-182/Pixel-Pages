@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { LayoutDashboard, Folder, BookOpen, FileText, Plus, ExternalLink, TrendingUp, Clock, Target, User, Trophy } from 'lucide-react';
 import TaskInsights from '../tasks/TaskInsights';
 import ActiveMissions from '../shared/ActiveMissions';
-import SmartSuggestions from '../shared/SmartSuggestions';
+import FocusTimerWidget from '../focus/FocusTimerWidget';
 import NoteModal from '../notes/NoteModal';
 import useFolders from '../../hooks/useFolders';
 import useNotebooks from '../../hooks/useNotebooks';
@@ -14,6 +14,8 @@ import { useModal } from '../../hooks/useModal';
 import { useNavigation } from '../../hooks/useNavigation';
 
 const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
+  const username = 'Jroc_182'; // Add this line
+
   // Get data from hooks
   const { folders } = useFolders();
   const { notebooks } = useNotebooks(); 
@@ -461,9 +463,9 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
             <TaskInsights tasks={tasks} taskLists={taskLists} onTabChange={onTabChange} />
           </motion.div>
 
-          {/* 4. Active Missions & Smart Suggestions Row - Violet to Purple */}
+          {/* 4. Active Missions & Focus Timer Row - UPDATED */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Active Missions Section - Violet with Gradient */}
+            {/* Active Missions Section - Keep exactly as is */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -473,7 +475,6 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
                 boxShadow: '0 0 15px rgba(99, 102, 241, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
               }}
             >
-              {/* Subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/15 to-violet-700/20 pointer-events-none" />
               <div className="absolute inset-0 border-2 border-violet-500 opacity-30 animate-pulse pointer-events-none" />
               
@@ -487,13 +488,31 @@ const DashboardTab = ({ tabColor = '#67E8F9', onTabChange }) => {
               </div>
             </motion.div>
 
-            {/* Smart Suggestions Section - Purple with Gradient (handled in component) */}
+            {/* Focus Timer Section - REPLACE Smart Suggestions with this */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
+              className="bg-gray-800 border-2 border-purple-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 relative overflow-hidden"
+              style={{
+                boxShadow: '0 0 15px rgba(147, 51, 234, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
+              }}
             >
-              <SmartSuggestions notes={notes} tasks={tasks} folders={folders} onTabChange={onTabChange} />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/15 to-purple-700/20 pointer-events-none" />
+              <div className="absolute inset-0 border-2 border-purple-500 opacity-30 animate-pulse pointer-events-none" />
+              
+              <div className="relative z-10">
+                <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+                  <div className="w-4 h-4 bg-purple-500 mr-2" />
+                  FOCUS COMMAND CENTER
+                </h2>
+                
+                {/* Focus Timer Widget */}
+                <FocusTimerWidget 
+                  username={username || 'Jroc_182'} 
+                  className="focus-timer-dashboard" 
+                />
+              </div>
             </motion.div>
           </div>
         </div>
