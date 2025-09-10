@@ -1,273 +1,219 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import apiService from '../services/api';
+import { useState, useEffect, useRef } from 'react';
+import { apiService } from '../services/api';
 
 export const useFocusTimer = (username) => {
-  const [activeSession, setActiveSession] = useState(null);
+  // Timer state
+  const [duration, setDuration] = useState(null); // 25, 90, or custom minutes
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [currentPhase, setCurrentPhase] = useState('work');
-  const [currentCycle, setCurrentCycle] = useState(1);
   const [startTime, setStartTime] = useState(null);
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
   
+  // UI state
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [sessionData, setSessionData] = useState(null);
+  
   const intervalRef = useRef(null);
-  const startTimeRef = useRef(null);
 
-  // Reset timer state - moved up to avoid dependency issues
-  const resetTimer = useCallback(() => {
-    clearInterval(intervalRef.current);
-    setActiveSession(null);
-    setTimeRemaining(0);
+  // Timer logic
+  useEffect(() => {
+    if (isRunning && !isPaused && timeRemaining > 0) {
+      intervalRef.current = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            // Timer completed naturally
+            handleTimerComplete();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+
+    return () => clearInterval(intervalRef.current);
+  }, [isRunning, isPaused, timeRemaining]);
+
+  // Start timer with duration
+  const startTimer = (minutes) => {
+    console.log(`🎮 Starting ${minutes}-minute focus session`);
+    
+    const seconds = minutes * 60;
+    setDuration(minutes);
+    setTimeRemaining(seconds);
+    setStartTime(new Date());
+    setIsRunning(true);
+    setIsPaused(false);
+    setTotalTimeSpent(0);
+    
+    // Create session data for potential saving
+    const sessionId = Date.now();
+    setSessionData({
+      sessionId,
+      ownerUsername: username,
+      startTime: new Date(),
+      duration: minutes
+    });
+  };
+
+  // Pause timer
+  const pauseTimer = () => {
+    console.log('⏸️ Timer paused');
+    setIsPaused(true);
+  };
+
+  // Resume timer
+  const resumeTimer = () => {
+    console.log('▶️ Timer resumed');
+    setIsPaused(false);
+  };
+
+  // Stop timer manually
+  const stopTimer = () => {
+    console.log('🛑 Timer stopped manually');
+    handleTimerStop();
+  };
+
+  // Handle manual stop
+  const handleTimerStop = () => {
     setIsRunning(false);
     setIsPaused(false);
-    setCurrentPhase('work');
-    setCurrentCycle(1);
-    setStartTime(null);
-    setTotalTimeSpent(0);
-    startTimeRef.current = null;
-    console.log('🔄 Timer reset');
-  }, []);
-
-  // Handle phase completion
-  const handlePhaseComplete = useCallback(async () => {
-    if (!activeSession || !username) return;
     
-    try {
-      const phaseStartTime = startTimeRef.current || startTime;
-      if (!phaseStartTime) {
-        console.error('❌ No start time recorded');
-        return;
-      }
-      
-      const endTime = new Date();
-      const timeSpentMinutes = Math.round((endTime - phaseStartTime) / 1000 / 60);
-      
-      console.log('🎯 Phase completed:', {
-        phase: currentPhase,
+    // Calculate time spent
+    const timeSpentMinutes = Math.ceil((duration * 60 - timeRemaining) / 60);
+    
+    if (timeSpentMinutes > 0) {
+      // Show save prompt for partial time
+      const updatedSessionData = {
+        ...sessionData,
+        endTime: new Date(),
         timeSpent: timeSpentMinutes,
-        sessionId: activeSession.id,
-        startTime: phaseStartTime.toISOString(),
-        endTime: endTime.toISOString()
-      });
-      
-      // Save completed phase to backend
-      if (timeSpentMinutes > 0) {
-        const entryData = {
-          sessionId: activeSession.id,
-          ownerUsername: username,
-          timeSpent: timeSpentMinutes,
-          date: new Date().toISOString().split('T')[0],
-          startTime: phaseStartTime.toISOString(),
-          endTime: endTime.toISOString(),
-          completed: true,
-          phase: currentPhase,
-          cycleNumber: currentCycle
-        };
-        
-        console.log('💾 Saving focus entry:', entryData);
-        
-        try {
-          await apiService.createFocusEntry(entryData);
-          console.log('✅ Focus entry saved successfully');
-        } catch (apiError) {
-          console.error('❌ API Error saving entry:', apiError);
-          console.error('Entry data that failed:', entryData);
-        }
-      }
-      
-      // Update total time
-      setTotalTimeSpent(prev => prev + timeSpentMinutes);
-      
-      // Determine next phase
-      if (currentPhase === 'work') {
-        if (currentCycle >= activeSession.cycles) {
-          // Session complete
-          console.log('🎉 Session completed!');
-          resetTimer();
-          return;
-        } else {
-          // Go to break
-          const nextPhase = currentCycle % 4 === 0 ? 'long_break' : 'break';
-          const nextDuration = nextPhase === 'long_break' ? 15 : activeSession.breakDuration;
-          
-          setCurrentPhase(nextPhase);
-          setTimeRemaining(nextDuration * 60);
-          setStartTime(new Date());
-          startTimeRef.current = new Date();
-          
-          console.log('➡️ Moving to break phase:', { nextPhase, nextDuration });
-        }
-      } else {
-        // Break finished, go to work
-        const nextCycle = currentCycle + 1;
-        setCurrentPhase('work');
-        setCurrentCycle(nextCycle);
-        setTimeRemaining(activeSession.workDuration * 60);
-        setStartTime(new Date());
-        startTimeRef.current = new Date();
-        
-        console.log('➡️ Moving to work phase:', { nextCycle });
-      }
-      
-    } catch (err) {
-      console.error('❌ Error handling phase complete:', err);
-    }
-  }, [activeSession, username, startTime, currentPhase, currentCycle, resetTimer]);
-
-  // Start session
-  const startSession = useCallback(async (session) => {
-    if (!session || !username) return;
-    
-    try {
-      console.log('🚀 Starting focus session:', session.name);
-      
-      const now = new Date();
-      setActiveSession(session);
-      setTimeRemaining(session.workDuration * 60);
-      setCurrentPhase('work');
-      setCurrentCycle(1);
-      setTotalTimeSpent(0);
-      setIsRunning(true);
-      setIsPaused(false);
-      setStartTime(now);
-      startTimeRef.current = now;
-      
-      console.log('⏰ Timer set for:', session.workDuration, 'minutes');
-      console.log('📅 Start time:', now.toISOString());
-      
-      // Start the timer
-      intervalRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          const newTime = prev - 1;
-          if (newTime <= 0) {
-            console.log('⏰ Time reached zero, triggering phase complete');
-            handlePhaseComplete();
-            return 0;
-          }
-          return newTime;
-        });
-      }, 1000);
-      
-    } catch (err) {
-      console.error('❌ Error starting session:', err);
-    }
-  }, [username, handlePhaseComplete]);
-
-  // Toggle pause
-  const togglePause = useCallback(() => {
-    if (!activeSession) return;
-    
-    if (isRunning && !isPaused) {
-      clearInterval(intervalRef.current);
-      setIsPaused(true);
-      console.log('⏸️ Timer paused');
-    } else if (isRunning && isPaused) {
-      intervalRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          const newTime = prev - 1;
-          if (newTime <= 0) {
-            handlePhaseComplete();
-            return 0;
-          }
-          return newTime;
-        });
-      }, 1000);
-      setIsPaused(false);
-      console.log('▶️ Timer resumed');
-    }
-  }, [activeSession, isRunning, isPaused, handlePhaseComplete]);
-
-  // Stop session and save progress
-  const stopSession = useCallback(async () => {
-    if (!activeSession || !username) return;
-    
-    try {
-      clearInterval(intervalRef.current);
-      console.log('🛑 Stopping session...');
-      
-      const phaseStartTime = startTimeRef.current || startTime;
-      if (!phaseStartTime) {
-        console.error('❌ No start time recorded for manual stop');
-        resetTimer();
-        return;
-      }
-      
-      const endTime = new Date();
-      const timeSpentMinutes = Math.round((endTime - phaseStartTime) / 1000 / 60);
-      
-      console.log('📊 Manual stop - Time calculation:', {
-        startTime: phaseStartTime.toISOString(),
-        endTime: endTime.toISOString(),
-        minutesSpent: timeSpentMinutes
-      });
-      
-      // Always save entry, even if 0 minutes (for tracking purposes)
-      const entryData = {
-        sessionId: activeSession.id,
-        ownerUsername: username,
-        timeSpent: Math.max(timeSpentMinutes, 1), // Minimum 1 minute for manual stops
-        date: new Date().toISOString().split('T')[0],
-        startTime: phaseStartTime.toISOString(),
-        endTime: endTime.toISOString(),
-        completed: false, // Manually stopped
-        phase: currentPhase,
-        cycleNumber: currentCycle,
-        notes: `Session stopped manually after ${Math.max(timeSpentMinutes, 1)} minutes`
+        completed: false,
+        notes: `Session stopped manually after ${timeSpentMinutes} minutes`
       };
       
-      console.log('💾 Saving manual stop entry:', entryData);
+      setSessionData(updatedSessionData);
+      setTotalTimeSpent(timeSpentMinutes);
+      setShowSavePrompt(true);
+    } else {
+      // No time to save
+      resetTimer();
+    }
+  };
+
+  // Handle natural completion
+  const handleTimerComplete = () => {
+    console.log('✅ Timer completed naturally');
+    setIsRunning(false);
+    setIsPaused(false);
+    
+    const updatedSessionData = {
+      ...sessionData,
+      endTime: new Date(),
+      timeSpent: duration,
+      completed: true,
+      notes: `Completed ${duration}-minute focus session`
+    };
+    
+    setSessionData(updatedSessionData);
+    setTotalTimeSpent(duration);
+    setShowSavePrompt(true);
+  };
+
+  // Save session to tracker
+  const saveSession = async (category) => {
+    try {
+      console.log(`💾 Saving ${totalTimeSpent} minutes to category: ${category}`);
       
-      try {
-        await apiService.createFocusEntry(entryData);
-        console.log('✅ Manual stop entry saved successfully');
-      } catch (apiError) {
-        console.error('❌ API Error saving manual stop:', apiError);
-        console.error('Failed entry data:', entryData);
-      }
+      const entryData = {
+        sessionId: sessionData.sessionId,
+        ownerUsername: username,
+        timeSpent: totalTimeSpent,
+        date: new Date().toISOString().split('T')[0],
+        startTime: sessionData.startTime.toISOString(),
+        endTime: sessionData.endTime.toISOString(),
+        completed: sessionData.completed,
+        notes: sessionData.notes,
+        category: category,
+        phase: 'work',
+        cycleNumber: 1,
+        isManualEntry: false
+      };
+
+      await apiService.createFocusEntry(entryData);
+      console.log('✅ Session saved successfully');
+      
+      // Show success message (you can add a toast notification here)
+      alert(`🎮 +${totalTimeSpent} XP added to ${category}!`);
       
       resetTimer();
       
-    } catch (err) {
-      console.error('❌ Error stopping session:', err);
+    } catch (error) {
+      console.error('❌ Error saving session:', error);
+      alert('Failed to save session. Please try again.');
     }
-  }, [activeSession, username, startTime, currentPhase, currentCycle, resetTimer]);
+  };
+
+  // Discard session
+  const discardSession = () => {
+    console.log('🗑️ Session discarded');
+    resetTimer();
+  };
+
+  // Reset timer state
+  const resetTimer = () => {
+    setDuration(null);
+    setTimeRemaining(0);
+    setIsRunning(false);
+    setIsPaused(false);
+    setStartTime(null);
+    setTotalTimeSpent(0);
+    setSessionData(null);
+    setShowSavePrompt(false);
+    clearInterval(intervalRef.current);
+  };
 
   // Format time display
-  const formatTime = useCallback((seconds = timeRemaining) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }, [timeRemaining]);
+  const formatTime = () => {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
-  // Calculate progress
-  const progress = activeSession && timeRemaining > 0 ? 
-    (((activeSession.workDuration * 60) - timeRemaining) / (activeSession.workDuration * 60)) * 100 : 0;
+  // Calculate progress percentage
+  const progress = duration && timeRemaining >= 0 ? 
+    ((duration * 60 - timeRemaining) / (duration * 60)) * 100 : 0;
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
+  // Check if timer is active (running or paused)
+  const isActive = duration !== null;
 
   return {
-    activeSession,
+    // Timer state
+    duration,
     timeRemaining,
     isRunning,
     isPaused,
-    currentPhase,
-    currentCycle,
+    isActive,
     totalTimeSpent,
-    startSession,
-    stopSession,
-    togglePause,
+    progress,
+    
+    // UI state
+    showSavePrompt,
+    sessionData,
+    
+    // Actions
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    stopTimer,
+    saveSession,
+    discardSession,
     resetTimer,
     formatTime,
-    progress
+    
+    // Cleanup
+    setShowSavePrompt
   };
 };
-
-export default useFocusTimer;

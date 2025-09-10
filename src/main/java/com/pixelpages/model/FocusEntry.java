@@ -46,6 +46,9 @@ public class FocusEntry {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
+    @Column(name = "category")
+    private String category; // e.g., "Study", "Work", "Personal", etc;
+    
     // Constructors
     public FocusEntry() {}
     
@@ -112,4 +115,7 @@ public class FocusEntry {
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 }
