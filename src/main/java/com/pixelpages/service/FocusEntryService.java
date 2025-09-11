@@ -3,6 +3,7 @@ package com.pixelpages.service;
 import com.pixelpages.model.FocusEntry;
 import com.pixelpages.repository.FocusEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,6 +17,12 @@ public class FocusEntryService {
     private final FocusEntryRepository focusEntryRepository;
     private final FocusSessionService focusSessionService;
     
+    // Achievement service with @Lazy to avoid circular dependencies
+    @Autowired
+    @Lazy
+    private AchievementService achievementService;
+    
+    // Constructor
     @Autowired
     public FocusEntryService(FocusEntryRepository focusEntryRepository, 
                            FocusSessionService focusSessionService) {
@@ -46,6 +53,16 @@ public class FocusEntryService {
         
         // Update the session's total time logged
         focusSessionService.updateSessionTimeLogged(sessionId, timeSpent);
+        
+        // REAL-TIME ACHIEVEMENT TRACKING
+        if (ownerUsername != null && timeSpent != null && timeSpent > 0 && achievementService != null) {
+            try {
+                achievementService.trackFocusSession(ownerUsername, timeSpent, "GENERAL");
+                System.out.println("🎯 Tracked focus session for: " + ownerUsername + " (" + timeSpent + " minutes)");
+            } catch (Exception e) {
+                System.err.println("Error tracking focus achievement: " + e.getMessage());
+            }
+        }
         
         return savedEntry;
     }

@@ -5,7 +5,7 @@ import { useFocusTimer } from '../../hooks/useFocusTimer';
 import CircularProgress from '../focus/CircularProgress';
 import SaveSessionModal from '../modals/SaveSessionModal';
 
-const FocusTab = ({ username = 'Jroc_182', tabColor = '#8B5CF6' }) => {
+const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
   const [selectedDuration, setSelectedDuration] = useState(null);
   const [customDuration, setCustomDuration] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);

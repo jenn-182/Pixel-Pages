@@ -2,6 +2,7 @@ package com.pixelpages.repository;
 
 import com.pixelpages.model.Note;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     Optional<Note> findByIdAndUsername(Long id, String username);
 
     List<Note> findByFolderId(Long folderId);
-    List<Note> findByNotebookId(Long notebookId); // ✅ Make sure this exists
+    List<Note> findByNotebookId(Long notebookId); 
     List<Note> findByFolderIdIsNull();
     List<Note> findByNotebookIdIsNull();
     List<Note> findByTitleContainingIgnoreCase(String title);
@@ -42,4 +43,9 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     
     // Combined searches
     List<Note> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String title, String content);
+    
+    List<Note> findByUsername(String username); // Added method
+
+    @Query("SELECT DISTINCT n.username FROM Note n")
+    List<String> findDistinctUsernames();
 }

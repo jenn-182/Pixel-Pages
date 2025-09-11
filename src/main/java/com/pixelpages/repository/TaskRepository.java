@@ -17,13 +17,12 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
            "t.createdAt DESC")
     List<Task> findByUsernameOrderByPriorityAndCreatedAt(String username);
     
-    // Count completed tasks for achievements
-    long countByUsernameAndCompleted(String username, boolean completed);
+    // Count completed tasks for achievements - FIXED VERSION
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.username = :username AND t.completed = :completed")
+    long countByUsernameAndCompleted(@Param("username") String username, @Param("completed") boolean completed);
     
     // Find tasks by completion status
     List<Task> findByUsernameAndCompleted(String username, boolean completed);
-    
-    // 🆕 NEW METHODS FOR PHASE 2
     
     // Find tasks by task list ID
     List<Task> findByTaskListId(Long taskListId);
@@ -53,4 +52,15 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
            "CASE t.priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END, " +
            "t.createdAt DESC")
     List<Task> findByUsernameAndTagsContaining(@Param("username") String username, @Param("tag") String tag);
+
+    // Find tasks by username
+    List<Task> findByUsername(String username);
+
+    @Query("SELECT DISTINCT t.username FROM Task t")
+    List<String> findDistinctUsernames();
+
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.username = :username")
+    long countByUsername(@Param("username") String username);
+
+    
 }

@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
+import com.pixelpages.service.AchievementService;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @Transactional
@@ -20,7 +23,14 @@ public class TaskService {
     private final PlayerRepository playerRepository;
     private final TaskListRepository taskListRepository;
     
-    public TaskService(TaskRepository taskRepository, PlayerRepository playerRepository, TaskListRepository taskListRepository) {
+    @Autowired
+    @Lazy
+    private AchievementService achievementService;
+    
+    // FIXED CONSTRUCTOR - Add all the repository parameters:
+    public TaskService(TaskRepository taskRepository, 
+                      PlayerRepository playerRepository,
+                      TaskListRepository taskListRepository) {
         this.taskRepository = taskRepository;
         this.playerRepository = playerRepository;
         this.taskListRepository = taskListRepository;
@@ -52,6 +62,8 @@ public class TaskService {
                 throw new RuntimeException("Unauthorized: Cannot update task belonging to another user");
             }
             
+            boolean wasCompleted = task.isCompleted();
+            
             // Update ALL fields
             task.setTitle(updatedTask.getTitle());
             task.setCompleted(updatedTask.isCompleted());
@@ -64,6 +76,16 @@ public class TaskService {
             task.setTaskListId(updatedTask.getTaskListId());
             
             Task savedTask = taskRepository.save(task);
+            
+            // TRACK ACHIEVEMENT - ADD THIS
+            if (!wasCompleted && savedTask.isCompleted() && savedTask.getUsername() != null && achievementService != null) {
+                try {
+                    achievementService.trackTaskCompletion(savedTask.getUsername());
+                    System.out.println("🎯 Tracked task completion for: " + savedTask.getUsername());
+                } catch (Exception e) {
+                    System.err.println("Error tracking task achievement: " + e.getMessage());
+                }
+            }
             
             System.out.println("🔄 Updated task: " + savedTask.getTitle());
             return savedTask;

@@ -13,7 +13,7 @@ import { useTabs } from '../../hooks/useTabs';
 import { useModal } from '../../hooks/useModal';
 import { useNavigation } from '../../hooks/useNavigation';
 
-const DashboardTab = ({ username = 'Jroc_182', tabColor = '#67E8F9', onTabChange }) => {
+const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) => {
   // Get data from hooks
   const { folders } = useFolders();
   const { notebooks } = useNotebooks(); 
@@ -77,7 +77,7 @@ const DashboardTab = ({ username = 'Jroc_182', tabColor = '#67E8F9', onTabChange
 
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours();
-    const playerName = "Jroc_182";
+    const playerName = "user";
     
     if (hour >= 5 && hour < 12) {
       return {
@@ -507,7 +507,7 @@ const DashboardTab = ({ username = 'Jroc_182', tabColor = '#67E8F9', onTabChange
                 
                 {/* Focus Timer Widget */}
                 <FocusTimerWidget 
-                  username={username || 'Jroc_182'} 
+                  username={username || 'user'} 
                   className="focus-timer-dashboard" 
                 />
               </div>

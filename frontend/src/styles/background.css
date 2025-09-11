@@ -25,7 +25,7 @@
     100% 100%;
   animation: starfield 60s linear infinite;
   position: relative;
-  overflow: hidden !important; /* Prevent any bars from showing outside */
+  overflow: hidden !important; 
 }
 
 @keyframes starfield {

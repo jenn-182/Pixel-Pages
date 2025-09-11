@@ -1,100 +1,160 @@
 package com.pixelpages.controller;
 
-import com.pixelpages.model.Achievement;
 import com.pixelpages.service.AchievementService;
+import com.pixelpages.repository.TaskRepository;
+import com.pixelpages.repository.NoteRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/achievements")
 @CrossOrigin(origins = "http://localhost:3000")
 public class AchievementController {
-    
+
     private final AchievementService achievementService;
-    
-    public AchievementController(AchievementService achievementService) {
+    private final TaskRepository taskRepository;
+    private final NoteRepository noteRepository;
+
+    public AchievementController(AchievementService achievementService,
+            TaskRepository taskRepository,
+            NoteRepository noteRepository) {
         this.achievementService = achievementService;
+        this.taskRepository = taskRepository;
+        this.noteRepository = noteRepository;
+        System.out.println("AchievementController initialized");
     }
-    
-    // Get all achievements with player progress
-    @GetMapping("/achievements")
-    public ResponseEntity<Map<String, Object>> getAchievements(
-            @RequestParam(defaultValue = "PixelAdventurer") String username) {
-        
-        List<Map<String, Object>> playerAchievements = achievementService.getPlayerAchievements(username);
-        
-        // Count achievements by status
-        long completed = playerAchievements.stream()
-            .mapToLong(achievement -> (boolean) achievement.get("isCompleted") ? 1 : 0)
-            .sum();
-        
-        long inProgress = playerAchievements.stream()
-            .mapToLong(achievement -> {
-                boolean isCompleted = (boolean) achievement.get("isCompleted");
-                int progress = (int) achievement.get("progress");
-                return !isCompleted && progress > 0 ? 1 : 0;
-            })
-            .sum();
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("action", "GET_ACHIEVEMENTS");
-        response.put("data", playerAchievements);
-        response.put("summary", Map.of(
-            "total", playerAchievements.size(),
-            "completed", completed,
-            "inProgress", inProgress,
-            "locked", playerAchievements.size() - completed - inProgress
-        ));
-        response.put("message", "Quest achievements retrieved! " + completed + " conquered, " + 
-                               inProgress + " in progress!");
-        response.put("timestamp", LocalDateTime.now());
-        
-        return ResponseEntity.ok(response);
+
+    @GetMapping
+    public ResponseEntity<List<Map<String, Object>>> getAllAchievements() {
+        try {
+            List<Map<String, Object>> achievements = achievementService.getAllAchievementsAsMap();
+            return ResponseEntity.ok(achievements);
+        } catch (Exception e) {
+            System.err.println("Error getting all achievements: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
-    
-    // Get achievements by category
-    @GetMapping("/achievements/category/{category}")
-    public ResponseEntity<Map<String, Object>> getAchievementsByCategory(
-            @PathVariable String category,
-            @RequestParam(defaultValue = "PixelAdventurer") String username) {
-        
-        List<Achievement> categoryAchievements = achievementService.getAllAchievements().stream()
-            .filter(achievement -> achievement.getCategory().equals(category))
-            .toList();
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("action", "GET_ACHIEVEMENTS_BY_CATEGORY");
-        response.put("data", categoryAchievements);
-        response.put("message", "Found " + categoryAchievements.size() + " achievements in '" + category + "' category!");
-        response.put("timestamp", LocalDateTime.now());
-        
-        return ResponseEntity.ok(response);
+
+    @GetMapping("/player/{username}")
+    public ResponseEntity<List<Map<String, Object>>> getPlayerAchievements(@PathVariable String username) {
+        try {
+            List<Map<String, Object>> achievements = achievementService.getPlayerAchievements(username);
+            return ResponseEntity.ok(achievements);
+        } catch (Exception e) {
+            System.err.println("Error getting player achievements for " + username + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
-    
-    // Get achievements by rarity
-    @GetMapping("/achievements/rarity/{rarity}")
-    public ResponseEntity<Map<String, Object>> getAchievementsByRarity(
-            @PathVariable String rarity,
-            @RequestParam(defaultValue = "PixelAdventurer") String username) {
-        
-        List<Achievement> rarityAchievements = achievementService.getAllAchievements().stream()
-            .filter(achievement -> achievement.getRarity().equals(rarity))
-            .toList();
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("action", "GET_ACHIEVEMENTS_BY_RARITY");
-        response.put("data", rarityAchievements);
-        response.put("message", "Found " + rarityAchievements.size() + " " + rarity + " achievements!");
-        response.put("timestamp", LocalDateTime.now());
-        
-        return ResponseEntity.ok(response);
+
+    @PostMapping("/player/{username}/progress")
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseEntity<String> updateProgress(
+            @PathVariable String username,
+            @RequestParam String achievementId,
+            @RequestParam int progress) {
+        try {
+            achievementService.updateProgress(username, achievementId, progress);
+            return ResponseEntity.ok("Progress updated successfully");
+        } catch (Exception e) {
+            System.err.println("Error updating progress: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update progress: " + e.getMessage());
+        }
     }
-    
-    // REMOVE the manual achievement check method to avoid circular dependency
-    // The achievements will be checked automatically when notes are created
+
+    @GetMapping("/player/{username}/stats")
+    public ResponseEntity<Map<String, Object>> getPlayerStats(@PathVariable String username) {
+        try {
+            if (username == null || username.trim().isEmpty()) {
+                System.err.println("No username provided for player stats");
+
+                // Return default stats for anonymous user
+                Map<String, Object> defaultStats = new HashMap<>();
+                defaultStats.put("completedAchievements", 0);
+                defaultStats.put("totalAchievements", achievementService.getAllAchievements().size());
+                defaultStats.put("totalXp", 0);
+                defaultStats.put("completionPercentage", 0.0);
+
+                return ResponseEntity.ok(defaultStats);
+            }
+
+            Map<String, Object> stats = achievementService.getPlayerStats(username);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            System.err.println("Error getting player stats: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/player/{username}/check")
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseEntity<String> checkAllAchievements(@PathVariable String username) {
+        try {
+            System.out.println("Checking achievements for user: " + username);
+            achievementService.checkAllUserAchievements(username);
+            return ResponseEntity.ok("Achievement check completed for " + username);
+        } catch (Exception e) {
+            System.err.println("Error checking achievements for " + username + ": " + e.getMessage());
+            e.printStackTrace(); // This will show the full stack trace
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to check achievements: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/test/populate/{username}")
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseEntity<String> populateTestData(@PathVariable String username) {
+        try {
+            System.out.println("Populating test data for user: " + username);
+            String result = achievementService.populateTestData(username);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("Error populating test data for " + username + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to populate test data: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/debug/usernames")
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseEntity<Map<String, Object>> debugUsernames() {
+        try {
+            Map<String, Object> result = new HashMap<>();
+
+            // Check task usernames
+            List<String> taskUsernames = taskRepository.findDistinctUsernames();
+            result.put("taskUsernames", taskUsernames);
+
+            // Check note usernames
+            List<String> noteUsernames = noteRepository.findDistinctUsernames();
+            result.put("noteUsernames", noteUsernames);
+
+            // Check task counts by username
+            Map<String, Long> taskCounts = new HashMap<>();
+            for (String username : taskUsernames) {
+                long completed = taskRepository.countByUsernameAndCompleted(username, true);
+                long total = taskRepository.countByUsername(username);
+                taskCounts.put(username + "_completed", completed);
+                taskCounts.put(username + "_total", total);
+                System.out.println("Username: " + username + " - Completed: " + completed + " - Total: " + total);
+            }
+            result.put("taskCounts", taskCounts);
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+
+        }
+    }
 }

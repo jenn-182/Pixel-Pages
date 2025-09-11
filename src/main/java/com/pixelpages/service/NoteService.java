@@ -12,6 +12,8 @@ import com.pixelpages.repository.NoteRepository;
 import com.pixelpages.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -27,20 +29,22 @@ public class NoteService {
     private final FolderRepository folderRepository;
     private final NotebookRepository notebookRepository;
     private final FileExportService fileExportService;
-    private final AchievementService achievementService;
+    
+    // Add achievement service with @Lazy to avoid circular dependencies
+    @Autowired
+    @Lazy
+    private AchievementService achievementService;
     
     public NoteService(NoteRepository noteRepository, 
                       PlayerRepository playerRepository,
                       FolderRepository folderRepository,
                       NotebookRepository notebookRepository,
-                      FileExportService fileExportService,
-                      AchievementService achievementService) {
+                      FileExportService fileExportService) {
         this.noteRepository = noteRepository;
         this.playerRepository = playerRepository;
         this.folderRepository = folderRepository;
         this.notebookRepository = notebookRepository;
         this.fileExportService = fileExportService;
-        this.achievementService = achievementService;
     }
     
     // Helper method to calculate word count
@@ -154,6 +158,11 @@ public class NoteService {
                 System.out.println("Achievement system failed, but note was saved successfully");
             }
             
+            // TRACK ACHIEVEMENT - ADD THIS:
+            if (savedNote.getUsername() != null) {
+                achievementService.trackNoteCreation(savedNote.getUsername());
+            }
+            
             return savedNote;
             
         } catch (Exception e) {
@@ -210,6 +219,11 @@ public class NoteService {
                     }
                 } catch (Exception e) {
                     System.err.println("XP award failed (but note updated): " + e.getMessage());
+                }
+                
+                // TRACK ACHIEVEMENT - ADD THIS:
+                if (updatedNote.getUsername() != null) {
+                    achievementService.trackNoteCreation(updatedNote.getUsername());
                 }
                 
                 return updatedNote;

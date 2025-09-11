@@ -27,7 +27,7 @@ import apiService from '../services/api';
 import AchievementNotification from './ui/AchievementNotification'; // Fixed path
 
 const PixelPages = () => {
-  const username = 'Jroc_182'; // Add this line near the top
+  const username = 'user'; // Add this line near the top
 
   // Add tab functionality
   const { activeTab, changeTab } = useTabs();

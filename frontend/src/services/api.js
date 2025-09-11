@@ -439,6 +439,108 @@ const apiService = {
     };
     return iconMap[categoryName.toUpperCase()] || 'User';
   },
+
+  // =================== ACHIEVEMENTS API ===================
+  
+  // Get all achievements  
+  async getAllAchievements() {
+    try {
+      const response = await fetch(`${API_BASE}/achievements`);
+      if (!response.ok) throw new Error('Failed to fetch achievements');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+      return [];
+    }
+  },
+
+  // Get player achievements with progress
+  async getPlayerAchievements(username) {
+    if (!username || username === 'undefined') {
+      console.log("No username provided for player achievements");
+      return [];
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE}/achievements/player/${username}`);
+      if (!response.ok) throw new Error('Failed to fetch player achievements');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching player achievements:', error);
+      return [];
+    }
+  },
+
+  // Get achievement player stats
+  async getAchievementPlayerStats(username) {
+    if (!username || username === 'undefined') {
+      console.log("No username provided for achievement player stats");
+      return {
+        completedAchievements: 0,
+        totalAchievements: 0,
+        totalXp: 0,
+        completionPercentage: 0.0
+      };
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE}/achievements/player/${username}/stats`);
+      if (!response.ok) throw new Error('Failed to fetch achievement player stats');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching achievement player stats:', error);
+      return {
+        completedAchievements: 0,
+        totalAchievements: 0,
+        totalXp: 0,
+        completionPercentage: 0.0
+      };
+    }
+  },
+
+  // Update achievement progress
+  async updateAchievementProgress(username, achievementId, progress) {
+    try {
+      const response = await fetch(`${API_BASE}/achievements/player/${username}/progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          achievementId: achievementId,
+          progress: progress
+        })
+      });
+      if (!response.ok) throw new Error('Failed to update achievement progress');
+      return await response.text();
+    } catch (error) {
+      console.error('Error updating achievement progress:', error);
+      throw error;
+    }
+  },
+
+  // Populate test achievement data
+  async populateTestAchievements(username) {
+    try {
+      const response = await fetch(`${API_BASE}/achievements/test/populate/${username}`, {
+        method: 'POST'
+      });
+      if (!response.ok) throw new Error('Failed to populate test achievements');
+      return await response.text();
+    } catch (error) {
+      console.error('Error populating test achievements:', error);
+      throw error;
+    }
+  },
+
+  // Add this method to your api.js if it's missing:
+  async checkAllAchievements(username) {
+    const response = await fetch(`${API_BASE}/achievements/player/${username}/check`, {
+      method: 'POST'
+    });
+    if (!response.ok) throw new Error('Failed to check achievements');
+    return response.text();
+  }
 };
 
 export default apiService;

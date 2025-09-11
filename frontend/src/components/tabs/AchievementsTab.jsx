@@ -1,168 +1,188 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, Zap, Crown, Lock, Shield, CheckCircle, Target, BarChart3, Award, Grid, List, ChevronDown, TrendingUp, Settings, X, Calendar } from 'lucide-react';
 import { allAchievements, achievementsByTier, tierInfo } from '../../data/achievements';
 import achievementService from '../../services/achievementService';
 import AchievementBadge from '../ui/AchievementBadge';
+import apiService from '../../services/api'; 
+import backendAchievementService from '../../services/backendAchievementService';
 
-const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
+const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' }) => {
   const [selectedTier, setSelectedTier] = useState('all');
   const [achievementStats, setAchievementStats] = useState({});
   const [userStats, setUserStats] = useState({});
   const [selectedAchievement, setSelectedAchievement] = useState(null);
-  const [lockedSortBy, setLockedSortBy] = useState('rarity'); // 'rarity', 'progress', 'name'
-  const [showLockedAchievements, setShowLockedAchievements] = useState(false); // Changed from showProgressSection
+  const [lockedSortBy, setLockedSortBy] = useState('rarity');
+  const [showLockedAchievements, setShowLockedAchievements] = useState(true); // Changed from false
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadAchievementData();
-  }, []);
+  }, [username]);
 
-  const loadAchievementData = () => {
-    const stats = achievementService.getStats();
-    setAchievementStats(stats);
-    
-    // Load comprehensive user stats
-    const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const sessions = JSON.parse(localStorage.getItem('focusSessions') || '[]');
-    
-    const calculatedStats = {
-      totalNotes: notes.length,
-      totalWords: notes.reduce((sum, note) => sum + (note.content?.split(' ').length || 0), 0),
-      uniqueTags: new Set(notes.flatMap(note => note.tags || [])).size,
-      totalTasks: tasks.filter(t => t.completed).length,
-      tasksCreated: tasks.length,
-      totalSessions: sessions.length,
-      totalFocusTime: sessions.reduce((sum, s) => sum + s.timeSpent, 0),
-      level: Math.floor(stats.totalXP / 1000) + 1,
-      totalXP: stats.totalXP
+  const loadAchievementData = useCallback(async () => {
+    setLoading(true);
+    try {
+      console.log('🔄 Loading achievement data for:', username);
+      
+      // Load from backend (skip the auto-trigger for now)
+      await backendAchievementService.loadData(username);
+      
+      // Get stats from backend service
+      const stats = backendAchievementService.getStats();
+      setAchievementStats(stats);
+      
+      // Set user stats for progress calculations
+      setUserStats({
+        totalNotes: backendAchievementService.playerStats.totalNotes || 0,
+        totalWords: backendAchievementService.playerStats.totalWords || 0,
+        totalTasks: backendAchievementService.playerStats.completedAchievements || 0,
+        totalSessions: backendAchievementService.playerStats.totalSessions || 0,
+        totalFocusTime: backendAchievementService.playerStats.totalFocusTime || 0,
+        totalXP: backendAchievementService.playerStats.totalXp || 0
+      });
+
+      console.log('🎯 Achievement data loaded:', {
+        stats,
+        unlocked: backendAchievementService.getUnlockedAchievements().length,
+        inProgress: backendAchievementService.getInProgressAchievements().length
+      });
+
+    } catch (error) {
+      console.error('Failed to load achievements:', error);
+      // Fallback to local service
+      const localStats = achievementService.getStats();
+      setAchievementStats(localStats);
+    } finally {
+      setLoading(false);
+    }
+  }, [username]);
+
+  // Add this useEffect after your existing useEffect:
+  useEffect(() => {
+    const handleAchievementsUpdated = () => {
+      console.log('🎯 Achievement update detected, reloading...');
+      loadAchievementData();
     };
-    
-    setUserStats(calculatedStats);
-  };
 
-  // Sorting functions
-  const getRarityOrder = (tier) => {
+    // Listen for achievement updates
+    window.addEventListener('achievementsUpdated', handleAchievementsUpdated);
+
+    return () => {
+      window.removeEventListener('achievementsUpdated', handleAchievementsUpdated);
+    };
+  }, [loadAchievementData]);
+
+  // Memoize expensive calculations
+  const tabColorRgb = useMemo(() => {
+    const hexToRgb = (hex) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? 
+        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+        '245, 158, 11';
+    };
+    return hexToRgb(tabColor);
+  }, [tabColor]);
+
+  // Memoize sorting function
+  const getRarityOrder = useCallback((tier) => {
     const order = { 'common': 1, 'uncommon': 2, 'rare': 3, 'legendary': 4 };
     return order[tier?.toLowerCase()] || 0;
-  };
+  }, []);
 
-  const sortAchievements = (achievements, sortBy) => {
+  const sortAchievements = useCallback((achievements, sortBy) => {
     return [...achievements].sort((a, b) => {
       switch (sortBy) {
         case 'rarity':
           return getRarityOrder(a.tier) - getRarityOrder(b.tier);
         case 'progress':
-          const progressA = achievementService.getAchievementProgress(a.id, userStats);
-          const progressB = achievementService.getAchievementProgress(b.id, userStats);
-          return progressB - progressA; // Highest progress first
+          // Use backend progress data instead of local service
+          const playerAchA = backendAchievementService.playerAchievements.find(pa => pa.achievementId === a.id);
+          const playerAchB = backendAchievementService.playerAchievements.find(pa => pa.achievementId === b.id);
+          const progressA = (playerAchA?.progress || 0) / 100;
+          const progressB = (playerAchB?.progress || 0) / 100;
+          return progressB - progressA;
         case 'name':
           return a.name.localeCompare(b.name);
         default:
           return 0;
       }
     });
-  };
+  }, [getRarityOrder]);
 
-  // Get sorted achievements
-  const unlockedAchievements = sortAchievements(
-    allAchievements.filter(a => achievementService.isUnlocked(a.id)), 
-    'rarity'
-  );
+  // Memoize achievement arrays
+  const unlockedAchievements = useMemo(() => 
+    backendAchievementService.getUnlockedAchievements() || []
+  , [achievementStats]);
   
-  const lockedAchievements = sortAchievements(
-    allAchievements.filter(a => !achievementService.isUnlocked(a.id)), 
-    lockedSortBy
-  );
+  const lockedAchievements = useMemo(() => 
+    backendAchievementService.getLockedAchievements() || []
+  , [achievementStats]);
 
-  // Get in-progress achievements
-  const inProgressAchievements = lockedAchievements.filter(a => {
-    const progress = achievementService.getAchievementProgress(a.id, userStats);
-    return progress > 0 && progress < 1;
-  }).map(a => ({
-    ...a,
-    progress: Math.round(achievementService.getAchievementProgress(a.id, userStats) * 100)
-  }));
+  const inProgressAchievements = useMemo(() => 
+    backendAchievementService.getInProgressAchievements() || []
+  , [achievementStats]);
 
-  const getFilteredAchievements = (achievements) => {
-    if (selectedTier === 'all') return achievements;
-    return achievements.filter(a => a.tier === selectedTier);
-  };
+  const filteredAchievements = useMemo(() => {
+    if (selectedTier === 'all') return unlockedAchievements;
+    return unlockedAchievements.filter(a => a.tier === selectedTier);
+  }, [unlockedAchievements, selectedTier]);
 
-  const hexToRgb = (hex) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? 
-      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-      '245, 158, 11';
-  };
+  const filteredLockedAchievements = useMemo(() => {
+    if (selectedTier === 'all') return lockedAchievements;
+    return lockedAchievements.filter(a => a.tier === selectedTier);
+  }, [lockedAchievements, selectedTier]);
 
-  const tabColorRgb = hexToRgb(tabColor);
+  // Memoize progress metrics
+  const progressMetrics = useMemo(() => ({
+    inProgressCount: inProgressAchievements.length,
+    lockedCount: lockedAchievements.length - inProgressAchievements.length
+  }), [inProgressAchievements.length, lockedAchievements.length]);
 
-  // Calculate progress metrics
-  const inProgressCount = inProgressAchievements.length;
-  const lockedCount = lockedAchievements.length - inProgressCount;
+  // Memoize click handler
+  const handleBadgeClick = useCallback((achievement, event) => {
+    setSelectedAchievement(achievement); // Remove clickPosition
+  }, []);
 
-  // Achievement Modal Component - Large Wide Badge Version
-  const AchievementModal = ({ achievement, onClose, clickPosition }) => {
-    if (!achievement) return null;
-
-    // Get rarity style for the modal
-    const getRarityStyle = (tier) => {
-      switch (tier?.toLowerCase()) {
-        case 'common':
-          return {
-            color: '#06B6D4', // Cyan
-            bgColor: 'rgba(6, 182, 212, 0.15)',
-            shadowColor: 'rgba(6, 182, 212, 0.6)',
-            name: 'COMMON'
-          };
-        case 'uncommon':
-          return {
-            color: '#EC4899', // Pink
-            bgColor: 'rgba(236, 72, 153, 0.15)',
-            shadowColor: 'rgba(236, 72, 153, 0.6)',
-            name: 'UNCOMMON'
-          };
-        case 'rare':
-          return {
-            color: '#8B5CF6', // Purple
-            bgColor: 'rgba(139, 92, 246, 0.15)',
-            shadowColor: 'rgba(139, 92, 246, 0.6)',
-            name: 'RARE'
-          };
-        case 'legendary':
-          return {
-            color: '#F59E0B', // Gold
-            bgColor: 'rgba(245, 158, 11, 0.15)',
-            shadowColor: 'rgba(245, 158, 11, 0.6)',
-            name: 'LEGENDARY'
-          };
-        default:
-          return {
-            color: '#6B7280',
-            bgColor: 'rgba(107, 114, 128, 0.15)',
-            shadowColor: 'rgba(107, 114, 128, 0.6)',
-            name: 'COMMON'
-          };
+  // Performance-optimized Achievement Modal Component
+  const AchievementModal = React.memo(({ achievement, onClose }) => {
+    // Move all hooks BEFORE any conditional returns
+    const rarityStyles = useMemo(() => ({
+      common: {
+        color: '#06B6D4',
+        bgColor: 'rgba(6, 182, 212, 0.15)',
+        shadowColor: 'rgba(6, 182, 212, 0.6)',
+        name: 'COMMON'
+      },
+      uncommon: {
+        color: '#EC4899',
+        bgColor: 'rgba(236, 72, 153, 0.15)',
+        shadowColor: 'rgba(236, 72, 153, 0.6)',
+        name: 'UNCOMMON'
+      },
+      rare: {
+        color: '#8B5CF6',
+        bgColor: 'rgba(139, 92, 246, 0.15)',
+        shadowColor: 'rgba(139, 92, 246, 0.6)',
+        name: 'RARE'
+      },
+      legendary: {
+        color: '#FFCB2E',
+        bgColor: 'rgba(245, 158, 11, 0.15)',
+        shadowColor: 'rgba(245, 158, 11, 0.6)',
+        name: 'LEGENDARY'
       }
-    };
+    }), []);
 
-    const getRarityIcon = (tier) => {
-      switch (tier?.toLowerCase()) {
-        case 'common': return Star;
-        case 'uncommon': return Award; 
-        case 'rare': return Shield;
-        case 'legendary': return Crown;
-        default: return Trophy;
-      }
-    };
+    const rarityIcons = useMemo(() => ({
+      common: Star,
+      uncommon: Award,
+      rare: Shield,
+      legendary: Crown
+    }), []);
 
-    const style = getRarityStyle(achievement.tier);
-    const IconComponent = getRarityIcon(achievement.tier);
-
-    // Format the unlock date
-    const formatUnlockDate = () => {
-      if (achievement.unlockedAt) {
+    const formatUnlockDate = useCallback(() => {
+      if (achievement?.unlockedAt) {
         const date = new Date(achievement.unlockedAt);
         return date.toLocaleDateString('en-US', { 
           weekday: 'long', 
@@ -172,16 +192,13 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
         });
       }
       return 'Achievement Date Unknown';
-    };
+    }, [achievement?.unlockedAt]);
 
-    // Calculate modal position - Always dead center of screen
-    const getModalPosition = () => {
-      return { 
-        top: '50%', 
-        left: '50%', 
-        transform: 'translate(-50%, -50%)' 
-      };
-    };
+    // NOW we can do the early return after all hooks are called
+    if (!achievement) return null;
+
+    const style = rarityStyles[achievement.tier?.toLowerCase()] || rarityStyles.common;
+    const IconComponent = rarityIcons[achievement.tier?.toLowerCase()] || Trophy;
 
     return (
       <motion.div
@@ -191,21 +208,19 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
         className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center p-4"
         style={{
           alignItems: 'flex-start',
-          paddingTop: clickPosition ? `${clickPosition.y - 150}px` : '50vh'
+          paddingTop: '57vh' //centers it in the badge section area
         }}
         onClick={onClose}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0 }}
+          initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0 }}
+          exit={{ opacity: 0, scale: 0.8 }}
           transition={{ 
-            type: "spring", 
-            damping: 25, 
-            stiffness: 400,
-            duration: 0.3
+            type: "tween",
+            duration: 0.2
           }}
-          className="bg-black border-2 p-8 relative max-w-2xl w-full"
+          className="bg-black border-2 p-8 relative max-w-2xl w-full overflow-hidden"
           style={{
             width: '600px',
             height: 'auto',
@@ -215,20 +230,28 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Shiny overlay effects - Same as badge */}
+          {/* Static overlay effects - no pulse */}
           <div 
-            className="absolute inset-0 pointer-events-none opacity-30 animate-pulse"
+            className="absolute inset-0 pointer-events-none opacity-30"
             style={{ 
               background: `linear-gradient(135deg, ${style.color}40, ${style.color}20, ${style.color}60)` 
             }} 
           />
-          
-          <div 
-            className="absolute inset-0 pointer-events-none opacity-50"
-            style={{ 
-              background: `linear-gradient(45deg, transparent 30%, ${style.color}20 50%, transparent 70%)`,
-              animation: 'shimmer 2s infinite'
-            }} 
+
+          {/* Initial shimmer effect - only on load */}
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: '200%' }}
+            transition={{ 
+              duration: 1.5, 
+              ease: "easeInOut",
+              delay: 0.2
+            }}
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `linear-gradient(90deg, transparent, ${style.color}40, transparent)`,
+              width: '100%'
+            }}
           />
 
           {/* Close button */}
@@ -241,12 +264,12 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
             <X size={24} />
           </motion.button>
 
-          {/* Wide Horizontal Layout - Like Achievement Badge */}
+          {/* Modal Content */}
           <div className="relative z-10 flex items-center h-full">
-            {/* Left side - Large Icon Circle */}
+            {/* Left side - Large Icon Circle - no pulse */}
             <div className="flex-shrink-0 mr-8">
               <div 
-                className="w-24 h-24 rounded-full border-4 flex items-center justify-center relative overflow-hidden animate-pulse"
+                className="w-24 h-24 rounded-full border-4 flex items-center justify-center relative overflow-hidden"
                 style={{
                   borderColor: style.color,
                   background: `radial-gradient(circle, ${style.color}40, ${style.color}20)`,
@@ -261,34 +284,23 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                     filter: `drop-shadow(0 0 12px ${style.color})`
                   }}
                 />
-                
-                {/* Inner glow for completed badges */}
-                <div 
-                  className="absolute inset-0 rounded-full opacity-40 animate-ping"
-                  style={{ 
-                    background: `radial-gradient(circle, ${style.shadowColor}, transparent 70%)`
-                  }}
-                />
               </div>
             </div>
 
             {/* Right side - Content */}
             <div className="flex-1 min-w-0">
-              {/* Achievement Title */}
               <h2 className="font-mono font-bold text-3xl text-white mb-3 leading-tight">
                 {achievement.name}
               </h2>
 
-              {/* Achievement Description */}
               <p className="text-gray-300 font-mono text-lg mb-4 leading-relaxed">
                 {achievement.description}
               </p>
 
               {/* Bottom Row - Rarity Badge and Unlock Date */}
               <div className="flex items-center justify-between gap-6">
-                {/* Rarity Badge */}
                 <div 
-                  className="px-4 py-2 text-base font-mono font-bold border-2 flex items-center gap-2 animate-pulse"
+                  className="px-4 py-2 text-base font-mono font-bold border-2 flex items-center gap-2"
                   style={{
                     color: style.color,
                     borderColor: style.color,
@@ -300,7 +312,6 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                   {style.name}
                 </div>
 
-                {/* Unlock Date */}
                 <div 
                   className="bg-gray-900 border-2 px-4 py-2 flex items-center gap-3"
                   style={{
@@ -312,13 +323,12 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                   <div>
                     <div className="font-mono font-bold text-white text-xs">DATE:</div>
                     <div className="font-mono text-sm" style={{ color: style.color }}>
-                      {formatUnlockDate().split(',')[0]} {/* Just the day and date */}
+                      {formatUnlockDate().split(',')[0]}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* XP Reward (if available) */}
               {achievement.xpReward && (
                 <div className="flex items-center gap-2 text-yellow-400 font-mono text-sm mt-4">
                   <Star size={16} />
@@ -329,7 +339,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
             </div>
           </div>
 
-          {/* Celebration Banner at Bottom */}
+          {/* Celebration Banner */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -341,79 +351,30 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
             </div>
           </motion.div>
 
-          {/* Special effects for legendary */}
+          {/* Special effects for legendary - no pulse */}
           {achievement.tier === 'legendary' && (
-            <>
-              <motion.div
-                className="absolute top-6 left-6 text-yellow-400 text-2xl"
-                animate={{ 
-                  rotate: [0, 360],
-                  scale: [1, 1.2, 1]
-                }}
-                transition={{ 
-                  duration: 3, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                ⭐
-              </motion.div>
-              <motion.div
-                className="absolute top-6 right-16 text-yellow-400 text-xl"
-                animate={{ 
-                  opacity: [0, 1, 0],
-                  y: [0, -10, 0]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity,
-                  delay: 1
-                }}
-              >
-                ✨
-              </motion.div>
-              <motion.div
-                className="absolute bottom-20 left-12 text-yellow-400 text-lg"
-                animate={{ 
-                  opacity: [0, 1, 0],
-                  x: [0, 5, 0]
-                }}
-                transition={{ 
-                  duration: 2.5, 
-                  repeat: Infinity,
-                  delay: 0.5
-                }}
-              >
-                💫
-              </motion.div>
-            </>
+            <div className="absolute top-6 left-6 text-yellow-400 text-2xl">⭐</div>
           )}
-
-          {/* Hover glow effect - Same as original badge */}
-          <div 
-            className="absolute inset-0 opacity-20 transition-opacity duration-300 rounded pointer-events-none"
-            style={{ 
-              background: `radial-gradient(circle, ${style.shadowColor}, transparent 70%)`
-            }}
-          />
         </motion.div>
       </motion.div>
     );
-  };
+  });
 
-  // Update your badge click handler to capture vertical position:
-  const handleBadgeClick = (achievement, event) => {
-    const clickPosition = {
-      x: event.clientX, // We don't use this anymore but keeping for compatibility
-      y: event.clientY  // This is the vertical position we want
-    };
-    
-    setSelectedAchievement({ ...achievement, clickPosition });
-  };
+  // Memoized Achievement Badge Component
+  const MemoizedAchievementBadge = React.memo(AchievementBadge);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="font-mono text-white">Loading achievements...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header with Locked Achievements Toggle */}
+      {/* Header */}
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
@@ -428,7 +389,6 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
           </p>
         </div>
         
-        {/* View Locked Achievements Toggle Button */}
         <motion.button
           onClick={() => setShowLockedAchievements(!showLockedAchievements)}
           className="bg-black border-2 px-4 py-2 font-mono font-bold transition-all duration-200 flex items-center gap-2"
@@ -452,7 +412,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
         </motion.button>
       </div>
 
-      {/* Progress Summary */}
+      {/* Progress Summary - Simplified animations */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -462,7 +422,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
           boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
         }}
       >
-        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+        <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
              style={{ borderColor: tabColor }} />
         <div className="absolute inset-0 pointer-events-none"
              style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
@@ -481,7 +441,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
           
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Completed */}
+              {/* Badges Earned */}
               <div className="bg-black border text-center p-4 relative transition-all duration-200"
                    style={{
                      borderColor: '#4B5563',
@@ -498,7 +458,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                 </div>
               </div>
 
-              {/* In Progress */}
+              {/* Badges In Progress */}
               <div className="bg-black border text-center p-4 relative transition-all duration-200"
                    style={{
                      borderColor: '#4B5563',
@@ -510,12 +470,12 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                   <Target size={20} className="text-blue-400 mx-auto mb-2" />
                   <div className="text-xs font-mono text-gray-400 mb-1">BADGES IN PROGRESS</div>
                   <div className="text-2xl font-mono font-bold text-blue-400">
-                    {inProgressCount}
+                    {progressMetrics.inProgressCount}
                   </div>
                 </div>
               </div>
 
-              {/* Locked */}
+              {/* Badges Locked */}
               <div className="bg-black border text-center p-4 relative transition-all duration-200"
                    style={{
                      borderColor: '#4B5563',
@@ -527,12 +487,12 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                   <Lock size={20} className="text-gray-400 mx-auto mb-2" />
                   <div className="text-xs font-mono text-gray-400 mb-1">BADGES LOCKED</div>
                   <div className="text-2xl font-mono font-bold text-gray-400">
-                    {lockedCount}
+                    {progressMetrics.lockedCount}
                   </div>
                 </div>
               </div>
 
-              {/* Total */}
+              {/* Badges Total */}
               <div className="bg-black border text-center p-4 relative transition-all duration-200"
                    style={{
                      borderColor: '#4B5563',
@@ -553,11 +513,11 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
         </div>
       </motion.div>
 
-      {/* Conditional Rendering: Main Achievement View OR Locked Achievements View */}
+      {/* Achievement Sections */}
       <AnimatePresence mode="wait">
         {!showLockedAchievements ? (
           <motion.div key="main-achievements">
-            {/* Achievement Badges Section with Rarity Filter */}
+            {/* User's Badges Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -569,7 +529,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                 boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
             >
-              <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+              <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
                    style={{ borderColor: tabColor }} />
               <div className="absolute inset-0 pointer-events-none"
                    style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
@@ -626,18 +586,18 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                 </div>
                 
                 <div className="p-6">
-                  {getFilteredAchievements(unlockedAchievements).length > 0 ? (
+                  {filteredAchievements.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {getFilteredAchievements(unlockedAchievements).map((achievement, index) => (
+                      {filteredAchievements.map((achievement, index) => (
                         <div 
                           key={achievement.id}
                           onClick={(e) => handleBadgeClick(achievement, e)}
                           className="cursor-pointer"
                         >
-                          <AchievementBadge
+                          <MemoizedAchievementBadge
                             achievement={achievement}
                             isUnlocked={true}
-                            onClick={() => {}} // Empty since we handle click on wrapper
+                            onClick={() => {}}
                           />
                         </div>
                       ))}
@@ -660,7 +620,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
               </div>
             </motion.div>
 
-            {/* Achievements in Progress Section - Always visible on main view */}
+            {/* Badges in Progress Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -672,7 +632,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                 boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
             >
-              <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+              <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
                    style={{ borderColor: tabColor }} />
               <div className="absolute inset-0 pointer-events-none"
                    style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
@@ -685,7 +645,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                      }}>
                   <h3 className="text-lg font-mono font-bold text-white flex items-center">
                     <TrendingUp className="mr-2" size={20} style={{ color: tabColor }} />
-                    BADGES IN PROGRESS ({inProgressCount})
+                    BADGES IN PROGRESS ({progressMetrics.inProgressCount})
                   </h3>
                 </div>
                 
@@ -693,7 +653,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                   {inProgressAchievements.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {inProgressAchievements.map((achievement, index) => (
-                        <AchievementBadge
+                        <MemoizedAchievementBadge
                           key={achievement.id}
                           achievement={achievement}
                           isUnlocked={false}
@@ -714,7 +674,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
             </motion.div>
           </motion.div>
         ) : (
-          /* Locked Achievements View - Only shows when button is clicked */
+          /* Locked Achievements View */
           <motion.div
             key="locked-achievements"
             initial={{ opacity: 0, y: 20 }}
@@ -727,7 +687,7 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
               boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
             }}
           >
-            <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+            <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
                  style={{ borderColor: tabColor }} />
             <div className="absolute inset-0 pointer-events-none"
                  style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
@@ -740,10 +700,9 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
                    }}>
                 <h3 className="text-lg font-mono font-bold text-white flex items-center">
                   <Lock className="mr-2" size={20} style={{ color: tabColor }} />
-                  LOCKED ACHIEVEMENTS ({getFilteredAchievements(lockedAchievements).length})
+                  LOCKED ACHIEVEMENTS ({filteredLockedAchievements.length})
                 </h3>
                 
-                {/* Sort Dropdown */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-mono text-gray-400">SORT BY:</span>
                   <select
@@ -764,12 +723,17 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
               
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {getFilteredAchievements(lockedAchievements).map((achievement, index) => {
-                    const progress = achievementService.getAchievementProgress(achievement.id, userStats);
+                  {sortAchievements(filteredLockedAchievements, lockedSortBy).map((achievement, index) => {
+                    // Get progress from backend instead of local service
+                    const playerAchievement = backendAchievementService.playerAchievements.find(
+                      pa => pa.achievementId === achievement.id
+                    );
+                    const progress = playerAchievement ? playerAchievement.progress : 0;
+                    
                     return (
-                      <AchievementBadge
+                      <MemoizedAchievementBadge
                         key={achievement.id}
-                        achievement={{ ...achievement, progress: Math.round(progress * 100) }}
+                        achievement={{ ...achievement, progress }}
                         isUnlocked={false}
                         showProgress={progress > 0}
                         onClick={() => setSelectedAchievement(achievement)}
@@ -789,20 +753,147 @@ const AchievementsTab = ({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
           <AchievementModal 
             achievement={selectedAchievement} 
             onClose={() => setSelectedAchievement(null)}
-            clickPosition={selectedAchievement.clickPosition}
           />
         )}
       </AnimatePresence>
 
-      {/* Add the shimmer animation CSS */}
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-      `}</style>
+      {/* CLEAN debug section */}
+      <div className="mb-4 p-4 bg-gray-900 border border-gray-600">
+        <h3 className="text-gray-300 font-mono font-bold mb-2">🔍 DEBUG STATUS:</h3>
+        <div className="text-gray-400 font-mono text-sm space-y-1">
+          <div>Backend loaded: {backendAchievementService.loaded ? 'YES' : 'NO'}</div>
+          <div>Total achievements: {backendAchievementService.allAchievements.length}</div>
+          <div>Player achievements: {backendAchievementService.playerAchievements.length}</div>
+          <div>Unlocked: {backendAchievementService.getUnlockedAchievements().length}</div>
+          <div>In progress: {backendAchievementService.getInProgressAchievements().length}</div>
+          <div>Locked: {backendAchievementService.getLockedAchievements().length}</div>
+        </div>
+        
+        <button
+          onClick={() => {
+            console.log('🔍 Sample player achievement:', backendAchievementService.playerAchievements[0]);
+            console.log('🔍 First 3 achievements:', backendAchievementService.allAchievements.slice(0, 3));
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 font-mono text-sm mt-2"
+        >
+          LOG SAMPLE DATA
+        </button>
+      </div>
+
+      {/* Manual test buttons (REMOVE LATER) */}
+      <div className="flex gap-2">
+        <button 
+          onClick={async () => {
+            try {
+              setLoading(true);
+              // Use the correct method name
+              const result = await apiService.populateTestAchievements(username);
+              console.log('✅ Populate result:', result);
+              await loadAchievementData();
+            } catch (error) {
+              console.error('❌ Populate failed:', error);
+            } finally {
+              setLoading(false);
+            }
+          }} 
+          className="bg-green-600 text-white font-mono text-sm px-4 py-2 rounded shadow-md transition-all duration-200 flex items-center gap-2"
+        >
+          TEST POPULATE
+        </button>
+        
+        <button 
+          onClick={() => {
+            console.log('Unlocked Achievements:', unlockedAchievements);
+            console.log('In Progress Achievements:', inProgressAchievements);
+            console.log('Locked Achievements:', lockedAchievements);
+          }} 
+          className="bg-blue-600 text-white font-mono text-sm px-4 py-2 rounded shadow-md transition-all duration-200 flex items-center gap-2"
+        >
+          LOG SAMPLES
+        </button>
+        
+        <button 
+          onClick={() => {
+            // Detailed check for all achievements
+            allAchievements.forEach(achievement => {
+              const isUnlocked = achievementService.isUnlocked(achievement.id);
+              const playerAchievement = backendAchievementService.playerAchievements.find(pa => pa.achievementId === achievement.id);
+              const progress = playerAchievement ? playerAchievement.progress : 0;
+              console.log(`Achievement: ${achievement.name} | Unlocked: ${isUnlocked} | Progress: ${progress}`);
+            });
+          }} 
+          className="bg-yellow-600 text-white font-mono text-sm px-4 py-2 rounded shadow-md transition-all duration-200 flex items-center gap-2"
+        >
+          DETAILED CHECK
+        </button>
+
+        <button
+          onClick={async () => {
+            try {
+              console.log('🔄 Running detailed achievement check...');
+              const result = await apiService.checkAllAchievements(username);
+              console.log('✅ Check completed:', result);
+              
+              // Reload data
+              await loadAchievementData();
+            } catch (error) {
+              console.error('❌ Check failed:', error);
+            }
+          }}
+          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 font-mono text-sm"
+        >
+          DETAILED CHECK (see backend logs)
+        </button>
+
+        <button
+          onClick={async () => {
+            try {
+              console.log('🔄 Force checking achievements...');
+              await apiService.checkAllAchievements(username);
+              
+              // Wait a moment for backend processing
+              setTimeout(async () => {
+                await loadAchievementData();
+              }, 1000);
+            } catch (error) {
+              console.error('❌ Force check failed:', error);
+            }
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 font-mono text-sm"
+        >
+          FORCE REFRESH
+        </button>
+
+        {/* Add this button to test usernames: */}
+        <button
+          onClick={async () => {
+            try {
+              const response = await fetch('http://localhost:8080/api/achievements/debug/usernames');
+              const data = await response.json();
+              console.log('🔍 Database usernames:', data);
+              
+              // Test each username found
+              if (data.taskUsernames) {
+                for (const testUsername of data.taskUsernames) {
+                  console.log(`🧪 Testing username: ${testUsername}`);
+                  try {
+                    await apiService.checkAllAchievements(testUsername);
+                  } catch (error) {
+                    console.log(`❌ ${testUsername} failed:`, error.message);
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('❌ Debug failed:', error);
+            }
+          }}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 font-mono text-sm"
+        >
+          DEBUG USERNAMES
+        </button>
+      </div>
     </div>
   );
-};
+});
 
 export default AchievementsTab;

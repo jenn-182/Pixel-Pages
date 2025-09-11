@@ -8,7 +8,7 @@ import useTasks from '../../hooks/useTasks';
 import { playerRanks, getRankByXP, getNextRank } from '../../data/ranks';
 import achievementService from '../../services/achievementService';
 
-const ProfileTab = ({ username = 'Jroc_182', tabColor = '#A78BFA' }) => {
+const ProfileTab = ({ username = 'user', tabColor = '#A78BFA' }) => {
   const { player } = usePlayer();
   const { notes } = useNotes();
   const { tasks, taskLists } = useTasks();

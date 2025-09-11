@@ -82,7 +82,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
 
   // Mock player data if no player provided
   const mockPlayer = {
-    username: "Jroc_182",
+    username: "user",
     level: 1,
     experience: 0
   };

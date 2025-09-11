@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, Trophy, Target, Calendar, BookOpen, Briefcase, Code, Palette, User } from 'lucide-react';
 
-const TrackerTab = ({ username = 'Jroc_182', tabColor = '#10B981' }) => {
+const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
   const [categories, setCategories] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState({

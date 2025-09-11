@@ -10,7 +10,7 @@ const SaveSessionModal = ({
   onDiscard, 
   timeSpent, 
   sessionType = 'session',
-  username = 'Jroc_182' // Add username prop
+  username = 'user' // Add username prop
 }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customCategoryName, setCustomCategoryName] = useState('');
