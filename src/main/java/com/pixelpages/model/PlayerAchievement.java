@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 public class PlayerAchievement {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id")
+    private Integer id; // ✅ REMOVE @GeneratedValue - we'll set manually
     
     @Column(name = "username", nullable = false)
     private String username;
@@ -44,9 +44,17 @@ public class PlayerAchievement {
         this.updatedAt = LocalDateTime.now();
     }
     
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // ✅ ADD METHOD TO GENERATE MANUAL ID
+    public void generateId() {
+        if (this.id == null) {
+            // Simple timestamp-based ID generation
+            this.id = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
+        }
+    }
+    
+    // All your existing getters and setters...
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
     
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
@@ -55,13 +63,25 @@ public class PlayerAchievement {
     public void setAchievementId(String achievementId) { this.achievementId = achievementId; }
     
     public boolean isCompleted() { return completed; }
-    public void setCompleted(boolean completed) { this.completed = completed; }
+    public void setCompleted(boolean completed) { 
+        this.completed = completed;
+        if (completed) {
+            this.unlockedAt = LocalDateTime.now();
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
     
     public int getProgress() { return progress; }
-    public void setProgress(int progress) { this.progress = progress; }
+    public void setProgress(int progress) { 
+        this.progress = progress; 
+        this.updatedAt = LocalDateTime.now();
+    }
     
     public Double getProgressPercentage() { return progressPercentage; }
-    public void setProgressPercentage(Double progressPercentage) { this.progressPercentage = progressPercentage; }
+    public void setProgressPercentage(Double progressPercentage) { 
+        this.progressPercentage = progressPercentage; 
+        this.updatedAt = LocalDateTime.now();
+    }
     
     public Integer getMaxProgress() { return maxProgress; }
     public void setMaxProgress(Integer maxProgress) { this.maxProgress = maxProgress; }

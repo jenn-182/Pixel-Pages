@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PlayerAchievementRepository extends JpaRepository<PlayerAchievement, Long> {
+public interface PlayerAchievementRepository extends JpaRepository<PlayerAchievement, Integer> {  // CHANGED FROM Long TO Integer
     
     // Find all achievements for a user
     List<PlayerAchievement> findByUsername(String username);
@@ -32,4 +32,7 @@ public interface PlayerAchievementRepository extends JpaRepository<PlayerAchieve
     // Get total XP earned from completed achievements
     @Query("SELECT COALESCE(SUM(a.xpReward), 0) FROM PlayerAchievement pa JOIN Achievement a ON pa.achievementId = a.id WHERE pa.username = :username AND pa.completed = true")
     int getTotalXpByUsername(@Param("username") String username);
+
+    @Query("SELECT MAX(p.id) FROM PlayerAchievement p")
+    Optional<Integer> findMaxId();
 }

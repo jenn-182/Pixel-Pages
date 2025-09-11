@@ -110,20 +110,20 @@ public class AchievementController {
         }
     }
 
-    @PostMapping("/test/populate/{username}")
-    @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<String> populateTestData(@PathVariable String username) {
-        try {
-            System.out.println("Populating test data for user: " + username);
-            String result = achievementService.populateTestData(username);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            System.err.println("Error populating test data for " + username + ": " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to populate test data: " + e.getMessage());
-        }
-    }
+    // @PostMapping("/test/populate/{username}")
+    // @CrossOrigin(origins = "http://localhost:3000")
+    // public ResponseEntity<String> populateTestData(@PathVariable String username) {
+    //     try {
+    //         System.out.println("Populating test data for user: " + username);
+    //         String result = achievementService.populateTestData(username);
+    //         return ResponseEntity.ok(result);
+    //     } catch (Exception e) {
+    //         System.err.println("Error populating test data for " + username + ": " + e.getMessage());
+    //         e.printStackTrace();
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    //                 .body("Failed to populate test data: " + e.getMessage());
+    //     }
+    // }
 
     @GetMapping("/debug/usernames")
     @CrossOrigin(origins = "http://localhost:3000")
