@@ -51,8 +51,6 @@ public class AchievementInitializationService {
                         "Edit3", "common", "notes", 75, "#10B981", "word_count", 100),
                 new Achievement("tag_rookie", "TAG ROOKIE", "Use your first tag in a log",
                         "Tag", "common", "notes", 50, "#10B981", "tag_count", 1),
-                new Achievement("daily_logger", "DAILY LOGGER", "Create a log today",
-                        "Calendar", "common", "notes", 25, "#10B981", "daily_notes", 1),
                 new Achievement("basic_editor", "BASIC EDITOR", "Edit your first log",
                         "Edit", "common", "notes", 50, "#10B981", "note_edits", 1),
 

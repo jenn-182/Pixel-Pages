@@ -1,0 +1,34 @@
+Introduction to Programming - CS101
+Created: 2025-09-12 14:24:54
+Updated: 2025-09-12 14:24:54
+Tags: programming, basics, python, homework
+Color: #4ADE80
+
+# Introduction to Programming
+
+## What is Programming?
+Programming is the process of creating instructions for computers to follow. Today we covered:
+
+### Key Concepts
+- **Variables**: Storage containers for data
+- **Functions**: Reusable blocks of code  
+- **Loops**: Repetitive execution structures
+- **Conditionals**: Decision-making logic
+
+### First Program
+```python
+def hello_world():
+    print("Hello, World!")
+    return "Success"
+```
+
+### Assignment
+Write a program that calculates the area of a rectangle using length and width inputs.
+
+**Due**: Next class
+**Points**: 10
+
+### Notes
+- Remember to comment your code
+- Use meaningful variable names
+- Test edge cases

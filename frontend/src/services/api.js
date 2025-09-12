@@ -424,8 +424,20 @@ const apiService = {
   // Helper method to get icon for category
   getCategoryIcon(categoryName) {
     const iconMap = {
-      'WORK': 'Briefcase',
+      // NEW 9 Default Branches
+      'SCHOLAR': 'BookOpen',      // Scholar (Study)
+      'PROFESSION': 'Briefcase',  // Profession (Work)
+      'ARTISAN': 'Palette',       // Artisan (Creating)
+      'SCRIBE': 'PenTool',        // Scribe (Writing)
+      'PROGRAMMING': 'Code',      // Programming (Coding)
+      'LITERACY': 'Target',       // Literacy (Reading)
+      'STRATEGIST': 'Calendar',   // Strategist (Planning)
+      'MINDFULNESS': 'Heart',     // Mindfulness (Rest)
+      'KNOWLEDGE': 'Search',      // Knowledge (Researching)
+      
+      // Legacy mappings (for backward compatibility)
       'STUDY': 'BookOpen',
+      'WORK': 'Briefcase',
       'LEARNING': 'BookOpen',
       'CODE': 'Code',
       'CREATE': 'Palette',

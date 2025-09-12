@@ -1,0 +1,61 @@
+Arrays and Linked Lists - Data Structures
+Created: 2025-01-20 14:20:00
+Updated: 2025-09-12 08:40:52
+Tags: data-structures, arrays, linked-lists, java, assignment
+Color: #cdee2b
+
+# Arrays and Linked Lists - Lecture 3
+
+## Arrays
+### Definition  
+Contiguous memory locations storing elements of the same type.
+
+### Advantages
+- **O(1)** random access by index
+- Cache-friendly due to locality
+- Simple implementation
+
+### Disadvantages  
+- Fixed size (static arrays)
+- Expensive insertion/deletion at beginning
+- Memory waste if not fully utilized
+
+## Linked Lists
+### Definition
+Linear data structure where elements (nodes) contain data and reference to next node.
+
+### Node Structure
+```java
+class Node {
+    int data;
+    Node next;
+    
+    Node(int data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+```
+
+### Advantages
+- Dynamic size
+- Efficient insertion/deletion at beginning O(1)
+- No memory waste
+
+### Disadvantages
+- No random access - O(n) to find element
+- Extra memory for pointers
+- Not cache-friendly
+
+## Comparison
+| Operation | Array | Linked List |
+|-----------|-------|-------------|
+| Access | O(1) | O(n) |
+| Insert at start | O(n) | O(1) |
+| Insert at end | O(1) | O(n) |
+| Delete | O(n) | O(1) if node known |
+
+## Assignment
+Implement both array and linked list versions of a simple stack.
+**Due**: Next Wednesday
+**Points**: 25

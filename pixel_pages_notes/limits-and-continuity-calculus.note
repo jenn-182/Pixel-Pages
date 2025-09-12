@@ -1,0 +1,40 @@
+Limits and Continuity - Calculus
+Created: 2024-08-25 11:15:00
+Updated: 2025-09-12 08:41:27
+Tags: calculus, limits, continuity, math, homework
+Color: #8a92ff
+
+# Limits and Continuity - Chapter 2
+
+## Definition of a Limit
+The limit of f(x) as x approaches a is L if we can make f(x) arbitrarily close to L by taking x sufficiently close to a.
+
+### Mathematical Notation
+lim(x→a) f(x) = L
+
+## Types of Limits
+1. **One-sided limits**
+   - Left-hand limit: lim(x→a⁻) f(x)
+   - Right-hand limit: lim(x→a⁺) f(x)
+
+2. **Two-sided limits** 
+   - Exists only if left and right limits are equal
+
+## Continuity
+A function f is continuous at x = a if:
+- f(a) is defined
+- lim(x→a) f(x) exists  
+- lim(x→a) f(x) = f(a)
+
+### Examples Worked in Class
+1. f(x) = x² + 3x - 2, find lim(x→1) f(x)
+2. Piecewise function continuity check
+
+## Homework Problems
+Section 2.2: Problems 15, 18, 22, 25-30
+**Due**: Friday
+
+### Study Tips
+- Practice graphing functions
+- Memorize limit laws
+- Work through discontinuity examples

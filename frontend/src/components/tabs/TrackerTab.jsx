@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, Trophy, Target, Calendar, BookOpen, Briefcase, Code, Palette, User } from 'lucide-react';
-import SkillTree from '../SkillTree';
+import { BarChart3, Trophy, Target, Calendar, BookOpen, Briefcase, Code, Palette, User, PenTool, Search, Heart, Activity } from 'lucide-react';
+import HexagonalSkillTree from '../trackerSkills/HexagonalSkillTree';
+import TimeManagementMatrix from '../widgets/TimeManagementMatrix';
 
 const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
   const [categories, setCategories] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [showMatrix, setShowMatrix] = useState(false);
   const [stats, setStats] = useState({
     totalTime: 0,
     totalSessions: 0,
@@ -13,13 +15,19 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
     weekSessions: 0
   });
 
+  // Updated icon mapping to match SaveSessionModal and HexagonalSkillTree
   const getIconComponent = (iconName) => {
     const iconMap = {
-      'BookOpen': BookOpen,
-      'Briefcase': Briefcase,
-      'Palette': Palette,
-      'Code': Code,
-      'User': User
+      'BookOpen': BookOpen,      // Scholar (Study)
+      'Briefcase': Briefcase,    // Profession (Work)
+      'Palette': Palette,        // Artisan (Creating)
+      'PenTool': PenTool,        // Scribe (Writing)
+      'Code': Code,              // Programming (Coding)
+      'Target': Target,          // Literacy (Reading)
+      'Calendar': Calendar,      // Strategist (Planning)
+      'Heart': Heart,            // Mindfulness (Rest)
+      'Search': Search,          // Knowledge (Researching)
+      'User': User               // Custom categories
     };
     return iconMap[iconName] || User;
   };
@@ -35,8 +43,64 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
 
   useEffect(() => {
     const loadTrackerData = () => {
-      // Load categories with XP
-      const categoryData = JSON.parse(localStorage.getItem('focusCategories') || '[]');
+      // Check if categories exist, if not initialize with defaults
+      let categoryData = JSON.parse(localStorage.getItem('focusCategories') || '[]');
+
+      
+      // MOCK DATA!!
+      // If no categories exist, initialize with the new 9 default branches with mock data
+      if (categoryData.length === 0) {
+        const defaultCategories = [
+          { id: 'scholar', name: 'Scholar', iconName: 'BookOpen', color: '#FF1493', xp: 95 },      // Level 2 with some progress
+          { id: 'profession', name: 'Profession', iconName: 'Briefcase', color: '#00FFFF', xp: 180 }, // Level 3 with some progress
+          { id: 'artisan', name: 'Artisan', iconName: 'Palette', color: '#8A2BE2', xp: 45 },        // Level 1 with progress
+          { id: 'scribe', name: 'Scribe', iconName: 'PenTool', color: '#FF6347', xp: 0 },           // No progress yet
+          { id: 'programming', name: 'Programming', iconName: 'Code', color: '#00FF7F', xp: 125 },  // Level 2 with progress
+          { id: 'literacy', name: 'Literacy', iconName: 'Target', color: '#FFD700', xp: 30 },       // Level 1 partial
+          { id: 'strategist', name: 'Strategist', iconName: 'Calendar', color: '#FF4500', xp: 0 },  // No progress
+          { id: 'mindfulness', name: 'Mindfulness', iconName: 'Heart', color: '#40E0D0', xp: 85 },  // Level 2 partial
+          { id: 'knowledge', name: 'Knowledge', iconName: 'Search', color: '#DA70D6', xp: 15 }      // Level 1 small progress
+        ];
+        
+        localStorage.setItem('focusCategories', JSON.stringify(defaultCategories));
+        categoryData = defaultCategories;
+
+        // Also add some mock session data to make it look realistic
+        const mockSessions = [
+          // Scholar sessions (95 minutes total) - Updated to recent dates
+          { id: 1, username: 'user', category: 'scholar', timeSpent: 25, sessionType: 'session', createdAt: '2025-09-10T10:00:00.000Z', date: 'Tue Sep 10 2025' },
+          { id: 2, username: 'user', category: 'scholar', timeSpent: 30, sessionType: 'session', createdAt: '2025-09-09T14:30:00.000Z', date: 'Mon Sep 09 2025' },
+          { id: 3, username: 'user', category: 'scholar', timeSpent: 40, sessionType: 'session', createdAt: '2025-09-08T09:15:00.000Z', date: 'Sun Sep 08 2025' },
+          
+          // Profession sessions (180 minutes total)
+          { id: 4, username: 'user', category: 'profession', timeSpent: 45, sessionType: 'session', createdAt: '2025-09-12T08:00:00.000Z', date: 'Thu Sep 12 2025' },
+          { id: 5, username: 'user', category: 'profession', timeSpent: 60, sessionType: 'session', createdAt: '2025-09-11T16:00:00.000Z', date: 'Wed Sep 11 2025' },
+          { id: 6, username: 'user', category: 'profession', timeSpent: 50, sessionType: 'session', createdAt: '2025-09-07T11:30:00.000Z', date: 'Sun Sep 07 2025' },
+          { id: 7, username: 'user', category: 'profession', timeSpent: 25, sessionType: 'session', createdAt: '2025-09-06T15:45:00.000Z', date: 'Sat Sep 06 2025' },
+          
+          // Artisan sessions (45 minutes total)
+          { id: 8, username: 'user', category: 'artisan', timeSpent: 45, sessionType: 'session', createdAt: '2025-09-09T20:00:00.000Z', date: 'Mon Sep 09 2025' },
+          
+          // Programming sessions (125 minutes total)
+          { id: 9, username: 'user', category: 'programming', timeSpent: 35, sessionType: 'session', createdAt: '2025-09-12T19:00:00.000Z', date: 'Thu Sep 12 2025' },
+          { id: 10, username: 'user', category: 'programming', timeSpent: 45, sessionType: 'session', createdAt: '2025-09-08T18:30:00.000Z', date: 'Sun Sep 08 2025' },
+          { id: 11, username: 'user', category: 'programming', timeSpent: 45, sessionType: 'session', createdAt: '2025-09-05T17:15:00.000Z', date: 'Fri Sep 05 2025' },
+          
+          // Literacy sessions (30 minutes total)
+          { id: 12, username: 'user', category: 'literacy', timeSpent: 30, sessionType: 'session', createdAt: '2025-09-10T21:00:00.000Z', date: 'Tue Sep 10 2025' },
+          
+          // Mindfulness sessions (85 minutes total)
+          { id: 13, username: 'user', category: 'mindfulness', timeSpent: 25, sessionType: 'session', createdAt: '2025-09-12T07:00:00.000Z', date: 'Thu Sep 12 2025' },
+          { id: 14, username: 'user', category: 'mindfulness', timeSpent: 30, sessionType: 'session', createdAt: '2025-09-09T07:30:00.000Z', date: 'Mon Sep 09 2025' },
+          { id: 15, username: 'user', category: 'mindfulness', timeSpent: 30, sessionType: 'session', createdAt: '2025-09-06T22:00:00.000Z', date: 'Sat Sep 06 2025' },
+          
+          // Knowledge sessions (15 minutes total)
+          { id: 16, username: 'user', category: 'knowledge', timeSpent: 15, sessionType: 'session', createdAt: '2025-09-08T13:45:00.000Z', date: 'Sun Sep 08 2025' }
+        ];
+        
+        localStorage.setItem('focusSessions', JSON.stringify(mockSessions));
+      }
+      
       setCategories(categoryData);
 
       // Load session history
@@ -76,156 +140,113 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-          <div 
-            className="w-6 h-6 border border-gray-600" 
-            style={{ backgroundColor: tabColor }}
-          />
-          SKILL TREE
-        </h1>
-        <p className="text-gray-400 font-mono text-sm">
-          Track your grind sessions and level up your skills.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
+              <div 
+                className="w-6 h-6 border border-gray-600" 
+                style={{ backgroundColor: tabColor }}
+              />
+              SKILL TREE
+            </h1>
+            <p className="text-gray-400 font-mono text-sm">
+              Track your grind sessions and level up your skills.
+            </p>
+          </div>
+
+          {/* View Matrix Button */}
+          <motion.button
+            className="px-6 py-3 border-2 bg-black font-mono font-bold text-sm flex items-center gap-3 hover:scale-105 transition-transform relative overflow-hidden"
+            style={{ 
+              borderColor: tabColor,
+              color: tabColor,
+              boxShadow: `0 0 15px ${tabColor}40`
+            }}
+            whileHover={{ 
+              boxShadow: `0 0 25px ${tabColor}60`,
+              borderColor: tabColor 
+            }}
+            onClick={() => setShowMatrix(!showMatrix)}
+          >
+            {/* Animated background scan line */}
+            <div 
+              className="absolute inset-0 opacity-30"
+              style={{
+                background: `linear-gradient(90deg, transparent 0%, ${tabColor}80 50%, transparent 100%)`,
+                width: '100%',
+                animation: showMatrix ? 'none' : 'scan 3s linear infinite'
+              }}
+            />
+            
+            <Activity size={18} className="relative z-10" />
+            <span className="relative z-10">
+              {showMatrix ? 'VIEW SKILL TREE' : 'VIEW TIME MATRIX'}
+            </span>
+          </motion.button>
+        </div>
       </motion.div>
 
-      {/* Focus Stats */}
+      {/* Content - Either Skill Tree or Matrix */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
-        style={{
-          borderColor: tabColor,
-          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-        }}
+        key={showMatrix ? 'matrix' : 'skilltree'}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
       >
-        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        <div className="absolute inset-0 pointer-events-none"
-             style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
-        
-        <div className="relative z-10">
-          <div className="border-b px-4 py-3"
-               style={{ 
-                 borderColor: tabColor,
-                 backgroundColor: '#1A0E26'
-               }}>
-            <h3 className="text-lg font-mono font-bold text-white flex items-center">
-              <BarChart3 className="mr-2" size={20} style={{ color: tabColor }} />
-              FOCUS STATISTICS
-            </h3>
-          </div>
-          
-          <div className="p-6">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-mono font-bold text-green-400">
-                  {Math.floor(stats.totalTime / 60)}h {stats.totalTime % 60}m
-                </div>
-                <div className="text-xs text-gray-400">TOTAL TIME</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-mono font-bold text-blue-400">
-                  {stats.totalSessions}
-                </div>
-                <div className="text-xs text-gray-400">TOTAL SESSIONS</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-mono font-bold text-yellow-400">
-                  {stats.todaySessions}
-                </div>
-                <div className="text-xs text-gray-400">TODAY</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-mono font-bold text-purple-400">
-                  {stats.weekSessions}
-                </div>
-                <div className="text-xs text-gray-400">THIS WEEK</div>
+        {showMatrix ? (
+          <TimeManagementMatrix 
+            tabColor={tabColor} 
+            tabColorRgb={tabColorRgb}
+            onClose={() => setShowMatrix(false)}
+          />
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
+            style={{
+              borderColor: tabColor,
+              boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+            }}
+          >
+            <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+                 style={{ borderColor: tabColor }} />
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
+            
+            <div className="relative z-10">
+              <div className="p-6">
+                {categories.length > 0 ? (
+                  <HexagonalSkillTree 
+                    categories={categories} 
+                    tabColor={tabColor} 
+                    tabColorRgb={tabColorRgb} 
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <Target size={48} className="text-gray-500 mx-auto mb-3" />
+                    <div className="text-gray-400 font-mono text-lg font-bold mb-2">
+                      NO SKILLS UNLOCKED
+                    </div>
+                    <div className="text-gray-500 font-mono text-sm">
+                      Complete focus sessions to start building your skill trees!
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        )}
       </motion.div>
 
-      {/* Skill Trees */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
-        style={{
-          borderColor: tabColor,
-          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-        }}
-      >
-        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        <div className="absolute inset-0 pointer-events-none"
-             style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
-        
-        <div className="relative z-10">
-          <div className="border-b px-4 py-3"
-               style={{ 
-                 borderColor: tabColor,
-                 backgroundColor: '#1A0E26'
-               }}>
-            <h3 className="text-lg font-mono font-bold text-white flex items-center">
-              <Trophy className="mr-2" size={20} style={{ color: tabColor }} />
-              SKILL TREES
-            </h3>
-          </div>
-          
-          <div className="p-6">
-            {categories.length > 0 ? (
-              <SkillTree 
-                categories={categories} 
-                tabColor={tabColor} 
-                tabColorRgb={tabColorRgb} 
-              />
-            ) : (
-              <div className="text-center py-8">
-                <Target size={48} className="text-gray-500 mx-auto mb-3" />
-                <div className="text-gray-400 font-mono text-lg font-bold mb-2">
-                  NO SKILLS UNLOCKED
-                </div>
-                <div className="text-gray-500 font-mono text-sm">
-                  Complete focus sessions to start building your skill trees!
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Recent Sessions */}
-      {sessions.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border-2 border-gray-600 p-6"
-        >
-          <h3 className="text-lg font-mono font-bold text-white mb-4 flex items-center">
-            <Calendar size={20} className="mr-2 text-gray-400" />
-            RECENT SESSIONS
-          </h3>
-          
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {sessions.slice(-10).reverse().map(session => (
-              <div key={session.id} className="bg-gray-900 border border-gray-700 p-3 font-mono text-sm">
-                <div className="flex justify-between items-center">
-                  <div className="text-white">
-                    <span className="font-bold">{session.category.toUpperCase()}</span>
-                    <span className="text-gray-400 ml-2">+{session.timeSpent}m</span>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(session.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
+      {/* Add CSS for scan animation */}
+      <style jsx>{`
+        @keyframes scan {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
     </div>
   );
 };

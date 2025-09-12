@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Trash2, Plus, Trophy, Code, BookOpen, Briefcase, Palette, User } from 'lucide-react';
+import { Save, Trash2, Plus, Trophy, Code, BookOpen, Briefcase, Palette, User, PenTool, Search, Calendar, Heart, Target } from 'lucide-react';
 import apiService from '../../services/api';
 import achievementService from '../../services/achievementService';
 
@@ -10,7 +10,7 @@ const SaveSessionModal = ({
   onDiscard, 
   timeSpent, 
   sessionType = 'session',
-  username = 'user' // Add username prop
+  username = 'user'
 }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customCategoryName, setCustomCategoryName] = useState('');
@@ -20,25 +20,34 @@ const SaveSessionModal = ({
   // Icon mapping function
   const getIconComponent = (iconName) => {
     const iconMap = {
-      'BookOpen': BookOpen,
-      'Briefcase': Briefcase,
-      'Palette': Palette,
-      'Code': Code,
-      'User': User
+      'BookOpen': BookOpen,      // Scholar (Study)
+      'Briefcase': Briefcase,    // Profession (Work)
+      'Palette': Palette,        // Artisan (Creating)
+      'PenTool': PenTool,        // Scribe (Writing)
+      'Code': Code,              // Programming (Coding)
+      'Target': Target,          // Literacy (Reading)
+      'Calendar': Calendar,      // Strategist (Planning)
+      'Heart': Heart,            // Mindfulness (Rest)
+      'Search': Search,          // Knowledge (Researching)
+      'User': User               // Custom categories
     };
     return iconMap[iconName] || User;
   };
 
-  // Load categories from localStorage only
+  // Load categories from localStorage
   useEffect(() => {
     const loadCategories = async () => {
-      // Default categories
+      // NEW Default categories with your 9 branches
       const defaultCategories = [
-        { id: 'study', name: 'Study', iconName: 'BookOpen', color: '#3B82F6', xp: 0 },
-        { id: 'work', name: 'Work', iconName: 'Briefcase', color: '#10B981', xp: 0 },
-        { id: 'read', name: 'Read', iconName: 'BookOpen', color: '#8B5CF6', xp: 0 },
-        { id: 'create', name: 'Create', iconName: 'Palette', color: '#F59E0B', xp: 0 },
-        { id: 'code', name: 'Code', iconName: 'Code', color: '#EF4444', xp: 0 }
+        { id: 'scholar', name: 'Scholar', iconName: 'BookOpen', color: '#FF1493', xp: 0 },
+        { id: 'profession', name: 'Profession', iconName: 'Briefcase', color: '#00FFFF', xp: 0 },
+        { id: 'artisan', name: 'Artisan', iconName: 'Palette', color: '#8A2BE2', xp: 0 },
+        { id: 'scribe', name: 'Scribe', iconName: 'PenTool', color: '#FF6347', xp: 0 },
+        { id: 'programming', name: 'Programming', iconName: 'Code', color: '#00FF7F', xp: 0 },
+        { id: 'literacy', name: 'Literacy', iconName: 'Target', color: '#FFD700', xp: 0 },
+        { id: 'strategist', name: 'Strategist', iconName: 'Calendar', color: '#FF4500', xp: 0 },
+        { id: 'mindfulness', name: 'Mindfulness', iconName: 'Heart', color: '#40E0D0', xp: 0 },
+        { id: 'knowledge', name: 'Knowledge', iconName: 'Search', color: '#DA70D6', xp: 0 }
       ];
 
       // Get categories from localStorage
@@ -46,7 +55,7 @@ const SaveSessionModal = ({
       if (saved) {
         setSavedCategories(JSON.parse(saved));
       } else {
-        // Initialize with defaults
+        // Initialize with new defaults
         localStorage.setItem('focusCategories', JSON.stringify(defaultCategories));
         setSavedCategories(defaultCategories);
       }
@@ -116,13 +125,12 @@ const SaveSessionModal = ({
       sessions.push(newSession);
       localStorage.setItem('focusSessions', JSON.stringify(sessions));
       
-      // 🎮 CHECK ACHIEVEMENTS AFTER SAVING SESSION
+      // Check achievements after saving session
       const userStats = calculateFocusStats(sessions, updatedCategories);
       const newAchievements = achievementService.checkAchievements(userStats);
       
       if (newAchievements.length > 0) {
         console.log(`🎉 Unlocked ${newAchievements.length} achievement(s)!`);
-        // Show achievement notifications in UI
         newAchievements.forEach(achievement => {
           showAchievementToast(achievement);
         });
@@ -155,7 +163,7 @@ const SaveSessionModal = ({
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-gray-800 border-2 border-purple-500 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-md relative"
+        className="bg-gray-800 border-2 border-purple-500 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-lg relative"
         style={{
           boxShadow: '0 0 20px rgba(139, 92, 246, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
         }}
@@ -181,26 +189,25 @@ const SaveSessionModal = ({
           {/* Category Selection */}
           <div className="mb-6">
             <div className="text-sm font-mono text-gray-300 mb-3">SELECT CATEGORY:</div>
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-3 gap-2 mb-3">
               {savedCategories.map(category => {
-                // Fix: Get the icon component dynamically
                 const IconComponent = getIconComponent(category.iconName || category.icon);
                 return (
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id)}
-                    className={`p-3 border-2 transition-all duration-200 font-mono text-sm ${
+                    className={`p-3 border-2 transition-all duration-200 font-mono text-xs ${
                       selectedCategory === category.id
                         ? 'border-purple-400 bg-purple-500 bg-opacity-20'
                         : 'border-gray-600 hover:border-gray-500'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center gap-1">
                       <IconComponent size={16} style={{ color: category.color }} />
-                      <span className="text-white font-bold">{category.name}</span>
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {category.xp || 0}m XP
+                      <span className="text-white font-bold truncate w-full">{category.name}</span>
+                      <div className="text-xs text-gray-400">
+                        {category.xp || 0}m XP
+                      </div>
                     </div>
                   </button>
                 );
@@ -286,8 +293,6 @@ const SaveSessionModal = ({
     </div>
   );
 };
-
-export default SaveSessionModal;
 
 // Add helper function to calculate focus stats
 const calculateFocusStats = (sessions, categories) => {
@@ -403,3 +408,5 @@ const showAchievementToast = (achievement) => {
   // Example with custom notification (you'll need to implement this component)
   // toast.success(`🏆 ${achievement.name} unlocked! +${achievement.xpReward} XP`);
 };
+
+export default SaveSessionModal;

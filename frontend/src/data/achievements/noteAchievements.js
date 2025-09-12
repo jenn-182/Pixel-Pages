@@ -56,20 +56,7 @@ export const noteAchievements = [
     xpReward: 50,
     color: '#10B981'
   },
-  {
-    id: 'daily_logger',
-    name: 'DAILY LOGGER',
-    description: 'Create a log today',
-    tier: 'common',
-    category: 'notes',
-    icon: 'Calendar',
-    requirement: {
-      type: 'daily_notes',
-      target: 1
-    },
-    xpReward: 25,
-    color: '#10B981'
-  },
+
   {
     id: 'basic_editor',
     name: 'BASIC EDITOR',
