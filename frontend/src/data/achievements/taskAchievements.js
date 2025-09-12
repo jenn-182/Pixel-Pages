@@ -31,7 +31,7 @@ export const taskAchievements = [
   {
     id: 'checkbox_champion',
     name: 'CHECKBOX CHAMPION',
-    description: 'Complete 2 tasks in one day',
+    description: 'Complete 2 missions in one day',
     tier: 'common',
     category: 'tasks',
     icon: 'CheckSquare',
@@ -45,7 +45,7 @@ export const taskAchievements = [
   {
     id: 'priority_learner',
     name: 'PRIORITY LEARNER',
-    description: 'Set your first task priority',
+    description: 'Set your first mission priority',
     tier: 'common',
     category: 'tasks',
     icon: 'Flag',
@@ -59,7 +59,7 @@ export const taskAchievements = [
   {
     id: 'due_date_setter',
     name: 'DUE DATE SETTER',
-    description: 'Set your first task due date',
+    description: 'Set your first mission due date',
     tier: 'common',
     category: 'tasks',
     icon: 'Calendar',
@@ -73,7 +73,7 @@ export const taskAchievements = [
   {
     id: 'category_starter',
     name: 'CATEGORY STARTER',
-    description: 'Create tasks in 2 different categories',
+    description: 'Create missions in 2 different operations',
     tier: 'common',
     category: 'tasks',
     icon: 'Folder',
@@ -87,7 +87,7 @@ export const taskAchievements = [
   {
     id: 'task_creator',
     name: 'TASK CREATOR',
-    description: 'Create 5 total tasks',
+    description: 'Create 5 total missions',
     tier: 'common',
     category: 'tasks',
     icon: 'Plus',
@@ -117,7 +117,7 @@ export const taskAchievements = [
   {
     id: 'efficiency_expert',
     name: 'EFFICIENCY EXPERT',
-    description: 'Complete 5 tasks in one day',
+    description: 'Complete 5 missions in one day',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'Zap',
@@ -131,7 +131,7 @@ export const taskAchievements = [
   {
     id: 'priority_master',
     name: 'PRIORITY MASTER',
-    description: 'Complete 10 high-priority tasks',
+    description: 'Complete 10 high-priority missions',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'Flag',
@@ -145,7 +145,7 @@ export const taskAchievements = [
   {
     id: 'deadline_defender',
     name: 'DEADLINE DEFENDER',
-    description: 'Complete 10 tasks before their due date',
+    description: 'Complete 10 missions before their due date',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'Clock',
@@ -159,7 +159,7 @@ export const taskAchievements = [
   {
     id: 'weekly_crusher',
     name: 'WEEKLY CRUSHER',
-    description: 'Complete 10 tasks in one week',
+    description: 'Complete 10 missions in one week',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'Calendar',
@@ -173,7 +173,7 @@ export const taskAchievements = [
   {
     id: 'overachiever',
     name: 'OVERACHIEVER',
-    description: 'Complete 20% more tasks than created',
+    description: 'Complete 20% more missions than created',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'TrendingUp',
@@ -187,7 +187,7 @@ export const taskAchievements = [
   {
     id: 'category_master',
     name: 'CATEGORY MASTER',
-    description: 'Use 5 different task categories',
+    description: 'Use 5 different operations',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'Folder',
@@ -201,7 +201,7 @@ export const taskAchievements = [
   {
     id: 'morning_achiever',
     name: 'MORNING ACHIEVER',
-    description: 'Complete 10 tasks before noon',
+    description: 'Complete 10 missions before noon',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'Sun',
@@ -216,7 +216,7 @@ export const taskAchievements = [
   {
     id: 'evening_finisher',
     name: 'EVENING FINISHER',
-    description: 'Complete 10 tasks after 6 PM',
+    description: 'Complete 10 missions after 6 PM',
     tier: 'uncommon',
     category: 'tasks',
     icon: 'Moon',
@@ -247,7 +247,7 @@ export const taskAchievements = [
   {
     id: 'productivity_titan',
     name: 'PRODUCTIVITY TITAN',
-    description: 'Complete 10 tasks in one day',
+    description: 'Complete 10 missions in one day',
     tier: 'rare',
     category: 'tasks',
     icon: 'Zap',
@@ -261,7 +261,7 @@ export const taskAchievements = [
   {
     id: 'organization_overlord',
     name: 'ORGANIZATION OVERLORD',
-    description: 'Maintain 5 different active task lists',
+    description: 'Maintain 5 different active operations',
     tier: 'rare',
     category: 'tasks',
     icon: 'List',
@@ -275,7 +275,7 @@ export const taskAchievements = [
   {
     id: 'streak_sentry',
     name: 'STREAK SENTRY',
-    description: 'Complete tasks 7 days in a row',
+    description: 'Complete missions 7 days in a row',
     tier: 'rare',
     category: 'tasks',
     icon: 'Flame',
@@ -289,7 +289,7 @@ export const taskAchievements = [
   {
     id: 'urgent_responder',
     name: 'URGENT RESPONDER',
-    description: 'Complete 20 urgent-priority tasks',
+    description: 'Complete 20 urgent-priority missions',
     tier: 'rare',
     category: 'tasks',
     icon: 'AlertTriangle',
@@ -303,7 +303,7 @@ export const taskAchievements = [
   {
     id: 'monthly_dominator',
     name: 'MONTHLY DOMINATOR',
-    description: 'Complete 50 tasks in one month',
+    description: 'Complete 50 missions in one month',
     tier: 'rare',
     category: 'tasks',
     icon: 'Calendar',
@@ -317,7 +317,7 @@ export const taskAchievements = [
   {
     id: 'perfectionist',
     name: 'PERFECTIONIST',
-    description: 'Complete 100 tasks with 95%+ on-time rate',
+    description: 'Complete 100 missions with 95%+ on-time rate',
     tier: 'rare',
     category: 'tasks',
     icon: 'Star',
@@ -332,7 +332,7 @@ export const taskAchievements = [
   {
     id: 'task_juggler',
     name: 'TASK JUGGLER',
-    description: 'Have 20+ active tasks at once',
+    description: 'Have 20+ active missions at once',
     tier: 'rare',
     category: 'tasks',
     icon: 'Layers',
@@ -362,7 +362,7 @@ export const taskAchievements = [
   {
     id: 'ultimate_achiever',
     name: 'ULTIMATE ACHIEVER',
-    description: 'Complete 25 tasks in one day',
+    description: 'Complete 25 missions in one day',
     tier: 'legendary',
     category: 'tasks',
     icon: 'Zap',
@@ -376,7 +376,7 @@ export const taskAchievements = [
   {
     id: 'grandmaster_planner',
     name: 'GRANDMASTER PLANNER',
-    description: 'Maintain a 30-day task completion streak',
+    description: 'Maintain a 30-day mission completion streak',
     tier: 'legendary',
     category: 'tasks',
     icon: 'Calendar',

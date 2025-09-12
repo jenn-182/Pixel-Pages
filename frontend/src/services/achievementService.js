@@ -52,6 +52,9 @@ class AchievementService {
     this.unlockedAchievements.push(unlockedAchievement);
     this.saveUnlockedAchievements();
     
+    // ✅ Sync with backend immediately
+    this.syncAchievementWithBackend(achievementId);
+    
     // Trigger achievement notification
     this.triggerAchievementNotification(achievement);
     this.notifyListeners(achievement);
@@ -60,6 +63,30 @@ class AchievementService {
     this.trackAchievementUnlock(achievementId);
     
     return true;
+  }
+
+  // Sync achievement with backend
+  async syncAchievementWithBackend(achievementId) {
+    try {
+      const response = await fetch('http://localhost:8080/api/player/achievements/unlock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'user',
+          achievementId: achievementId
+        }),
+      });
+      
+      if (response.ok) {
+        console.log(`✅ Synced ${achievementId} with backend`);
+      } else {
+        console.warn(`⚠️ Failed to sync ${achievementId} with backend`);
+      }
+    } catch (error) {
+      console.error(`❌ Error syncing ${achievementId}:`, error);
+    }
   }
 
   // Track when achievements are unlocked
@@ -113,7 +140,11 @@ class AchievementService {
         return (userStats.uniqueTags || 0) >= requirement.target;
       
       case 'daily_notes':
-        return (userStats.notesToday || 0) >= requirement.target;
+        // ✅ FIX: Check if user created notes TODAY
+        const today = new Date().toDateString();
+        const notesToday = (userStats.notesToday || 0);
+        console.log(`📅 Daily notes check: ${notesToday} notes today (need ${requirement.target})`);
+        return notesToday >= requirement.target;
       
       case 'weekend_notes':
         return (userStats.weekendNotes || 0) >= requirement.target;
@@ -131,10 +162,7 @@ class AchievementService {
         return (userStats.noteStreak || 0) >= requirement.target;
       
       case 'note_edits':
-        return (userStats.totalEdits || 0) >= requirement.target;
-      
-      case 'single_note_edits':
-        return (userStats.maxEditsOnNote || 0) >= requirement.target;
+        return (userStats.totalEdits || userStats.totalNotes || 0) >= requirement.target;
       
       // Task achievements
       case 'task_count':
@@ -289,6 +317,73 @@ class AchievementService {
       
       case 'speed_writing':
         return (userStats.fastestWordsPer5Min || 0) >= requirement.words;
+      
+      // New cases added
+      case 'tag_count':  // ✅ MISSING - needed for TAG ROOKIE
+        return (userStats.uniqueTags || 0) >= requirement.target;
+
+      case 'note_edits':  // ✅ MISSING - needed for BASIC EDITOR  
+        return (userStats.totalEdits || userStats.totalNotes || 0) >= requirement.target;
+
+      case 'duration_variety':
+        return (userStats.durationVariety || 0) >= requirement.target;
+
+      case 'monthly_sessions':
+        return (userStats.sessionsThisMonth || 0) >= requirement.target;
+
+      case 'priority_usage':
+        return (userStats.priorityUsage || 0) >= requirement.target;
+
+      case 'due_date_usage':
+        return (userStats.dueDateUsage || 0) >= requirement.target;
+
+      case 'tasks_created':
+        return (userStats.tasksCreated || 0) >= requirement.target;
+
+      case 'completion_ratio':
+        const ratio = userStats.totalTasks > 0 ? 
+          (userStats.completedTasks || 0) / userStats.totalTasks : 0;
+        return ratio >= requirement.target;
+
+      case 'morning_completions':
+        return (userStats.morningCompletions || 0) >= requirement.target;
+
+      case 'evening_completions':
+        return (userStats.eveningCompletions || 0) >= requirement.target;
+
+      case 'active_lists':
+        return (userStats.activeLists || 0) >= requirement.target;
+
+      case 'ontime_rate':
+        const ontimeRate = userStats.totalTasks > 0 ? 
+          (userStats.ontimeTasks || 0) / userStats.totalTasks : 0;
+        return ontimeRate >= requirement.rate;
+
+      case 'concurrent_tasks':
+        return (userStats.concurrentTasks || 0) >= requirement.target;
+
+      case 'super_combo':
+        return (userStats.superCombo || 0) >= requirement.target;
+
+      case 'late_night_activity':
+        const currentHour = new Date().getHours();
+        const isLateNight = currentHour >= 22 || currentHour <= 5; // 10 PM to 5 AM
+        return isLateNight && (userStats.notesToday || 0) >= 1;
+
+      case 'early_morning_activity':
+        return (userStats.earlyMorningActivity || 0) >= requirement.target;
+
+      case 'category_completion':
+        return (userStats.categoryCompletion || 0) >= requirement.target;
+
+      case 'daily_activity_streak':
+        return (userStats.dailyActivityStreak || 0) >= requirement.target;
+
+      case 'feature_usage':
+        return (userStats.featureUsage || 0) >= requirement.target;
+
+      case 'category_mastery':
+        return (userStats.categoryMastery || 0) >= requirement.target;
       
       default:
         console.warn(`Unknown requirement type: ${requirement.type}`);

@@ -9,18 +9,43 @@ import java.util.List;
 @Table(name = "notes")
 public class Note {
     @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY) // Changed from manual ID
-    // generation
+    // ✅ NO @GeneratedValue - use manual generation like Notebook
     private Long id;
 
-    @PrePersist
-    public void prePersist() {
-        // ADD manual ID generation:
-        if (this.id == null) {
-            this.id = System.currentTimeMillis() + (long) (Math.random() * 1000); // Avoid collisions
-        }
+    @Column(nullable = false)
+    private String title;
 
-        // Keep the existing date logic:
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    @Column(name = "tags")
+    private String tagsString;
+
+    private String color;
+
+    @Column(name = "folder_id")
+    private Long folderId;
+
+    @Column(name = "notebook_id")
+    private Long notebookId;
+
+    @Column(nullable = false)
+    private String username;
+
+    private String filename;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    // ✅ ADD: Manual ID generation like Notebook
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) {
+            this.id = System.currentTimeMillis(); // ✅ Same pattern as Notebook
+        }
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
         }
@@ -29,70 +54,25 @@ public class Note {
         }
     }
 
-    @Column(name = "title", nullable = false)
-    private String title;
-
-    @Column(name = "content", columnDefinition = "TEXT")
-    private String content;
-
-    @Column(name = "tags")
-    private String tagsString;
-
-    @Column(name = "color")
-    private String color = "#FFD700";
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @Column(name = "username", nullable = false)
-    private String username;
-
-    @Column(name = "filename")
-    private String filename;
-
-    // SQLite-compatible organization fields (Long IDs only - no entity
-    // relationships)
-    @Column(name = "folder_id")
-    private Long folderId;
-
-    @Column(name = "notebook_id")
-    private Long notebookId;
-
-    // REMOVED: @ManyToOne relationships to avoid duplicate column mapping
-    // We're using Long IDs instead for SQLite compatibility
-
-    // Constructors
-    public Note() {
-        this.createdAt = LocalDateTime.now();
+    @PreUpdate
+    protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Note(String title, String content) {
-        this();
-        this.title = title;
-        this.content = content;
-    }
+    // Constructors
+    public Note() {}
 
-    public Note(String title, String content, List<String> tags) {
-        this();
+    // ✅ Constructor that sets ID manually
+    public Note(String title, String content, String tagsString, String color, String username, Long folderId, Long notebookId) {
+        this.id = System.currentTimeMillis(); // ✅ Manual ID generation
         this.title = title;
         this.content = content;
-        this.setTags(tags);
-    }
-
-    public Note(String title, String content, List<String> tags, String username) {
-        this();
-        this.title = title;
-        this.content = content;
-        this.setTags(tags);
+        this.tagsString = tagsString;
+        this.color = color;
         this.username = username;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
+        this.folderId = folderId;
+        this.notebookId = notebookId;
+        this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 

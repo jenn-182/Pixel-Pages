@@ -79,35 +79,50 @@ const useTasks = () => {
   };
 
   // Update task
-  const updateTask = async (taskId, updates) => {
+  const updateTask = async (taskId, updatedData) => {
     try {
+      console.log('Updating task:', taskId, updatedData);
+      
+      // ✅ FIX: Format data properly for backend
+      const requestData = {
+        title: updatedData.title,
+        description: updatedData.description,
+        priority: updatedData.priority,
+        dueDate: updatedData.dueDate, // Should be YYYY-MM-DD format
+        tags: updatedData.tags,
+        taskListId: updatedData.taskListId,
+        completed: updatedData.completed
+      };
+      
+      // ✅ FIX: Use API_BASE constant and 'user' instead of currentUser
       const response = await fetch(`${API_BASE}/${taskId}?username=user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update task');
+        const errorText = await response.text();
+        console.error('Update task error response:', errorText);
+        throw new Error(`Failed to update task: ${response.status} - ${errorText}`);
       }
 
-      const updatedTask = await response.json();
+      const updated = await response.json();
+      
+      // Update local state
       setTasks(prevTasks => 
-        prevTasks.map(task => task.id === taskId ? updatedTask : task)
+        prevTasks.map(task => 
+          task.id === taskId ? updated : task
+        )
       );
       
-      // Check achievements after task update
-      setTimeout(() => {
-        checkTaskAchievements();
-      }, 100);
-      
-      return updatedTask;
-    } catch (err) {
-      console.error('Failed to update task:', err);
-      setError(err.message);
-      throw err;
+      console.log('Task updated successfully:', updated);
+      return updated;
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      throw error;
     }
   };
 

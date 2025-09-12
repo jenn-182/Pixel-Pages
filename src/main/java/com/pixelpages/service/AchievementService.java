@@ -3,10 +3,13 @@ package com.pixelpages.service;
 import com.pixelpages.model.Note;
 import com.pixelpages.model.Achievement;
 import com.pixelpages.model.PlayerAchievement;
+import com.pixelpages.model.Player;
+import com.pixelpages.model.Task;
 import com.pixelpages.repository.AchievementRepository;
 import com.pixelpages.repository.PlayerAchievementRepository;
 import com.pixelpages.repository.NoteRepository;
 import com.pixelpages.repository.TaskRepository;
+import com.pixelpages.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.annotation.Lazy;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,16 +34,20 @@ public class AchievementService {
     
     private final TaskService taskService;
     
+    private final PlayerRepository playerRepository;  // Add this field
+    
     public AchievementService(AchievementRepository achievementRepository,
                              PlayerAchievementRepository playerAchievementRepository,
                              NoteRepository noteRepository,
                              TaskRepository taskRepository,
-                             TaskService taskService) {
+                             TaskService taskService,
+                             PlayerRepository playerRepository) {  // Add this parameter
         this.achievementRepository = achievementRepository;
         this.playerAchievementRepository = playerAchievementRepository;
         this.noteRepository = noteRepository;
         this.taskRepository = taskRepository;
         this.taskService = taskService;
+        this.playerRepository = playerRepository;  // Add this line
         System.out.println("AchievementService initialized (CLEAN VERSION)");
     }
     
@@ -72,6 +80,9 @@ public class AchievementService {
     }
     
     public List<Map<String, Object>> getPlayerAchievements(String username) {
+        // ✅ AUTO-INITIALIZE ACHIEVEMENTS ON FIRST LOAD
+        ensurePlayerAchievementsInitialized(username);
+        
         List<Achievement> allAchievements = getAllAchievements();
         List<PlayerAchievement> playerProgress = playerAchievementRepository.findByUsername(username);
         
@@ -91,10 +102,20 @@ public class AchievementService {
             achievementData.put("xpReward", achievement.getXpReward());
             achievementData.put("color", achievement.getColor());
             
-            // Progress data
-            achievementData.put("progress", progress != null ? progress.getProgressPercentage() : 0.0);
-            achievementData.put("completed", progress != null && progress.isCompleted());
-            achievementData.put("unlockedAt", progress != null ? progress.getUnlockedAt() : null);
+            if (progress != null) {
+                achievementData.put("progress", progress.getProgress());
+                achievementData.put("maxProgress", progress.getMaxProgress());
+                achievementData.put("progressPercentage", progress.getProgressPercentage());
+                achievementData.put("completed", progress.isCompleted());
+                achievementData.put("unlockedAt", progress.getUnlockedAt());
+            } else {
+                // This shouldn't happen after auto-initialization, but just in case
+                achievementData.put("progress", 0);
+                achievementData.put("maxProgress", achievement.getRequirementTarget());
+                achievementData.put("progressPercentage", 0.0);
+                achievementData.put("completed", false);
+                achievementData.put("unlockedAt", null);
+            }
             
             return achievementData;
         }).collect(Collectors.toList());
@@ -118,57 +139,38 @@ public class AchievementService {
     // MAIN ACHIEVEMENT CHECK METHOD
     // ===============================
     
-    @Transactional
     public void checkAllUserAchievements(String username) {
         try {
-            System.out.println("=== CHECKING ALL ACHIEVEMENTS FOR: " + username + " ===");
-            System.out.println("Step 1: Gathering user statistics...");
+            // ✅ AUTO-INITIALIZE ACHIEVEMENTS FIRST
+            ensurePlayerAchievementsInitialized(username);
             
-            // Get user data
-            List<Note> notes = noteRepository.findByUsername(username);
+            System.out.println("🔄 Checking achievements for user: " + username);
             
-            // Fix: Handle both possible method names
-            long completedTasks = 0;
-            long totalTasks = 0;
+            // Get user stats
+            Player player = getOrCreatePlayer(username);
+            List<Note> userNotes = noteRepository.findByUsername(username);
+            List<Task> userTasks = taskRepository.findByUsername(username);
             
-            try {
-                completedTasks = taskRepository.countByUsernameAndCompleted(username, true);
-            } catch (Exception e) {
-                System.err.println("Method countByUsernameAndCompleted not found, trying alternative...");
-                // Alternative method if the above doesn't exist
-                try {
-                    totalTasks = taskRepository.countByUsername(username);
-                    // Calculate completed manually if needed
-                    completedTasks = totalTasks; // Placeholder - adjust based on your actual repository
-                } catch (Exception e2) {
-                    System.err.println("No task count methods available: " + e2.getMessage());
-                }
-            }
+            // Calculate stats
+            int noteCount = userNotes.size();
+            int totalWords = calculateTotalWords(userNotes);
+            long completedTasks = taskRepository.countByUsernameAndCompleted(username, true);
+            int totalFocusMinutes = getTotalFocusMinutesForUser(username);
+            int focusSessionCount = getFocusSessionCountForUser(username);
             
-            try {
-                totalTasks = taskRepository.countByUsername(username);
-            } catch (Exception e) {
-                System.err.println("Method countByUsername not found: " + e.getMessage());
-            }
+            System.out.println("📊 User stats - Notes: " + noteCount + ", Words: " + totalWords + 
+                              ", Tasks: " + completedTasks + ", Focus: " + totalFocusMinutes + "min");
             
-            int totalFocusTime = getTotalFocusMinutesForUser(username);
-            int focusSessions = getFocusSessionCountForUser(username);
+            // Track all achievement types
+            trackNoteCreation(username, userNotes);
+            trackTaskCompletion(username);
+            trackFocusSession(username, totalFocusMinutes, "GENERAL");
             
-            System.out.println("User stats - Notes: " + notes.size() + ", Words: " + calculateTotalWords(notes) + 
-                              ", Completed Tasks: " + completedTasks + ", Total Tasks: " + totalTasks +
-                              ", Focus Time: " + totalFocusTime + " mins, Sessions: " + focusSessions);
-            
-            // Step 2: Check achievements
-            System.out.println("Step 2: Checking achievements...");
-            checkNoteAchievements(username, notes.size(), calculateTotalWords(notes));
-            checkTaskAchievements(username, (int)completedTasks, (int)totalTasks);
-            checkFocusAchievements(username, totalFocusTime, focusSessions);
-            
-            System.out.println("✅ Achievement check completed for: " + username);
+            System.out.println("✅ Achievement check completed for user: " + username);
             
         } catch (Exception e) {
-            System.err.println("Error checking achievements for " + username + ": " + e.getMessage());
-            e.printStackTrace(); // This will show the exact error
+            System.err.println("❌ Error checking achievements: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
@@ -215,6 +217,87 @@ public class AchievementService {
             
         } catch (Exception e) {
             System.err.println("Error tracking task completion: " + e.getMessage());
+        }
+    }
+    
+    public void trackFocusSession(String username, int totalMinutes, String category) {
+        if (username == null || username.trim().isEmpty() || totalMinutes <= 0) {
+            return;
+        }
+        
+        try {
+            int sessionCount = getFocusSessionCountForUser(username);
+            
+            // Update focus time achievements
+            updateProgress(username, "focused_initiate", sessionCount);
+            updateProgress(username, "concentration_cadet", sessionCount);
+            updateProgress(username, "hour_apprentice", totalMinutes);
+            updateProgress(username, "steady_studier", totalMinutes);
+            
+            System.out.println("🎯 Focus tracking: " + username + " - " + totalMinutes + " mins, " + sessionCount + " sessions");
+            
+        } catch (Exception e) {
+            System.err.println("Error tracking focus session: " + e.getMessage());
+        }
+    }
+    
+    // ADD THIS NEW METHOD TO AchievementService:
+
+    public void trackNoteEdit(String username, Note editedNote) {
+        if (username == null || username.trim().isEmpty()) {
+            return;
+        }
+        
+        try {
+            // Track basic editor achievement (note edits)
+            List<Note> userNotes = noteRepository.findByUsername(username);
+            int totalEdits = userNotes.size(); // Simple approximation
+            
+            // ✅ USE CORRECT ACHIEVEMENT IDs FROM YOUR FRONTEND FILES:
+            updateProgress(username, "basic_editor", totalEdits >= 1 ? 1 : 0);  // ✅ CORRECT ID
+            updateProgress(username, "revision_master", totalEdits);             // ✅ CORRECT ID
+            
+            // Track tag usage if note has tags
+            if (editedNote.getTagsString() != null && !editedNote.getTagsString().trim().isEmpty()) {
+                int uniqueTagCount = getUniqueTagCount(username);
+                
+                // ✅ USE CORRECT ACHIEVEMENT IDs:
+                updateProgress(username, "tag_rookie", uniqueTagCount >= 1 ? 1 : 0);    // ✅ CORRECT ID
+                updateProgress(username, "tag_apprentice", uniqueTagCount);              // ✅ CORRECT ID  
+                updateProgress(username, "tag_master", uniqueTagCount);                  // ✅ CORRECT ID
+            }
+            
+            System.out.println("📝 Note edit tracking completed for: " + username);
+            
+        } catch (Exception e) {
+            System.err.println("Error tracking note edit: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    // ADD HELPER METHOD TO COUNT UNIQUE TAGS:
+    private int getUniqueTagCount(String username) {
+        try {
+            List<Note> userNotes = noteRepository.findByUsername(username);
+            Set<String> uniqueTags = new HashSet<>();
+            
+            for (Note note : userNotes) {
+                if (note.getTagsString() != null && !note.getTagsString().trim().isEmpty()) {
+                    String[] tags = note.getTagsString().split(",");
+                    for (String tag : tags) {
+                        String cleanTag = tag.trim().toLowerCase();
+                        if (!cleanTag.isEmpty()) {
+                            uniqueTags.add(cleanTag);
+                        }
+                    }
+                }
+            }
+            
+            System.out.println("🏷️ Found " + uniqueTags.size() + " unique tags for " + username);
+            return uniqueTags.size();
+        } catch (Exception e) {
+            System.err.println("Error counting unique tags: " + e.getMessage());
+            return 0;
         }
     }
     
@@ -282,26 +365,25 @@ public class AchievementService {
         }
     }
     
-    private void unlockAchievement(String username, String achievementId) {
+    public void unlockAchievement(String username, String achievementId) {
         try {
-            ensurePlayerAchievementExists(username, achievementId);
+            // Find existing progress or create new
+            PlayerAchievement playerAchievement = playerAchievementRepository
+                .findByUsernameAndAchievementId(username, achievementId)
+                .orElse(new PlayerAchievement(username, achievementId));
             
-            Optional<PlayerAchievement> existingOpt = playerAchievementRepository
-                .findByUsernameAndAchievementId(username, achievementId);
+            // Force unlock
+            playerAchievement.setProgress(playerAchievement.getTargetValue());
+            playerAchievement.setCompleted(true);
+            playerAchievement.setCompletedAt(LocalDateTime.now());
             
-            if (existingOpt.isPresent()) {
-                PlayerAchievement existing = existingOpt.get();
-                if (!existing.isCompleted()) {
-                    existing.setCompleted(true);
-                    existing.setProgressPercentage(100.0);
-                    existing.setUnlockedAt(LocalDateTime.now());
-                    existing.setUpdatedAt(LocalDateTime.now());
-                    playerAchievementRepository.save(existing);
-                    System.out.println("✅ UNLOCKED: " + achievementId + " for " + username);
-                }
-            }
+            playerAchievementRepository.save(playerAchievement);
+            
+            System.out.println("🎯 Achievement " + achievementId + " unlocked for " + username);
+            
         } catch (Exception e) {
             System.err.println("Error unlocking achievement " + achievementId + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
@@ -348,57 +430,124 @@ public class AchievementService {
         
         if (existingOpt.isPresent()) {
             PlayerAchievement existing = existingOpt.get();
-            if (!existing.isCompleted() && progressPercentage > existing.getProgressPercentage()) {
-                existing.setProgress(currentValue);
-                existing.setProgressPercentage(progressPercentage);
-                
-                if (isCompleted && !existing.isCompleted()) {
-                    existing.setCompleted(true);
-                    existing.setUnlockedAt(LocalDateTime.now());
-                    System.out.println("🎉 Achievement Unlocked: " + achievement.getName() + " for " + username);
-                }
-                
-                playerAchievementRepository.save(existing);
-            }
-        } else if (currentValue > 0) {
-            PlayerAchievement newProgress = new PlayerAchievement();
+            if (!existing.isCompleted()) {  // Only update if not already completed
             
-            // ✅ GENERATE MANUAL ID
-            newProgress.generateId();
+            // ✅ FIX: Cap progress at target for in-progress achievements
+            int cappedProgress = Math.min(currentValue, target);
+            existing.setProgress(cappedProgress);
+            existing.setProgressPercentage(progressPercentage);
             
-            newProgress.setUsername(username);
-            newProgress.setAchievementId(achievementId);
-            newProgress.setProgress(currentValue);
-            newProgress.setMaxProgress(target);
-            newProgress.setProgressPercentage(progressPercentage);
-            newProgress.setCompleted(isCompleted);
-            newProgress.setCreatedAt(LocalDateTime.now());
-            newProgress.setUpdatedAt(LocalDateTime.now());
-            
-            if (isCompleted) {
-                newProgress.setUnlockedAt(LocalDateTime.now());
+            if (isCompleted && !existing.isCompleted()) {
+                existing.setCompleted(true);
+                existing.setProgress(target);  // ✅ Set to exact target when completed
+                existing.setProgressPercentage(100.0);
+                existing.setUnlockedAt(LocalDateTime.now());
                 System.out.println("🎉 Achievement Unlocked: " + achievement.getName() + " for " + username);
             }
             
-            playerAchievementRepository.save(newProgress);
+            existing.setUpdatedAt(LocalDateTime.now());
+            playerAchievementRepository.save(existing);
+        }
+    } else if (currentValue > 0) {
+        PlayerAchievement newProgress = new PlayerAchievement();
+        newProgress.generateId();
+        newProgress.setUsername(username);
+        newProgress.setAchievementId(achievementId);
+        
+        // ✅ FIX: Cap progress at target for in-progress achievements
+        int cappedProgress = Math.min(currentValue, target);
+        newProgress.setProgress(cappedProgress);
+        newProgress.setMaxProgress(target);
+        newProgress.setProgressPercentage(progressPercentage);
+        newProgress.setCompleted(isCompleted);
+        newProgress.setCreatedAt(LocalDateTime.now());
+        newProgress.setUpdatedAt(LocalDateTime.now());
+        
+        if (isCompleted) {
+            newProgress.setProgress(target);  // ✅ Set to exact target when completed
+            newProgress.setProgressPercentage(100.0);
+            newProgress.setUnlockedAt(LocalDateTime.now());
+            System.out.println("🎉 Achievement Unlocked: " + achievement.getName() + " for " + username);
+        }
+        
+        playerAchievementRepository.save(newProgress);
+    }
+}
+    
+    // Helper method to get current progress for any achievement
+    private int getCurrentProgressForAchievement(String username, Achievement achievement) {
+        try {
+            switch (achievement.getRequirementType()) {
+                case "note_count":
+                    return noteRepository.findByUsername(username).size();
+                    
+                case "word_count":
+                    List<Note> notes = noteRepository.findByUsername(username);
+                    return calculateTotalWords(notes);
+                    
+                case "note_edits":  // ✅ ADD THIS CASE
+                    return noteRepository.findByUsername(username).size(); // Simplified for now
+                
+                case "tag_count":   // ✅ ADD THIS CASE
+                    return getUniqueTagCount(username);
+                
+                case "task_count":
+                    return (int) taskRepository.countByUsernameAndCompleted(username, true);
+                    
+                case "session_count":
+                    return getFocusSessionCountForUser(username);
+                    
+                case "total_time":
+                    return getTotalFocusMinutesForUser(username);
+                    
+                default:
+                    System.err.println("Unknown requirement type: " + achievement.getRequirementType());
+                    return 0;
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting progress for " + achievement.getId() + ": " + e.getMessage());
+            return 0;
+        }
+    }
+    
+    private Player getOrCreatePlayer(String username) {
+        try {
+            Optional<Player> existingPlayer = playerRepository.findByUsername(username);
+            if (existingPlayer.isPresent()) {
+                return existingPlayer.get();
+            }
+            
+            // Create new player using EXISTING field names
+            Player newPlayer = new Player();
+            newPlayer.setUsername(username);
+            newPlayer.setExperience(0);  // Use existing field instead of totalXp
+            // createdAt and updatedAt are handled by constructor/prePersist
+            
+            return playerRepository.save(newPlayer);
+        } catch (Exception e) {
+            System.err.println("Error getting/creating player: " + e.getMessage());
+            throw new RuntimeException("Failed to get or create player: " + username);
         }
     }
     
     private int calculateTotalWords(List<Note> notes) {
-        if (notes == null || notes.isEmpty()) {
+        try {
+            return notes.stream()
+                .filter(note -> note.getContent() != null)
+                .mapToInt(note -> {
+                    String content = note.getContent().trim();
+                    if (content.isEmpty()) {
+                        return 0;
+                    }
+                    // Split by whitespace and count non-empty parts
+                    String[] words = content.split("\\s+");
+                    return words.length;
+                })
+                .sum();
+        } catch (Exception e) {
+            System.err.println("Error calculating total words: " + e.getMessage());
             return 0;
         }
-        
-        return notes.stream()
-            .mapToInt(note -> {
-                String content = note.getContent();
-                if (content == null || content.trim().isEmpty()) {
-                    return 0;
-                }
-                String[] words = content.trim().split("\\s+");
-                return words.length > 0 && !words[0].isEmpty() ? words.length : 0;
-            })
-            .sum();
     }
     
     private int getFocusSessionCountForUser(String username) {
@@ -438,6 +587,85 @@ public class AchievementService {
         } catch (Exception e) {
             System.err.println("Error getting total focus minutes: " + e.getMessage());
             return 0;
+        }
+    }
+    
+    // Add this method to create progress records for ALL achievements
+    public void initializeAllPlayerAchievements(String username) {
+        try {
+            System.out.println("🔄 Initializing ALL player achievements for: " + username);
+            
+            List<Achievement> allAchievements = achievementRepository.findAll();
+            
+            for (Achievement achievement : allAchievements) {
+                // Only create if doesn't exist
+                Optional<PlayerAchievement> existing = playerAchievementRepository
+                    .findByUsernameAndAchievementId(username, achievement.getId());
+                
+                if (existing.isEmpty()) {
+                    // Get current progress based on user stats
+                    int currentProgress = getCurrentProgressForAchievement(username, achievement);
+                    
+                    PlayerAchievement pa = new PlayerAchievement();
+                    pa.generateId();
+                    pa.setUsername(username);
+                    pa.setAchievementId(achievement.getId());
+                    pa.setProgress(currentProgress);
+                    pa.setMaxProgress(achievement.getRequirementTarget());
+                    pa.setProgressPercentage(Math.min(100.0, (currentProgress * 100.0) / achievement.getRequirementTarget()));
+                    pa.setCompleted(currentProgress >= achievement.getRequirementTarget());
+                    pa.setCreatedAt(LocalDateTime.now());
+                    pa.setUpdatedAt(LocalDateTime.now());
+                    
+                    if (pa.isCompleted()) {
+                        pa.setUnlockedAt(LocalDateTime.now());
+                    }
+                    
+                    playerAchievementRepository.save(pa);
+                    System.out.println("✅ Created progress record: " + achievement.getId() + " (" + currentProgress + "/" + achievement.getRequirementTarget() + ")");
+                }
+            }
+            
+            System.out.println("🎯 Finished initializing achievements for: " + username);
+            
+        } catch (Exception e) {
+            System.err.println("Error initializing achievements: " + e.getMessage());
+        }
+    }
+
+    // Add this method to AchievementService.java
+    public void ensurePlayerAchievementsInitialized(String username) {
+        try {
+            // Check if user has ANY achievement records
+            List<PlayerAchievement> existingRecords = playerAchievementRepository.findByUsername(username);
+            
+            if (existingRecords.isEmpty()) {
+                System.out.println("🔄 First-time user detected! Auto-initializing achievements for: " + username);
+                initializeAllPlayerAchievements(username);
+            } else {
+                // Update progress for existing records
+                updateAllAchievementProgress(username);
+            }
+        } catch (Exception e) {
+            System.err.println("Error ensuring achievements initialized: " + e.getMessage());
+        }
+    }
+
+    // Add this method to update ALL achievement progress
+    public void updateAllAchievementProgress(String username) {
+        try {
+            System.out.println("🔄 Updating all achievement progress for: " + username);
+            
+            List<Achievement> allAchievements = achievementRepository.findAll();
+            
+            for (Achievement achievement : allAchievements) {
+                int currentProgress = getCurrentProgressForAchievement(username, achievement);
+                updateProgress(username, achievement.getId(), currentProgress);
+            }
+            
+            System.out.println("✅ Updated progress for all achievements for: " + username);
+        } catch (Exception e) {
+            System.err.println("Error updating all progress: " + e.getMessage());
         }
     }
 }

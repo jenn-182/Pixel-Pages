@@ -320,13 +320,13 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
               <div 
                 className="h-full rounded transition-all duration-500"
                 style={{ 
-                  width: `${achievement.progress || 0}%`,
+                  width: `${Math.round(achievement.progressPercentage || 0)}%`,
                   background: `linear-gradient(to right, ${style.lockedColor}, ${style.color}60)`
                 }}
               />
             </div>
             <div className="text-xs font-mono text-gray-400 mt-1">
-              {achievement.progress || 0}% Complete
+              {Math.round(achievement.progressPercentage || 0)}% Complete  
             </div>
           </div>
         )}

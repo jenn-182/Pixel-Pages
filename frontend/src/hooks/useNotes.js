@@ -5,6 +5,10 @@ import achievementService from '../services/achievementService';
 const useNotes = () => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);  // ✅ ADD THIS MISSING STATE
+
+  // ✅ ADD MISSING API_BASE CONSTANT
+  const API_BASE = 'http://localhost:8080/api/notes';
 
   useEffect(() => {
     fetchNotes();
@@ -13,55 +17,82 @@ const useNotes = () => {
   const fetchNotes = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/notes');
+      // ✅ FIX: Use consistent API endpoint
+      const response = await fetch(`${API_BASE}?username=user`);
       if (response.ok) {
         const data = await response.json();
         setNotes(data);
+        setError(null);  // ✅ Clear error on success
       } else {
         console.error('Failed to fetch notes:', response.statusText);
+        setError('Failed to fetch notes');
       }
     } catch (error) {
       console.error('Error fetching notes:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // REPLACE the createNote method:
   const createNote = async (noteData) => {
     try {
       console.log('useNotes: Creating note with data:', noteData);
       
-      const dataToSend = {
+      // ✅ FIX: Ensure proper tags format
+      const noteWithTimestamp = {
         ...noteData,
-        tags: Array.isArray(noteData.tags) ? noteData.tags : 
-              typeof noteData.tags === 'string' ? noteData.tags.split(',').map(t => t.trim()).filter(t => t) : []
+        // ✅ Convert empty/null tags to empty array, not empty string
+        tags: noteData.tags ? 
+          (Array.isArray(noteData.tags) ? noteData.tags : 
+           noteData.tags.split(',').map(t => t.trim()).filter(t => t)) : [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
-
-      const response = await fetch('/api/notes', {
+      
+      console.log('📝 Note with timestamp and fixed tags:', noteWithTimestamp);
+      
+      const response = await fetch(`${API_BASE}?username=user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(noteWithTimestamp),
       });
 
-      if (response.ok) {
-        const newNote = await response.json();
-        setNotes(prevNotes => [...prevNotes, newNote]);
-        
-        // Check achievements after note creation
-        setTimeout(() => {
-          checkNoteAchievements();
-        }, 100);
-        
-        return newNote;
-      } else {
+      if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to create note: ${response.status} ${errorText}`);
+        console.error('❌ Backend error response:', errorText);
+        console.error('❌ Response status:', response.status);
+        throw new Error(`Failed to create note: ${response.status} - ${errorText}`);
       }
-    } catch (error) {
-      console.error('Error creating note:', error);
-      throw error;
+
+      const newNote = await response.json();
+      console.log('📝 Backend returned note:', newNote);  // ✅ DEBUG LOG
+      
+      // ✅ FIX: Ensure the returned note has proper timestamp
+      const noteWithProperTimestamp = {
+        ...newNote,
+        createdAt: newNote.createdAt || new Date().toISOString(),
+        updatedAt: newNote.updatedAt || new Date().toISOString()
+      };
+      
+      console.log('📝 Final note for state:', noteWithProperTimestamp);  // ✅ DEBUG LOG
+      
+      setNotes(prevNotes => [...prevNotes, noteWithProperTimestamp]);
+      setError(null);
+
+      // Check for achievements after a short delay to ensure state is updated
+      setTimeout(() => {
+        checkNoteAchievements();
+      }, 100);
+
+      return noteWithProperTimestamp;
+    } catch (err) {
+      console.error('useNotes: Error creating note:', err);
+      setError(err.message);
+      throw err;
     }
   };
 
@@ -72,10 +103,12 @@ const useNotes = () => {
       const dataToSend = {
         ...noteData,
         tags: Array.isArray(noteData.tags) ? noteData.tags : 
-              typeof noteData.tags === 'string' ? noteData.tags.split(',').map(t => t.trim()).filter(t => t) : []
+              typeof noteData.tags === 'string' ? noteData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+        updatedAt: new Date().toISOString()  // ✅ ADD TIMESTAMP
       };
 
-      const response = await fetch(`/api/notes/${id}`, {
+      // ✅ FIX: Use consistent API endpoint
+      const response = await fetch(`${API_BASE}/${id}?username=user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -91,6 +124,8 @@ const useNotes = () => {
           )
         );
         
+        setError(null);  // ✅ Clear error on success
+        
         // Check achievements after note update
         setTimeout(() => {
           checkNoteAchievements();
@@ -103,6 +138,7 @@ const useNotes = () => {
       }
     } catch (error) {
       console.error('Error updating note:', error);
+      setError(error.message);  // ✅ Set error state
       throw error;
     }
   };
@@ -111,17 +147,20 @@ const useNotes = () => {
     try {
       console.log('useNotes: Deleting note with ID:', id);
       
-      const response = await fetch(`/api/notes/${id}`, {
+      // ✅ FIX: Use consistent API endpoint
+      const response = await fetch(`${API_BASE}/${id}?username=user`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
         setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
+        setError(null);  // ✅ Clear error on success
       } else {
         throw new Error(`Failed to delete note: ${response.status}`);
       }
     } catch (error) {
       console.error('Error deleting note:', error);
+      setError(error.message);  // ✅ Set error state
       throw error;
     }
   };
@@ -174,31 +213,70 @@ const useNotes = () => {
     const today = now.toDateString();
     const thisWeek = getWeekStart(now);
     
+    console.log(`📅 Today is: ${today}`); // ✅ DEBUG LOG
+    
     // Calculate note statistics
     const totalNotes = notes.length;
     const totalWords = notes.reduce((sum, note) => sum + (note.content?.split(' ').length || 0), 0);
     
-    // Get all unique tags
+    // ✅ FIX: Get all unique tags properly
     const allTags = new Set();
     notes.forEach(note => {
-      if (note.tags) {
-        note.tags.forEach(tag => allTags.add(tag));
+      // Handle both array and string tags
+      if (Array.isArray(note.tags)) {
+        note.tags.forEach(tag => allTags.add(tag.toLowerCase().trim()));
+      } else if (typeof note.tags === 'string' && note.tags.trim()) {
+        note.tags.split(',').forEach(tag => {
+          const cleanTag = tag.toLowerCase().trim();
+          if (cleanTag) allTags.add(cleanTag);
+        });
+      }
+      // Also check tagsString field
+      if (note.tagsString && typeof note.tagsString === 'string') {
+        note.tagsString.split(',').forEach(tag => {
+          const cleanTag = tag.toLowerCase().trim();
+          if (cleanTag) allTags.add(cleanTag);
+        });
       }
     });
     const uniqueTags = allTags.size;
     
-    // Today's notes
-    const notesToday = notes.filter(note => 
-      new Date(note.createdAt).toDateString() === today
-    ).length;
+    // ✅ FIX: Today's notes with better debugging
+    const notesToday = notes.filter(note => {
+      if (!note.createdAt) {
+        console.warn('❌ Note missing createdAt:', note);
+        return false;
+      }
+      
+      // Parse both dates consistently
+      const noteDate = new Date(note.createdAt);
+      const todayDate = new Date();
+      
+      // Compare dates only (ignore time)
+      const noteDateString = noteDate.toDateString();
+      const todayDateString = todayDate.toDateString();
+      
+      const isToday = noteDateString === todayDateString;
+      
+      if (isToday) {
+        console.log(`✅ TODAY's note found: "${note.title}" created ${note.createdAt}`);
+      } else {
+        console.log(`📅 Note "${note.title}": created ${note.createdAt} -> ${noteDateString} | Today: ${todayDateString} | Match: ${isToday}`);
+      }
+      
+      return isToday;
+    }).length;
+
+    console.log(`📊 Notes today: ${notesToday} out of ${notes.length} total`);
     
     // Week notes
     const notesThisWeek = notes.filter(note => 
-      new Date(note.createdAt) >= thisWeek
+      note.createdAt && new Date(note.createdAt) >= thisWeek
     ).length;
     
     // Weekend notes
     const weekendNotes = notes.filter(note => {
+      if (!note.createdAt) return false;
       const day = new Date(note.createdAt).getDay();
       return day === 0 || day === 6; // Sunday or Saturday
     }).length;
@@ -209,35 +287,37 @@ const useNotes = () => {
     ), 0);
     
     // Max tags in a single note
-    const maxTagsInNote = Math.max(...notes.map(note => 
-      note.tags?.length || 0
-    ), 0);
+    const maxTagsInNote = Math.max(...notes.map(note => {
+      if (Array.isArray(note.tags)) return note.tags.length;
+      if (typeof note.tags === 'string' && note.tags.trim()) {
+        return note.tags.split(',').length;
+      }
+      return 0;
+    }), 0);
     
     // Note streak (simplified)
     const noteStreak = calculateNoteStreak(notes);
-    
-    // Edit statistics (if you track edits)
-    const totalEdits = notes.reduce((sum, note) => sum + (note.editCount || 0), 0);
-    const maxEditsOnNote = Math.max(...notes.map(note => note.editCount || 0), 0);
-    
+    const totalEdits = notes.reduce((sum, note) => sum + (note.editCount || 1), 0);
+
     return {
       totalNotes,
       totalWords,
       uniqueTags,
-      notesToday,
+      notesToday,        // ✅ NOW PROPERLY CALCULATED
       notesThisWeek,
       weekendNotes,
       maxWordsInNote,
       maxTagsInNote,
       noteStreak,
       totalEdits,
-      maxEditsOnNote
+      maxEditsOnNote: Math.max(...notes.map(note => note.editCount || 1), 0)
     };
   };
 
   return {
     notes,
     loading,
+    error,           // ✅ ADD ERROR TO RETURN
     createNote,
     updateNote,
     deleteNote,

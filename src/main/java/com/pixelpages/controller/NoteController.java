@@ -4,9 +4,13 @@ import com.pixelpages.model.Note;
 import com.pixelpages.service.NoteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus; 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Arrays;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/notes")
@@ -20,12 +24,14 @@ public class NoteController {
 
     // Get all notes for user
     @GetMapping
+    @CrossOrigin(origins = "http://localhost:3000") // ✅ ADD THIS
     public List<Note> getAllNotes(@RequestParam(defaultValue = "user") String username) {
         return noteService.getAllNotes(username);
     }
 
     // Get note by ID
     @GetMapping("/{id}")
+    @CrossOrigin(origins = "http://localhost:3000") // ✅ ADD THIS  
     public ResponseEntity<Note> getNoteById(@PathVariable Long id) {
         Optional<Note> note = noteService.getNoteById(id);
         return note.map(ResponseEntity::ok)
@@ -34,16 +40,23 @@ public class NoteController {
 
     // CREATE NOTE - This matches your NoteService method
     @PostMapping("/create")
+    @CrossOrigin(origins = "http://localhost:3000") // ✅ ADD CORS
     public ResponseEntity<?> createNote(@RequestBody CreateNoteRequest request) {
         try {
             System.out.println("=== CREATE NOTE DEBUG ===");
             System.out.println("Request: " + request.toString());
             
+            // Convert tags array to comma-separated string for service
+            String tagsString = null;
+            if (request.getTags() != null && !request.getTags().isEmpty()) {
+                tagsString = String.join(",", request.getTags());
+            }
+            
             Note note = noteService.createNote(
                 request.getTitle(),
                 request.getContent(),
                 request.getColor(),
-                request.getTags(),
+                tagsString, // ✅ Pass converted string, not List<String>
                 request.getUsername() != null ? request.getUsername() : "user",
                 request.getFolderId(),
                 request.getNotebookId()
@@ -58,26 +71,61 @@ public class NoteController {
             e.printStackTrace();
             System.err.println("=== END ERROR ===");
             
-            // Return error details to frontend
-            return ResponseEntity.status(400).body(
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 "Error creating note: " + e.getMessage()
             );
         }
     }
 
+    // CREATE NOTE - Basic POST endpoint (matches frontend expectation)
+    @PostMapping
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseEntity<Note> createNote(@RequestBody CreateNoteRequest request, 
+                                     @RequestParam(defaultValue = "user") String username) {
+        try {
+            System.out.println("📝 Creating note: " + request.getTitle() + " for user: " + username);
+            
+            String tagsString = request.getTags() != null ? 
+                String.join(",", request.getTags()) : "";
+                
+            Note createdNote = noteService.createNote(
+                request.getTitle(),
+                request.getContent(),
+                request.getColor(),
+                tagsString,
+                username,
+                request.getFolderId(),
+                request.getNotebookId()
+            );
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdNote);
+        } catch (Exception e) {
+            System.err.println("Error creating note: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
     // UPDATE NOTE
     @PutMapping("/{id}")
+    @CrossOrigin(origins = "http://localhost:3000") // ✅ ADD THIS
     public ResponseEntity<Note> updateNote(@PathVariable Long id, @RequestBody UpdateNoteRequest request) {
         try {
             System.out.println("=== UPDATE NOTE DEBUG ===");
             System.out.println("Note ID: " + id);
             System.out.println("Request: " + request.toString());
             
+            // Convert List<String> tags to comma-separated string
+            String tagsString = null;
+            if (request.getTags() != null && !request.getTags().isEmpty()) {
+                tagsString = String.join(",", request.getTags());
+            }
+            
             Note note = noteService.updateNote(
                 id,
                 request.getTitle(),
                 request.getContent(),
-                request.getTags(),
+                tagsString, 
                 request.getColor(),
                 request.getFolderId(),
                 request.getNotebookId()
@@ -91,12 +139,13 @@ public class NoteController {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
             System.err.println("=== END UPDATE ERROR ===");
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     // DELETE NOTE
     @DeleteMapping("/{id}")
+    @CrossOrigin(origins = "http://localhost:3000") // ✅ ADD THIS
     public ResponseEntity<Void> deleteNote(@PathVariable Long id) {
         try {
             noteService.deleteNote(id);
@@ -246,12 +295,40 @@ public class NoteController {
         private String title;
         private String content;
         private String color;
-        private List<String> tags; // Array from frontend
+        
+        // ✅ Make tags flexible to handle both string and array
+        @JsonProperty("tags")
+        private Object tagsRaw; // Can be String or List<String>
+        
         private String username;
         private Long folderId;
         private Long notebookId;
 
-        // Getters and setters
+        // ✅ Smart getter that handles both formats
+        public List<String> getTags() {
+            if (tagsRaw == null) {
+                return new ArrayList<>();
+            }
+            
+            if (tagsRaw instanceof List) {
+                return (List<String>) tagsRaw;
+            }
+            
+            if (tagsRaw instanceof String) {
+                String tagsString = (String) tagsRaw;
+                if (tagsString.trim().isEmpty()) {
+                    return new ArrayList<>();
+                }
+                return Arrays.asList(tagsString.split(","));
+            }
+            
+            return new ArrayList<>();
+        }
+
+        public void setTags(Object tags) {
+            this.tagsRaw = tags;
+        }
+
         public String getTitle() { return title; }
         public void setTitle(String title) { this.title = title; }
 
@@ -261,8 +338,6 @@ public class NoteController {
         public String getColor() { return color; }
         public void setColor(String color) { this.color = color; }
 
-        public List<String> getTags() { return tags; }
-        public void setTags(List<String> tags) { this.tags = tags; }
 
         public String getUsername() { return username; }
         public void setUsername(String username) { this.username = username; }
@@ -278,7 +353,7 @@ public class NoteController {
             return "CreateNoteRequest{" +
                     "title='" + title + '\'' +
                     ", content='" + (content != null ? content.substring(0, Math.min(50, content.length())) + "..." : null) + '\'' +
-                    ", tags=" + tags +
+                    ", tags=" + tagsRaw +
                     ", color='" + color + '\'' +
                     ", username='" + username + '\'' +
                     ", folderId=" + folderId +
@@ -290,20 +365,20 @@ public class NoteController {
     public static class UpdateNoteRequest {
         private String title;
         private String content;
-        private String tags; // String, not List<String> - matches your service method
+        private List<String> tags; // ✅ Change from String to List<String>
         private String color;
         private Long folderId;
         private Long notebookId;
 
         // Getters and setters
+        public List<String> getTags() { return tags; }
+        public void setTags(List<String> tags) { this.tags = tags; }
+        
         public String getTitle() { return title; }
         public void setTitle(String title) { this.title = title; }
 
         public String getContent() { return content; }
         public void setContent(String content) { this.content = content; }
-
-        public String getTags() { return tags; }
-        public void setTags(String tags) { this.tags = tags; }
 
         public String getColor() { return color; }
         public void setColor(String color) { this.color = color; }
@@ -320,7 +395,7 @@ public class NoteController {
             return "UpdateNoteRequest{" +
                     "title='" + title + '\'' +
                     ", content='" + (content != null ? content.substring(0, Math.min(50, content.length())) + "..." : null) + '\'' +
-                    ", tags='" + tags + '\'' +
+                    ", tags=" + tags + 
                     ", color='" + color + '\'' +
                     ", folderId=" + folderId +
                     ", notebookId=" + notebookId +

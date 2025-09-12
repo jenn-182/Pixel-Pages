@@ -3,7 +3,7 @@ export const focusAchievements = [
   {
     id: 'focused_initiate',
     name: 'FOCUSED INITIATE',
-    description: 'Complete your first focus session',
+    description: 'Complete your first grind',
     tier: 'common',
     category: 'focus',
     icon: 'Target',
@@ -17,7 +17,7 @@ export const focusAchievements = [
   {
     id: 'micro_master',
     name: 'MICRO MASTER',
-    description: 'Complete 3 micro sessions (5-15 min)',
+    description: 'Complete 3 micro grinds (5-15 min)',
     tier: 'common',
     category: 'focus',
     icon: 'Clock',
@@ -33,7 +33,7 @@ export const focusAchievements = [
   {
     id: 'hour_apprentice',
     name: 'HOUR APPRENTICE',
-    description: 'Spend 1 hour total in focus',
+    description: 'Spend 1 hour total grinding',
     tier: 'common',
     category: 'focus',
     icon: 'Clock',
@@ -47,7 +47,7 @@ export const focusAchievements = [
   {
     id: 'quick_burst',
     name: 'QUICK BURST',
-    description: 'Complete a 5-minute session',
+    description: 'Complete a 5-minute grind',
     tier: 'common',
     category: 'focus',
     icon: 'Zap',
@@ -61,7 +61,7 @@ export const focusAchievements = [
   {
     id: 'pomodoro_starter',
     name: 'POMODORO STARTER',
-    description: 'Complete your first 25-minute session',
+    description: 'Complete your first 25-minute grind',
     tier: 'common',
     category: 'focus',
     icon: 'Target',
@@ -75,7 +75,7 @@ export const focusAchievements = [
   {
     id: 'break_taker',
     name: 'BREAK TAKER',
-    description: 'Take a 5-minute focus break',
+    description: 'Take a 5-minute grind break',
     tier: 'common',
     category: 'focus',
     icon: 'Coffee',
@@ -89,7 +89,7 @@ export const focusAchievements = [
   {
     id: 'morning_focus',
     name: 'MORNING FOCUS',
-    description: 'Complete a session before 10 AM',
+    description: 'Complete a grind before 10 AM',
     tier: 'common',
     category: 'focus',
     icon: 'Sun',
@@ -103,7 +103,7 @@ export const focusAchievements = [
   {
     id: 'category_explorer',
     name: 'CATEGORY EXPLORER',
-    description: 'Try 2 different focus categories',
+    description: 'Try 2 different grind skills',
     tier: 'common',
     category: 'focus',
     icon: 'Compass',
@@ -119,7 +119,7 @@ export const focusAchievements = [
   {
     id: 'pomodoro_warrior',
     name: 'POMODORO WARRIOR',
-    description: 'Complete 10 Pomodoro sessions',
+    description: 'Complete 10 Pomodoro grinds',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Target',
@@ -133,7 +133,7 @@ export const focusAchievements = [
   {
     id: 'focus_streak',
     name: 'FOCUS STREAK',
-    description: 'Complete sessions 3 days in a row',
+    description: 'Grind for 3 days in a row',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Calendar',
@@ -147,7 +147,7 @@ export const focusAchievements = [
   {
     id: 'deep_diver',
     name: 'DEEP DIVER',
-    description: 'Complete a 60+ minute session',
+    description: 'Complete a 60+ minute grind',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Brain',
@@ -161,7 +161,7 @@ export const focusAchievements = [
   {
     id: 'dedication_keeper',
     name: 'DEDICATION KEEPER',
-    description: 'Spend 5 hours total in focus',
+    description: 'Grind for 5 hours total',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Clock',
@@ -175,7 +175,7 @@ export const focusAchievements = [
   {
     id: 'evening_scholar',
     name: 'EVENING SCHOLAR',
-    description: 'Complete 5 sessions after 6 PM',
+    description: 'Complete 5 grinds after 6 PM',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Moon',
@@ -190,7 +190,7 @@ export const focusAchievements = [
   {
     id: 'study_buddy',
     name: 'STUDY BUDDY',
-    description: 'Complete 10 study-category sessions',
+    description: 'Complete 10 study skill grinds',
     tier: 'uncommon',
     category: 'focus',
     icon: 'BookOpen',
@@ -205,7 +205,7 @@ export const focusAchievements = [
   {
     id: 'code_ninja',
     name: 'CODE NINJA',
-    description: 'Complete 10 code-category sessions',
+    description: 'Complete 10 code skill grinds',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Code',
@@ -220,7 +220,7 @@ export const focusAchievements = [
   {
     id: 'work_horse',
     name: 'WORK HORSE',
-    description: 'Complete 10 work-category sessions',
+    description: 'Complete 10 work skill grinds',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Briefcase',
@@ -235,7 +235,7 @@ export const focusAchievements = [
   {
     id: 'creative_soul',
     name: 'CREATIVE SOUL',
-    description: 'Complete 10 creative-category sessions',
+    description: 'Complete 10 creative skill grinds',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Palette',
@@ -250,7 +250,7 @@ export const focusAchievements = [
   {
     id: 'session_variety',
     name: 'SESSION VARIETY',
-    description: 'Complete sessions in 5 different durations',
+    description: 'Grind in 5 different durations',
     tier: 'uncommon',
     category: 'focus',
     icon: 'Shuffle',
@@ -266,7 +266,7 @@ export const focusAchievements = [
   {
     id: 'concentration_king',
     name: 'CONCENTRATION KING',
-    description: 'Complete 50 focus sessions',
+    description: 'Complete 50 grind sessions',
     tier: 'rare',
     category: 'focus',
     icon: 'Crown',
@@ -280,7 +280,7 @@ export const focusAchievements = [
   {
     id: 'flow_state_master',
     name: 'FLOW STATE MASTER',
-    description: 'Complete sessions 7 days in a row',
+    description: 'Grind for 7 days in a row',
     tier: 'rare',
     category: 'focus',
     icon: 'Waves',
@@ -294,7 +294,7 @@ export const focusAchievements = [
   {
     id: 'marathon_mind',
     name: 'MARATHON MIND',
-    description: 'Spend 20 hours total in focus',
+    description: 'Spend 20 hours total grinding',
     tier: 'rare',
     category: 'focus',
     icon: 'Brain',
@@ -308,7 +308,7 @@ export const focusAchievements = [
   {
     id: 'category_crusher',
     name: 'CATEGORY CRUSHER',
-    description: 'Reach 10 hours in any focus category',
+    description: 'Reach 10 hours grinding any skill',
     tier: 'rare',
     category: 'focus',
     icon: 'Target',
@@ -322,7 +322,7 @@ export const focusAchievements = [
   {
     id: 'deep_work_legend',
     name: 'DEEP WORK LEGEND',
-    description: 'Complete 5 sessions of 90+ minutes',
+    description: 'Complete 5 grinds of 90+ minutes',
     tier: 'rare',
     category: 'focus',
     icon: 'Brain',
@@ -337,7 +337,7 @@ export const focusAchievements = [
   {
     id: 'monthly_warrior',
     name: 'MONTHLY WARRIOR',
-    description: 'Complete 30 sessions in one month',
+    description: 'Complete 30 grinds in one month',
     tier: 'rare',
     category: 'focus',
     icon: 'Calendar',
@@ -351,7 +351,7 @@ export const focusAchievements = [
   {
     id: 'super_streaker',
     name: 'SUPER STREAKER',
-    description: 'Complete sessions 14 days in a row',
+    description: 'Complete grinds 14 days in a row',
     tier: 'rare',
     category: 'focus',
     icon: 'Flame',
@@ -365,7 +365,7 @@ export const focusAchievements = [
   {
     id: 'time_optimizer',
     name: 'TIME OPTIMIZER',
-    description: 'Complete sessions at 6 different times of day',
+    description: 'Complete grinds at 6 different times of day',
     tier: 'rare',
     category: 'focus',
     icon: 'Clock',
@@ -381,7 +381,7 @@ export const focusAchievements = [
   {
     id: 'focus_legend',
     name: 'FOCUS LEGEND',
-    description: 'Complete 200 focus sessions',
+    description: 'Complete 200 grinds',
     tier: 'legendary',
     category: 'focus',
     icon: 'Crown',
@@ -395,7 +395,7 @@ export const focusAchievements = [
   {
     id: 'zen_master',
     name: 'ZEN MASTER',
-    description: 'Complete sessions 30 days in a row',
+    description: 'Complete grinds 30 days in a row',
     tier: 'legendary',
     category: 'focus',
     icon: 'Lotus',
@@ -409,7 +409,7 @@ export const focusAchievements = [
   {
     id: 'time_lord',
     name: 'TIME LORD',
-    description: 'Spend 100 hours total in focus',
+    description: 'Spend 100 hours total grinding',
     tier: 'legendary',
     category: 'focus',
     icon: 'Clock',
@@ -423,7 +423,7 @@ export const focusAchievements = [
   {
     id: 'omnifocus_sage',
     name: 'OMNIFOCUS SAGE',
-    description: 'Reach 20 hours in all focus categories',
+    description: 'Grind for 20 hours in all skills',
     tier: 'legendary',
     category: 'focus',
     icon: 'Star',

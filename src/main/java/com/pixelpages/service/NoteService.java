@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 import java.util.Arrays;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -82,7 +83,7 @@ public class NoteService {
     
     // Main create note method (with all parameters)
     @Transactional
-    public Note createNote(String title, String content, String color, List<String> tags, 
+    public Note createNote(String title, String content, String color, String tagsString, 
                           String username, Long folderId, Long notebookId) {
         try {
             Note note = new Note();
@@ -91,9 +92,9 @@ public class NoteService {
             note.setUsername(username);
             note.setColor(color != null ? color : "#4ADE80");
             
-            // Convert tags list to string
-            if (tags != null && !tags.isEmpty()) {
-                note.setTagsString(String.join(",", tags));
+            // Handle tags as string (not List<String>)
+            if (tagsString != null && !tagsString.trim().isEmpty()) {
+                note.setTagsString(tagsString);
             }
             
             note.setFolderId(folderId);
@@ -126,41 +127,14 @@ public class NoteService {
                 System.err.println("XP award failed (but note saved): " + e.getMessage());
             }
             
-            // TEST ACHIEVEMENT SYSTEM - Let's debug this step by step
-            System.out.println("=== TESTING ACHIEVEMENT SYSTEM ===");
+            // ✅ AUTO-TRIGGER ACHIEVEMENT CHECK
             try {
-                System.out.println("Step 1: Getting player for username: " + username);
-                Player player = getOrCreatePlayer(username);
-                System.out.println("Step 1 SUCCESS: Player found/created: " + player.getUsername());
-                
-                System.out.println("Step 2: Getting all notes for user: " + username);
-                List<Note> allNotes = getAllNotes(username);
-                System.out.println("Step 2 SUCCESS: Found " + allNotes.size() + " notes");
-                
-                System.out.println("Step 3: Checking achievements...");
-                if (achievementService != null) {
-                    achievementService.checkAndUnlockAchievements(username, allNotes, player);
-                    System.out.println("Step 3 SUCCESS: Achievement check completed");
-                } else {
-                    System.out.println("Step 3 SKIPPED: AchievementService is null");
+                if (achievementService != null && savedNote.getUsername() != null) {
+                    achievementService.trackNoteCreation(savedNote.getUsername(), null);
+                    System.out.println("🎯 Tracked note creation for: " + savedNote.getUsername());
                 }
-                
-                System.out.println("=== ACHIEVEMENT SYSTEM TEST COMPLETED ===");
-                
             } catch (Exception e) {
-                System.err.println("=== ACHIEVEMENT SYSTEM ERROR ===");
-                System.err.println("Error at step: " + e.getMessage());
-                System.err.println("Stack trace:");
-                e.printStackTrace();
-                System.err.println("=== END ACHIEVEMENT ERROR ===");
-                
-                // Don't throw - let the note creation succeed
-                System.out.println("Achievement system failed, but note was saved successfully");
-            }
-            
-            // TRACK ACHIEVEMENT - ADD THIS:
-            if (savedNote.getUsername() != null) {
-                achievementService.trackNoteCreation(savedNote.getUsername());
+                System.err.println("Achievement tracking failed (but note saved): " + e.getMessage());
             }
             
             return savedNote;
@@ -221,9 +195,19 @@ public class NoteService {
                     System.err.println("XP award failed (but note updated): " + e.getMessage());
                 }
                 
-                // TRACK ACHIEVEMENT - ADD THIS:
-                if (updatedNote.getUsername() != null) {
-                    achievementService.trackNoteCreation(updatedNote.getUsername());
+                // ✅ TRACK NOTE EDIT ACHIEVEMENTS
+                try {
+                    if (achievementService != null && updatedNote.getUsername() != null) {
+                        // Track note editing specifically
+                        achievementService.trackNoteEdit(updatedNote.getUsername(), updatedNote);
+                        
+                        // Also check overall note achievements (for counts, words, etc.)
+                        achievementService.trackNoteCreation(updatedNote.getUsername(), null);
+                        
+                        System.out.println("🎯 Tracked note edit + overall achievements for: " + updatedNote.getUsername());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Achievement tracking failed (but note updated): " + e.getMessage());
                 }
                 
                 return updatedNote;

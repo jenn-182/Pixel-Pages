@@ -3,7 +3,7 @@ export const specialAchievements = [
   {
     id: 'triple_threat',
     name: 'TRIPLE THREAT',
-    description: 'Complete a note, task, and focus session in one day',
+    description: 'Create a log, mission and grind in one day',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Star',
@@ -17,7 +17,7 @@ export const specialAchievements = [
   {
     id: 'balanced_user',
     name: 'BALANCED USER',
-    description: 'Use all three features in one week',
+    description: 'Complete a log, mission and grind in one week',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Scale',
@@ -31,7 +31,7 @@ export const specialAchievements = [
   {
     id: 'productivity_stack',
     name: 'PRODUCTIVITY STACK',
-    description: 'Complete 5 tasks + 1 focus session + 1 note in one day',
+    description: 'Complete 5 missions + 1 grind + 1 log in one day',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Layers',
@@ -47,7 +47,7 @@ export const specialAchievements = [
   {
     id: 'weekend_grinder',
     name: 'WEEKEND GRINDER',
-    description: 'Complete activities on both weekend days',
+    description: 'Complete a log, mission and grind on both weekend days',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Calendar',
@@ -61,7 +61,7 @@ export const specialAchievements = [
   {
     id: 'midnight_oil',
     name: 'MIDNIGHT OIL',
-    description: 'Complete activities after midnight',
+    description: 'Be productive after midnight',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Moon',
@@ -75,7 +75,7 @@ export const specialAchievements = [
   {
     id: 'early_riser',
     name: 'EARLY RISER',
-    description: 'Complete activities before 6 AM',
+    description: 'Be productive before 6 AM',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Sun',
@@ -91,7 +91,7 @@ export const specialAchievements = [
   {
     id: 'power_user',
     name: 'POWER USER',
-    description: 'Use all three features for 7 consecutive days',
+    description: 'Complete a log, mission and grind for 7 consecutive days',
     tier: 'rare',
     category: 'combo',
     icon: 'Zap',
@@ -120,7 +120,7 @@ export const specialAchievements = [
   {
     id: 'habit_master',
     name: 'HABIT MASTER',
-    description: 'Complete daily activities for 14 days',
+    description: 'Complete a log, mission and grind for 14 days',
     tier: 'rare',
     category: 'combo',
     icon: 'Repeat',
@@ -148,7 +148,7 @@ export const specialAchievements = [
   {
     id: 'consistency_king',
     name: 'CONSISTENCY KING',
-    description: 'Complete at least one activity every day for 21 days',
+    description: 'Be productive every day for 21 days',
     tier: 'rare',
     category: 'combo',
     icon: 'Crown',
@@ -162,7 +162,7 @@ export const specialAchievements = [
   {
     id: 'productivity_beast',
     name: 'PRODUCTIVITY BEAST',
-    description: 'Complete 10+ activities in one day across all categories',
+    description: 'Be productive 10+ times in one day',
     tier: 'rare',
     category: 'combo',
     icon: 'Zap',
@@ -176,7 +176,7 @@ export const specialAchievements = [
   {
     id: 'monthly_master',
     name: 'MONTHLY MASTER',
-    description: 'Complete 100+ activities in one month',
+    description: 'Be productive 100+ times in one month',
     tier: 'rare',
     category: 'combo',
     icon: 'Calendar',
@@ -190,7 +190,7 @@ export const specialAchievements = [
   {
     id: 'level_climber',
     name: 'LEVEL CLIMBER',
-    description: 'Reach level 10 overall',
+    description: 'Reach level 10',
     tier: 'rare',
     category: 'meta',
     icon: 'TrendingUp',
@@ -218,7 +218,7 @@ export const specialAchievements = [
   {
     id: 'achievement_hunter',
     name: 'ACHIEVEMENT HUNTER',
-    description: 'Unlock 25 achievements',
+    description: 'Unlock 25 achievement badges',
     tier: 'rare',
     category: 'meta',
     icon: 'Trophy',
@@ -234,7 +234,7 @@ export const specialAchievements = [
   {
     id: 'pixel_master',
     name: 'PIXEL MASTER',
-    description: 'Unlock 50 total achievements',
+    description: 'Unlock 50 total achievement badges',
     tier: 'legendary',
     category: 'meta',
     icon: 'Crown',
@@ -262,7 +262,7 @@ export const specialAchievements = [
   {
     id: 'ultimate_completionist',
     name: 'ULTIMATE COMPLETIONIST',
-    description: 'Unlock 75% of all achievements',
+    description: 'Unlock 75% of all achievement badges',
     tier: 'legendary',
     category: 'meta',
     icon: 'Award',
@@ -276,7 +276,7 @@ export const specialAchievements = [
   {
     id: 'eternal_grinder',
     name: 'ETERNAL GRINDER',
-    description: 'Complete activities for 100 consecutive days',
+    description: 'Be productive for 100 consecutive days',
     tier: 'legendary',
     category: 'combo',
     icon: 'Infinity',
@@ -290,7 +290,7 @@ export const specialAchievements = [
   {
     id: 'omnipotent_user',
     name: 'OMNIPOTENT USER',
-    description: 'Master all categories (top 10% in each)',
+    description: 'Master all skills (top 10% in each)',
     tier: 'legendary',
     category: 'meta',
     icon: 'Crown',
@@ -304,7 +304,7 @@ export const specialAchievements = [
   {
     id: 'legendary_completionist',
     name: 'LEGENDARY COMPLETIONIST',
-    description: 'Unlock 95% of all achievements',
+    description: 'Unlock 95% of all achievement badges',
     tier: 'legendary',
     category: 'meta',
     icon: 'Gem',

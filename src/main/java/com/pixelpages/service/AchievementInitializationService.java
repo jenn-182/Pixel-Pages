@@ -12,251 +12,321 @@ import java.util.List;
 
 @Service
 public class AchievementInitializationService {
-    
+
     private final AchievementRepository achievementRepository;
-    
+
     public AchievementInitializationService(AchievementRepository achievementRepository) {
         this.achievementRepository = achievementRepository;
     }
-    
+
     @PostConstruct
     @Transactional
     public void initializeAchievements() {
         if (achievementRepository.count() == 0) {
-            System.out.println("🚀 Initializing achievements from frontend definitions...");
-            
+            System.out.println("Initializing achievements from frontend definitions...");
+
             List<Achievement> allAchievements = new ArrayList<>();
-            
+
             // Add all achievement categories
             allAchievements.addAll(createNoteAchievements());
             allAchievements.addAll(createTaskAchievements());
             allAchievements.addAll(createFocusAchievements());
             allAchievements.addAll(createSpecialAchievements());
-            
+
             achievementRepository.saveAll(allAchievements);
             System.out.println("✅ Initialized " + allAchievements.size() + " achievements!");
         } else {
             System.out.println("📚 Achievements already exist, skipping initialization");
         }
     }
-    
+
     private List<Achievement> createNoteAchievements() {
         return Arrays.asList(
-            // COMMON TIER - Note Count Achievements
-            new Achievement("first_scroll", "FIRST SCROLL", "Create your first mission log", 
-                          "BookOpen", "common", "notes", 50, "#06B6D4", "note_count", 1),
-            
-            new Achievement("apprentice_scribe", "APPRENTICE SCRIBE", "Collect 5 quest scrolls", 
-                          "BookOpen", "common", "notes", 100, "#06B6D4", "note_count", 5),
-            
-            new Achievement("journeyman_writer", "JOURNEYMAN WRITER", "Document 10 adventures", 
-                          "BookOpen", "common", "notes", 150, "#06B6D4", "note_count", 10),
-            
-            new Achievement("dedicated_chronicler", "DEDICATED CHRONICLER", "Amass 15 chronicles", 
-                          "BookOpen", "common", "notes", 200, "#06B6D4", "note_count", 15),
-            
-            new Achievement("master_archivist", "MASTER ARCHIVIST", "Curate 25 documents", 
-                          "BookOpen", "common", "notes", 250, "#06B6D4", "note_count", 25),
-            
-            // COMMON TIER - Word Count Achievements  
-            new Achievement("word_warrior", "WORD WARRIOR", "Write 100 words total", 
-                          "Edit3", "common", "notes", 75, "#06B6D4", "word_count", 100),
-            
-            new Achievement("verbose_victor", "VERBOSE VICTOR", "Compose 500 words", 
-                          "Edit3", "common", "notes", 125, "#06B6D4", "word_count", 500),
-            
-            new Achievement("prolific_penman", "PROLIFIC PENMAN", "Author 1,000 words", 
-                          "Edit3", "common", "notes", 200, "#06B6D4", "word_count", 1000),
-            
-            // UNCOMMON TIER
-            new Achievement("lore_keeper", "LORE KEEPER", "Maintain 50 sacred texts", 
-                          "BookOpen", "uncommon", "notes", 400, "#EC4899", "note_count", 50),
-            
-            new Achievement("epic_novelist", "EPIC NOVELIST", "Craft 2,500 words of legend", 
-                          "Edit3", "uncommon", "notes", 350, "#EC4899", "word_count", 2500),
-            
-            new Achievement("daily_chronicler", "DAILY CHRONICLER", "Write for 7 consecutive days", 
-                          "Calendar", "uncommon", "notes", 300, "#EC4899", "daily_streak", 7),
-            
-            new Achievement("weekend_warrior", "WEEKEND WARRIOR", "Write 5 notes on weekend days", 
-                          "Zap", "uncommon", "notes", 250, "#EC4899", "weekend_notes", 5),
-            
-            new Achievement("midnight_scribe", "MIDNIGHT SCRIBE", "Write a note after 11 PM", 
-                          "Moon", "uncommon", "notes", 200, "#EC4899", "late_night_note", 1),
-            
-            // RARE TIER
-            new Achievement("grand_librarian", "GRAND LIBRARIAN", "Oversee 100 volumes", 
-                          "BookOpen", "rare", "notes", 750, "#8B5CF6", "note_count", 100),
-            
-            new Achievement("master_wordsmith", "MASTER WORDSMITH", "Pen 5,000 words of wisdom", 
-                          "Edit3", "rare", "notes", 600, "#8B5CF6", "word_count", 5000),
-            
-            new Achievement("dedication_sage", "DEDICATION SAGE", "Maintain 14-day writing streak", 
-                          "Calendar", "rare", "notes", 500, "#8B5CF6", "daily_streak", 14),
-            
-            new Achievement("category_explorer", "CATEGORY EXPLORER", "Use 5 different note categories", 
-                          "FolderOpen", "rare", "notes", 400, "#8B5CF6", "unique_categories", 5),
-            
-            // LEGENDARY TIER
-            new Achievement("immortal_chronicler", "IMMORTAL CHRONICLER", "Archive 250 eternal records", 
-                          "BookOpen", "legendary", "notes", 1500, "#FFCB2E", "note_count", 250),
-            
-            new Achievement("legendary_wordsmith", "LEGENDARY WORDSMITH", "Compose 10,000 words of power", 
-                          "Edit3", "legendary", "notes", 1200, "#FFCB2E", "word_count", 10000),
-            
-            new Achievement("eternal_dedication", "ETERNAL DEDICATION", "Achieve 30-day writing mastery", 
-                          "Calendar", "legendary", "notes", 1000, "#FFCB2E", "daily_streak", 30)
+                // COMMON TIER (6 achievements)
+                new Achievement("first_scroll", "FIRST SCROLL", "Create your first note log",
+                        "BookOpen", "common", "notes", 50, "#10B981", "note_count", 1),
+                new Achievement("apprentice_scribe", "APPRENTICE SCRIBE", "Create 5 note logs",
+                        "BookOpen", "common", "notes", 100, "#10B981", "note_count", 5),
+                new Achievement("word_warrior", "WORD WARRIOR", "Write 100 words total in logs",
+                        "Edit3", "common", "notes", 75, "#10B981", "word_count", 100),
+                new Achievement("tag_rookie", "TAG ROOKIE", "Use your first tag in a log",
+                        "Tag", "common", "notes", 50, "#10B981", "tag_count", 1),
+                new Achievement("daily_logger", "DAILY LOGGER", "Create a log today",
+                        "Calendar", "common", "notes", 25, "#10B981", "daily_notes", 1),
+                new Achievement("basic_editor", "BASIC EDITOR", "Edit your first log",
+                        "Edit", "common", "notes", 50, "#10B981", "note_edits", 1),
+
+                // UNCOMMON TIER (8 achievements)
+                new Achievement("journeyman_writer", "JOURNEYMAN WRITER", "Collect 10 logs",
+                        "BookOpen", "uncommon", "notes", 200, "#3B82F6", "note_count", 10),
+                new Achievement("verbose_victor", "VERBOSE VICTOR", "Write 500 words total in logs",
+                        "Edit3", "uncommon", "notes", 250, "#3B82F6", "word_count", 500),
+                new Achievement("tag_apprentice", "TAG APPRENTICE", "Use 5 different tags in logs",
+                        "Tag", "uncommon", "notes", 200, "#3B82F6", "unique_tags", 5),
+                new Achievement("night_owl", "NIGHT OWL", "Write a log between 11 PM and 5 AM",
+                        "Moon", "uncommon", "notes", 150, "#3B82F6", "time_range", 1),
+                new Achievement("early_bird", "EARLY BIRD", "Write a log between 5 AM and 8 AM",
+                        "Sun", "uncommon", "notes", 150, "#3B82F6", "time_range", 1),
+                new Achievement("weekend_warrior", "WEEKEND WARRIOR", "Create 5 logs on weekends",
+                        "Calendar", "uncommon", "notes", 200, "#3B82F6", "weekend_notes", 5),
+                new Achievement("speed_writer", "SPEED WRITER", "Write 100 words in under 5 minutes",
+                        "Zap", "uncommon", "notes", 300, "#3B82F6", "speed_writing", 1),
+                new Achievement("revision_master", "REVISION MASTER", "Edit the same log 5 times",
+                        "RotateCcw", "uncommon", "notes", 250, "#3B82F6", "single_note_edits", 5),
+
+                // RARE TIER (7 achievements)
+                new Achievement("master_chronicler", "MASTER CHRONICLER", "Collect 25 logs",
+                        "BookOpen", "rare", "notes", 500, "#8B5CF6", "note_count", 25),
+                new Achievement("wordsmith_supreme", "WORDSMITH SUPREME", "Write 2000 words total",
+                        "Edit3", "rare", "notes", 750, "#8B5CF6", "word_count", 2000),
+                new Achievement("tag_master", "TAG MASTER", "Use 15 different tags",
+                        "Tag", "rare", "notes", 600, "#8B5CF6", "unique_tags", 15),
+                new Achievement("consistent_writer", "CONSISTENT WRITER", "Write logs for 7 consecutive days",
+                        "Calendar", "rare", "notes", 800, "#8B5CF6", "streak", 7),
+                new Achievement("marathon_scribe", "MARATHON SCRIBE", "Write 500+ words in one log",
+                        "FileText", "rare", "notes", 700, "#8B5CF6", "single_note_words", 500),
+                new Achievement("weekly_champion", "WEEKLY CHAMPION", "Create 10 logs in one week",
+                        "Trophy", "rare", "notes", 600, "#8B5CF6", "weekly_notes", 10),
+                new Achievement("organization_guru", "ORGANIZATION GURU", "Use 3+ tags in a single log",
+                        "Tags", "rare", "notes", 500, "#8B5CF6", "single_note_tags", 3),
+
+                // LEGENDARY TIER (4 achievements)
+                new Achievement("legendary_archivist", "LEGENDARY ARCHIVIST", "Create 100 logs",
+                        "Archive", "legendary", "notes", 2000, "#F59E0B", "note_count", 100),
+                new Achievement("epic_novelist", "EPIC NOVELIST", "Write 1000+ words in one log",
+                        "Book", "legendary", "notes", 2500, "#F59E0B", "single_note_words", 1000),
+                new Achievement("tag_grandmaster", "TAG GRANDMASTER", "Use 25 different tags",
+                        "Tags", "legendary", "notes", 2000, "#F59E0B", "unique_tags", 25),
+                new Achievement("archive_emperor", "ARCHIVE EMPEROR", "Write 10,000 words total",
+                        "Crown", "legendary", "notes", 5000, "#F59E0B", "word_count", 10000)
         );
     }
-    
+
     private List<Achievement> createTaskAchievements() {
         return Arrays.asList(
-            // COMMON TIER - Task Completion
-            new Achievement("task_rookie", "TASK ROOKIE", "Complete your first mission", 
-                          "CheckSquare", "common", "tasks", 75, "#06B6D4", "task_count", 1),
-            
-            new Achievement("mission_apprentice", "MISSION APPRENTICE", "Finish 5 quests", 
-                          "CheckSquare", "common", "tasks", 125, "#06B6D4", "task_count", 5),
-            
-            new Achievement("quest_journeyman", "QUEST JOURNEYMAN", "Complete 10 objectives", 
-                          "CheckSquare", "common", "tasks", 175, "#06B6D4", "task_count", 10),
-            
-            new Achievement("duty_guardian", "DUTY GUARDIAN", "Fulfill 25 responsibilities", 
-                          "CheckSquare", "common", "tasks", 225, "#06B6D4", "task_count", 25),
-            
-            // COMMON TIER - Daily Tasks
-            new Achievement("daily_warrior", "DAILY WARRIOR", "Complete 3 tasks in one day", 
-                          "Zap", "common", "tasks", 100, "#06B6D4", "daily_tasks", 3),
-            
-            new Achievement("morning_champion", "MORNING CHAMPION", "Complete a task before 9 AM", 
-                          "Sun", "common", "tasks", 150, "#06B6D4", "morning_task", 1),
-            
-            // UNCOMMON TIER
-            new Achievement("task_master", "TASK MASTER", "Achieve 50 completions", 
-                          "CheckSquare", "uncommon", "tasks", 400, "#EC4899", "task_count", 50),
-            
-            new Achievement("priority_expert", "PRIORITY EXPERT", "Complete 10 high-priority tasks", 
-                          "AlertTriangle", "uncommon", "tasks", 300, "#EC4899", "high_priority_tasks", 10),
-            
-            new Achievement("speed_demon", "SPEED DEMON", "Finish 5 tasks in 30 minutes", 
-                          "Zap", "uncommon", "tasks", 350, "#EC4899", "speed_completion", 5),
-            
-            new Achievement("consistency_king", "CONSISTENCY KING", "Complete tasks 5 days straight", 
-                          "Calendar", "uncommon", "tasks", 300, "#EC4899", "task_streak", 5),
-            
-            // RARE TIER
-            new Achievement("centurion_completer", "CENTURION COMPLETER", "Conquer 100 tasks", 
-                          "CheckSquare", "rare", "tasks", 750, "#8B5CF6", "task_count", 100),
-            
-            new Achievement("list_liquidator", "LIST LIQUIDATOR", "Clear an entire task list", 
-                          "List", "rare", "tasks", 500, "#8B5CF6", "complete_list", 1),
-            
-            new Achievement("deadline_destroyer", "DEADLINE DESTROYER", "Beat 10 deadlines", 
-                          "Clock", "rare", "tasks", 400, "#8B5CF6", "deadline_tasks", 10),
-            
-            // LEGENDARY TIER
-            new Achievement("task_emperor", "TASK EMPEROR", "Rule over 250 completed tasks", 
-                          "CheckSquare", "legendary", "tasks", 1500, "#FFCB2E", "task_count", 250),
-            
-            new Achievement("productivity_god", "PRODUCTIVITY GOD", "Complete 10 tasks daily for a week", 
-                          "Zap", "legendary", "tasks", 1200, "#FFCB2E", "intense_productivity", 7)
+                // COMMON TIER (7 achievements)
+                new Achievement("task_rookie", "TASK ROOKIE", "Complete your first mission",
+                        "CheckSquare", "common", "tasks", 75, "#10B981", "task_count", 1),
+                new Achievement("daily_warrior", "DAILY WARRIOR", "Complete 3 missions",
+                        "CheckSquare", "common", "tasks", 100, "#10B981", "task_count", 3),
+                new Achievement("checkbox_champion", "CHECKBOX CHAMPION", "Complete 2 missions in one day",
+                        "CheckSquare", "common", "tasks", 100, "#10B981", "daily_tasks", 2),
+                new Achievement("priority_learner", "PRIORITY LEARNER", "Set your first mission priority",
+                        "Flag", "common", "tasks", 50, "#10B981", "priority_usage", 1),
+                new Achievement("due_date_setter", "DUE DATE SETTER", "Set your first mission due date",
+                        "Calendar", "common", "tasks", 50, "#10B981", "due_date_usage", 1),
+                new Achievement("category_starter", "CATEGORY STARTER", "Create missions in 2 different operations",
+                        "Folder", "common", "tasks", 75, "#10B981", "task_categories", 2),
+                new Achievement("task_creator", "TASK CREATOR", "Create 5 total missions",
+                        "Plus", "common", "tasks", 100, "#10B981", "tasks_created", 5),
+
+                // UNCOMMON TIER (9 achievements)
+                new Achievement("mission_commander", "MISSION COMMANDER", "Complete 15 missions",
+                        "Shield", "uncommon", "tasks", 300, "#3B82F6", "task_count", 15),
+                new Achievement("efficiency_expert", "EFFICIENCY EXPERT", "Complete 5 missions in one day",
+                        "Zap", "uncommon", "tasks", 400, "#3B82F6", "daily_tasks", 5),
+                new Achievement("priority_master", "PRIORITY MASTER", "Complete 10 high-priority missions",
+                        "Flag", "uncommon", "tasks", 350, "#3B82F6", "high_priority_tasks", 10),
+                new Achievement("deadline_defender", "DEADLINE DEFENDER", "Complete 10 missions before their due date",
+                        "Clock", "uncommon", "tasks", 400, "#3B82F6", "early_completions", 10),
+                new Achievement("weekly_crusher", "WEEKLY CRUSHER", "Complete 10 missions in one week",
+                        "Calendar", "uncommon", "tasks", 350, "#3B82F6", "weekly_tasks", 10),
+                new Achievement("overachiever", "OVERACHIEVER", "Complete 20% more missions than created",
+                        "TrendingUp", "uncommon", "tasks", 300, "#3B82F6", "completion_ratio", 1),
+                new Achievement("category_master", "CATEGORY MASTER", "Use 5 different operations",
+                        "Folder", "uncommon", "tasks", 250, "#3B82F6", "task_categories", 5),
+                new Achievement("morning_achiever", "MORNING ACHIEVER", "Complete 10 missions before noon",
+                        "Sun", "uncommon", "tasks", 300, "#3B82F6", "morning_completions", 10),
+                new Achievement("evening_finisher", "EVENING FINISHER", "Complete 10 missions after 6 PM",
+                        "Moon", "uncommon", "tasks", 300, "#3B82F6", "evening_completions", 10),
+
+                // RARE TIER (8 achievements)
+                new Achievement("quest_conqueror", "QUEST CONQUEROR", "Complete 50 missions",
+                        "Sword", "rare", "tasks", 1000, "#8B5CF6", "task_count", 50),
+                new Achievement("productivity_titan", "PRODUCTIVITY TITAN", "Complete 10 missions in one day",
+                        "Zap", "rare", "tasks", 1200, "#8B5CF6", "daily_tasks", 10),
+                new Achievement("organization_overlord", "ORGANIZATION OVERLORD", "Maintain 5 different active operations",
+                        "List", "rare", "tasks", 800, "#8B5CF6", "active_lists", 5),
+                new Achievement("streak_sentry", "STREAK SENTRY", "Complete missions 7 days in a row",
+                        "Flame", "rare", "tasks", 1000, "#8B5CF6", "completion_streak", 7),
+                new Achievement("urgent_responder", "URGENT RESPONDER", "Complete 20 urgent-priority missions",
+                        "AlertTriangle", "rare", "tasks", 800, "#8B5CF6", "urgent_tasks", 20),
+                new Achievement("monthly_dominator", "MONTHLY DOMINATOR", "Complete 50 missions in one month",
+                        "Calendar", "rare", "tasks", 1200, "#8B5CF6", "monthly_tasks", 50),
+                new Achievement("perfectionist", "PERFECTIONIST", "Complete 100 missions with 95%+ on-time rate",
+                        "Star", "rare", "tasks", 1500, "#8B5CF6", "ontime_rate", 1),
+                new Achievement("task_juggler", "TASK JUGGLER", "Have 20+ active missions at once",
+                        "Layers", "rare", "tasks", 700, "#8B5CF6", "concurrent_tasks", 20),
+
+                // LEGENDARY TIER (4 achievements)
+                new Achievement("mission_emperor", "MISSION EMPEROR", "Complete 200 missions",
+                        "Crown", "legendary", "tasks", 3000, "#F59E0B", "task_count", 200),
+                new Achievement("ultimate_achiever", "ULTIMATE ACHIEVER", "Complete 25 missions in one day",
+                        "Zap", "legendary", "tasks", 4000, "#F59E0B", "daily_tasks", 25),
+                new Achievement("grandmaster_planner", "GRANDMASTER PLANNER", "Maintain a 30-day mission completion streak",
+                        "Calendar", "legendary", "tasks", 5000, "#F59E0B", "completion_streak", 30),
+                new Achievement("legendary_executor", "LEGENDARY EXECUTOR", "Complete 500 total missions",
+                        "Sword", "legendary", "tasks", 7500, "#F59E0B", "task_count", 500)
         );
     }
-    
+
     private List<Achievement> createFocusAchievements() {
         return Arrays.asList(
-            // COMMON TIER - Session Count
-            new Achievement("focused_initiate", "FOCUSED INITIATE", "Complete your first focus session", 
-                          "Target", "common", "focus", 100, "#06B6D4", "session_count", 1),
-            
-            new Achievement("concentration_cadet", "CONCENTRATION CADET", "Finish 5 focus sessions", 
-                          "Target", "common", "focus", 150, "#06B6D4", "session_count", 5),
-            
-            new Achievement("attention_apprentice", "ATTENTION APPRENTICE", "Complete 10 sessions", 
-                          "Target", "common", "focus", 200, "#06B6D4", "session_count", 10),
-            
-            new Achievement("mindfulness_rookie", "MINDFULNESS ROOKIE", "Achieve 25 sessions", 
-                          "Target", "common", "focus", 250, "#06B6D4", "session_count", 25),
-            
-            // COMMON TIER - Time Based
-            new Achievement("hour_apprentice", "HOUR APPRENTICE", "Focus for 1 hour total", 
-                          "Clock", "common", "focus", 125, "#06B6D4", "total_time", 60),
-            
-            new Achievement("steady_studier", "STEADY STUDIER", "Accumulate 3 hours of focus", 
-                          "Clock", "common", "focus", 200, "#06B6D4", "total_time", 180),
-            
-            // UNCOMMON TIER
-            new Achievement("focus_veteran", "FOCUS VETERAN", "Complete 50 sessions", 
-                          "Target", "uncommon", "focus", 400, "#EC4899", "session_count", 50),
-            
-            new Achievement("deep_work_warrior", "DEEP WORK WARRIOR", "Focus for 10 hours total", 
-                          "Clock", "uncommon", "focus", 500, "#EC4899", "total_time", 600),
-            
-            new Achievement("long_distance_runner", "LONG DISTANCE RUNNER", "Complete a 2-hour session", 
-                          "Zap", "uncommon", "focus", 300, "#EC4899", "long_session", 120),
-            
-            new Achievement("daily_focuser", "DAILY FOCUSER", "Focus daily for 5 days straight", 
-                          "Calendar", "uncommon", "focus", 350, "#EC4899", "focus_streak", 5),
-            
-            new Achievement("category_specialist", "CATEGORY SPECIALIST", "Focus 5 hours in one category", 
-                          "FolderOpen", "uncommon", "focus", 300, "#EC4899", "category_time", 300),
-            
-            // RARE TIER
-            new Achievement("concentration_master", "CONCENTRATION MASTER", "Achieve 100 sessions", 
-                          "Target", "rare", "focus", 750, "#8B5CF6", "session_count", 100),
-            
-            new Achievement("marathon_mind", "MARATHON MIND", "Focus for 20 hours total", 
-                          "Clock", "rare", "focus", 800, "#8B5CF6", "total_time", 1200),
-            
-            new Achievement("zen_master", "ZEN MASTER", "Complete a 4-hour deep session", 
-                          "Zap", "rare", "focus", 600, "#8B5CF6", "long_session", 240),
-            
-            new Achievement("weekly_warrior", "WEEKLY WARRIOR", "Focus daily for 7 days straight", 
-                          "Calendar", "rare", "focus", 500, "#8B5CF6", "focus_streak", 7),
-            
-            // LEGENDARY TIER
-            new Achievement("focus_legend", "FOCUS LEGEND", "Complete 250 sessions", 
-                          "Target", "legendary", "focus", 1500, "#FFCB2E", "session_count", 250),
-            
-            new Achievement("time_lord", "TIME LORD", "Focus for 100 hours total", 
-                          "Clock", "legendary", "focus", 2000, "#FFCB2E", "total_time", 6000),
-            
-            new Achievement("omnifocus_sage", "OMNIFOCUS SAGE", "Master all focus categories with 20+ hours each", 
-                          "Crown", "legendary", "focus", 2500, "#FFCB2E", "all_categories_time", 1200)
-        );
+                // COMMON TIER (8 achievements)
+                new Achievement("focused_initiate", "FOCUSED INITIATE", "Complete your first grind",
+                        "Target", "common", "focus", 100, "#10B981", "session_count", 1),
+                new Achievement("micro_master", "MICRO MASTER", "Complete 3 micro grinds (5-15 min)",
+                        "Clock", "common", "focus", 150, "#10B981", "session_duration_range", 3),
+                new Achievement("hour_apprentice", "HOUR APPRENTICE", "Spend 1 hour total grinding",
+                        "Clock", "common", "focus", 200, "#10B981", "total_time", 60),
+                new Achievement("quick_burst", "QUICK BURST", "Complete a 5-minute grind",
+                        "Zap", "common", "focus", 75, "#10B981", "single_session_duration", 5),
+                new Achievement("pomodoro_starter", "POMODORO STARTER", "Complete your first 25-minute grind",
+                        "Target", "common", "focus", 150, "#10B981", "single_session_duration", 25),
+                new Achievement("break_taker", "BREAK TAKER", "Take a 5-minute grind break",
+                        "Coffee", "common", "focus", 50, "#10B981", "break_session", 5),
+                new Achievement("morning_focus", "MORNING FOCUS", "Complete a grind before 10 AM",
+                        "Sun", "common", "focus", 100, "#10B981", "time_before", 10),
+                new Achievement("category_explorer", "CATEGORY EXPLORER", "Try 2 different grind skills",
+                        "Compass", "common", "focus", 100, "#10B981", "unique_categories", 2),
+
+                // UNCOMMON TIER (10 achievements)
+                new Achievement("pomodoro_warrior", "POMODORO WARRIOR", "Complete 10 Pomodoro grinds",
+                        "Target", "uncommon", "focus", 300, "#3B82F6", "pomodoro_count", 10),
+                new Achievement("focus_streak", "FOCUS STREAK", "Grind for 3 days in a row",
+                        "Calendar", "uncommon", "focus", 400, "#3B82F6", "daily_streak", 3),
+                new Achievement("deep_diver", "DEEP DIVER", "Complete a 60+ minute grind",
+                        "Brain", "uncommon", "focus", 350, "#3B82F6", "single_session_duration", 60),
+                new Achievement("dedication_keeper", "DEDICATION KEEPER", "Grind for 5 hours total",
+                        "Clock", "uncommon", "focus", 500, "#3B82F6", "total_time", 300),
+                new Achievement("evening_scholar", "EVENING SCHOLAR", "Complete 5 grinds after 6 PM",
+                        "Moon", "uncommon", "focus", 250, "#3B82F6", "time_after", 5),
+                new Achievement("study_buddy", "STUDY BUDDY", "Complete 10 study skill grinds",
+                        "BookOpen", "uncommon", "focus", 300, "#3B82F6", "category_sessions", 10),
+                new Achievement("code_ninja", "CODE NINJA", "Complete 10 code skill grinds",
+                        "Code", "uncommon", "focus", 300, "#3B82F6", "category_sessions", 10),
+                new Achievement("work_horse", "WORK HORSE", "Complete 10 work skill grinds",
+                        "Briefcase", "uncommon", "focus", 300, "#3B82F6", "category_sessions", 10),
+                new Achievement("creative_soul", "CREATIVE SOUL", "Complete 10 creative skill grinds",
+                        "Palette", "uncommon", "focus", 300, "#3B82F6", "category_sessions", 10),
+                new Achievement("session_variety", "SESSION VARIETY", "Grind in 5 different durations",
+                        "Shuffle", "uncommon", "focus", 250, "#3B82F6", "duration_variety", 5),
+
+                // RARE TIER (8 achievements)
+                new Achievement("concentration_king", "CONCENTRATION KING", "Complete 50 grind sessions",
+                        "Crown", "rare", "focus", 1000, "#8B5CF6", "session_count", 50),
+                new Achievement("flow_state_master", "FLOW STATE MASTER", "Grind for 7 days in a row",
+                        "Waves", "rare", "focus", 800, "#8B5CF6", "daily_streak", 7),
+                new Achievement("marathon_mind", "MARATHON MIND", "Spend 20 hours total grinding",
+                        "Brain", "rare", "focus", 1200, "#8B5CF6", "total_time", 1200),
+                new Achievement("category_crusher", "CATEGORY CRUSHER", "Reach 10 hours grinding any skill",
+                        "Target", "rare", "focus", 800, "#8B5CF6", "category_time", 600),
+                new Achievement("deep_work_legend", "DEEP WORK LEGEND", "Complete 5 grinds of 90+ minutes",
+                        "Brain", "rare", "focus", 1000, "#8B5CF6", "long_sessions", 5),
+                new Achievement("monthly_warrior", "MONTHLY WARRIOR", "Complete 30 grinds in one month",
+                        "Calendar", "rare", "focus", 800, "#8B5CF6", "monthly_sessions", 30),
+                new Achievement("super_streaker", "SUPER STREAKER", "Complete grinds 14 days in a row",
+                        "Flame", "rare", "focus", 1200, "#8B5CF6", "daily_streak", 14),
+                new Achievement("time_optimizer", "TIME OPTIMIZER", "Complete grinds at 6 different times of day",
+                        "Clock", "rare", "focus", 700, "#8B5CF6", "time_variety", 6),
+
+                // LEGENDARY TIER (4 achievements)
+                new Achievement("focus_legend", "FOCUS LEGEND", "Complete 200 grinds",
+                        "Crown", "legendary", "focus", 3000, "#F59E0B", "session_count", 200),
+                new Achievement("zen_master", "ZEN MASTER", "Complete grinds 30 days in a row",
+                        "Lotus", "legendary", "focus", 5000, "#F59E0B", "daily_streak", 30),
+                new Achievement("time_lord", "TIME LORD", "Spend 100 hours total grinding",
+                        "Clock", "legendary", "focus", 4000, "#F59E0B", "total_time", 6000),
+                new Achievement("omnifocus_sage", "OMNIFOCUS SAGE", "Grind for 20 hours in all skills",
+                        "Star", "legendary", "focus", 6000, "#F59E0B", "all_categories_time", 1200)
+    );
     }
-    
+
     private List<Achievement> createSpecialAchievements() {
         return Arrays.asList(
-            // UNCOMMON TIER - Combo Achievements
-            new Achievement("triple_threat", "TRIPLE THREAT", "Complete a note, task, and focus session in one day", 
-                          "Star", "uncommon", "combo", 500, "#EC4899", "daily_combo", 1),
+                // UNCOMMON TIER (6 achievements)
+                new Achievement("triple_threat", "TRIPLE THREAT", "Create a log, mission and grind in one day",
+                        "Star", "uncommon", "combo", 500, "#3B82F6", "daily_combo", 1),
+                new Achievement("balanced_user", "BALANCED USER", "Complete a log, mission and grind in one week",
+                        "Scale", "uncommon", "combo", 300, "#3B82F6", "weekly_combo", 1),
+                new Achievement("productivity_stack", "PRODUCTIVITY STACK", "Complete 5 missions + 1 grind + 1 log in one day",
+                        "Layers", "uncommon", "combo", 600, "#3B82F6", "super_combo", 1),
+                new Achievement("weekend_grinder", "WEEKEND GRINDER", "Complete a log, mission and grind on both weekend days",
+                        "Calendar", "uncommon", "combo", 400, "#3B82F6", "weekend_activity", 2),
+                new Achievement("midnight_oil", "MIDNIGHT OIL", "Be productive after midnight",
+                        "Moon", "uncommon", "combo", 300, "#3B82F6", "late_night_activity", 1),
+                new Achievement("early_riser", "EARLY RISER", "Be productive before 6 AM",
+                        "Sun", "uncommon", "combo", 300, "#3B82F6", "early_morning_activity", 1),
+
+                // RARE TIER (10 achievements)
+                new Achievement("power_user", "POWER USER", "Complete a log, mission and grind for 7 consecutive days",
+                        "Zap", "rare", "combo", 1000, "#8B5CF6", "combo_streak", 7),
+                new Achievement("completionist", "COMPLETIONIST", "Reach 25% completion in all achievement categories",
+                        "Award", "rare", "meta", 800, "#8B5CF6", "category_completion", 1),
+                new Achievement("habit_master", "HABIT MASTER", "Complete a log, mission and grind for 14 days",
+                        "Repeat", "rare", "combo", 1200, "#8B5CF6", "daily_activity_streak", 14),
+                new Achievement("feature_explorer", "FEATURE EXPLORER", "Use every major feature at least once",
+                        "Compass", "rare", "meta", 600, "#8B5CF6", "feature_usage", 1),
+                new Achievement("consistency_king", "CONSISTENCY KING", "Be productive every day for 21 days",
+                        "Crown", "rare", "combo", 1500, "#8B5CF6", "activity_consistency", 21),
+                new Achievement("productivity_beast", "PRODUCTIVITY BEAST", "Be productive 10+ times in one day",
+                        "Zap", "rare", "combo", 1000, "#8B5CF6", "daily_activity_count", 10),
+                new Achievement("monthly_master", "MONTHLY MASTER", "Be productive 100+ times in one month",
+                        "Calendar", "rare", "combo", 1200, "#8B5CF6", "monthly_activity_count", 100),
+                new Achievement("level_climber", "LEVEL CLIMBER", "Reach level 10",
+                        "TrendingUp", "rare", "meta", 1000, "#8B5CF6", "player_level", 10),
+                new Achievement("xp_hunter", "XP HUNTER", "Earn 5000 total XP",
+                        "Target", "rare", "meta", 500, "#8B5CF6", "total_xp", 5000),
+                new Achievement("achievement_hunter", "ACHIEVEMENT HUNTER", "Unlock 25 achievement badges",
+                        "Trophy", "rare", "meta", 1000, "#8B5CF6", "achievement_count", 25),
+
+                // LEGENDARY TIER (6 achievements)
+                new Achievement("pixel_master", "PIXEL MASTER", "Unlock 50 total achievement badges",
+                        "Crown", "legendary", "meta", 3000, "#F59E0B", "achievement_count", 50),
+                new Achievement("gaming_legend", "GAMING LEGEND", "Reach level 25 overall",
+                        "Star", "legendary", "meta", 5000, "#F59E0B", "player_level", 25),
+                new Achievement("ultimate_completionist", "ULTIMATE COMPLETIONIST", "Unlock 75% of all achievement badges",
+                        "Award", "legendary", "meta", 4000, "#F59E0B", "completion_percentage", 1),
+                new Achievement("eternal_grinder", "ETERNAL GRINDER", "Be productive for 100 consecutive days",
+                        "Infinity", "legendary", "meta", 10000, "#F59E0B", "activity_consistency", 100),
+                new Achievement("omnipotent_user", "OMNIPOTENT USER", "Master all skills (top 10% in each)",
+                        "Crown", "legendary", "meta", 7500, "#F59E0B", "category_mastery", 1),
+                new Achievement("legendary_completionist", "LEGENDARY COMPLETIONIST", "Unlock 95% of all achievement badges",
+                        "Gem", "legendary", "meta", 15000, "#F59E0B", "completion_percentage", 1)
+    );
+    }
+
+    @Transactional
+    public void forceUpdateAchievements() {
+        System.out.println("🔄 Force updating achievement descriptions...");
+        
+        try {
+            // Clear all existing data
+            achievementRepository.deleteAll();
+            achievementRepository.flush(); // Force immediate deletion
             
-            new Achievement("balanced_warrior", "BALANCED WARRIOR", "Achieve weekly goals in all categories", 
-                          "Scale", "uncommon", "combo", 400, "#EC4899", "weekly_balance", 1),
+            System.out.println("🗑️ Deleted all existing achievements");
             
-            new Achievement("productivity_trifecta", "PRODUCTIVITY TRIFECTA", "Triple combo for 3 days", 
-                          "Zap", "uncommon", "combo", 600, "#EC4899", "combo_streak", 3),
+            // Re-initialize with new descriptions
+            List<Achievement> allAchievements = new ArrayList<>();
+            allAchievements.addAll(createNoteAchievements());
+            allAchievements.addAll(createTaskAchievements());
+            allAchievements.addAll(createFocusAchievements());
+            allAchievements.addAll(createSpecialAchievements());
             
-            // RARE TIER - Meta Achievements
-            new Achievement("achievement_hunter", "ACHIEVEMENT HUNTER", "Unlock 10 achievements", 
-                          "Trophy", "rare", "meta", 500, "#8B5CF6", "achievement_count", 10),
+            // Save all new achievements
+            achievementRepository.saveAllAndFlush(allAchievements); // Force immediate save
             
-            new Achievement("badge_collector", "BADGE COLLECTOR", "Earn 25 achievements", 
-                          "Award", "rare", "meta", 750, "#8B5CF6", "achievement_count", 25),
+            System.out.println("✅ Force updated " + allAchievements.size() + " achievements!");
             
-            new Achievement("rare_finder", "RARE FINDER", "Unlock your first rare achievement", 
-                          "Gem", "rare", "meta", 400, "#8B5CF6", "rare_achievement", 1),
+            // Verify the update worked
+            long count = achievementRepository.count();
+            System.out.println("📊 Total achievements in database: " + count);
             
-            // LEGENDARY TIER - Ultimate Achievements
-            new Achievement("legendary_achiever", "LEGENDARY ACHIEVER", "Unlock your first legendary achievement", 
-                          "Crown", "legendary", "meta", 1000, "#FFCB2E", "legendary_achievement", 1),
-            
-            new Achievement("completionist", "COMPLETIONIST", "Unlock 50 achievements", 
-                          "Trophy", "legendary", "meta", 2000, "#FFCB2E", "achievement_count", 50),
-            
-            new Achievement("pixel_pages_master", "PIXEL PAGES MASTER", "Achieve mastery in all areas", 
-                          "Crown", "legendary", "meta", 5000, "#FFCB2E", "complete_mastery", 1)
-        );
+        } catch (Exception e) {
+            System.err.println("❌ Error during force update: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

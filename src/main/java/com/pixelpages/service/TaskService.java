@@ -68,17 +68,16 @@ public class TaskService {
             task.setTitle(updatedTask.getTitle());
             task.setCompleted(updatedTask.isCompleted());
             task.setPriority(updatedTask.getPriority());
-            
-            // 🆕 UPDATE NEW FIELDS
             task.setDescription(updatedTask.getDescription());
             task.setDueDate(updatedTask.getDueDate());
             task.setTags(updatedTask.getTags());
             task.setTaskListId(updatedTask.getTaskListId());
+            task.setUpdatedAt(LocalDateTime.now());  // ✅ ADD THIS
             
             Task savedTask = taskRepository.save(task);
             
-            // TRACK ACHIEVEMENT - ADD THIS
-            if (!wasCompleted && savedTask.isCompleted() && savedTask.getUsername() != null && achievementService != null) {
+            // ✅ PROPER ACHIEVEMENT TRACKING
+            if (!wasCompleted && savedTask.isCompleted() && achievementService != null) {
                 try {
                     achievementService.trackTaskCompletion(savedTask.getUsername());
                     System.out.println("🎯 Tracked task completion for: " + savedTask.getUsername());
@@ -187,10 +186,33 @@ public class TaskService {
 
     // 🆕 TASK STATS METHOD
     public TaskStats getTaskStats(String username) {
-        long totalTasks = taskRepository.countByUsernameAndCompleted(username, true) + 
-                         taskRepository.countByUsernameAndCompleted(username, false);
+        long totalTasks = taskRepository.countByUsername(username);  // ✅ FIXED
         long completedTasks = taskRepository.countByUsernameAndCompleted(username, true);
         
         return new TaskStats(totalTasks, completedTasks);
+    }
+    
+    // ✅ AUTO-COMPLETE TASK METHOD
+    public Task completeTask(Long taskId, String username) {
+        Task task = updateTaskStatus(taskId, true);
+        
+        // ✅ AUTO-TRIGGER ACHIEVEMENT CHECK
+        if (username != null) {
+            achievementService.trackTaskCompletion(username);
+        }
+        
+        return task;
+    }
+
+    // Add this missing method to TaskService:
+    public Task updateTaskStatus(Long taskId, boolean completed) {
+        Optional<Task> taskOpt = taskRepository.findById(taskId);
+        if (taskOpt.isPresent()) {
+            Task task = taskOpt.get();
+            task.setCompleted(completed);
+            task.setUpdatedAt(LocalDateTime.now());
+            return taskRepository.save(task);
+        }
+        throw new RuntimeException("Task not found with id: " + taskId);
     }
 }

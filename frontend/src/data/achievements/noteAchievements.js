@@ -3,7 +3,7 @@ export const noteAchievements = [
   {
     id: 'first_scroll',
     name: 'FIRST SCROLL',
-    description: 'Create your first mission log',
+    description: 'Create your first note log',
     tier: 'common',
     category: 'notes',
     icon: 'BookOpen',
@@ -17,7 +17,7 @@ export const noteAchievements = [
   {
     id: 'apprentice_scribe',
     name: 'APPRENTICE SCRIBE', 
-    description: 'Collect 5 quest scrolls',
+    description: 'Create 5 note logs',
     tier: 'common',
     category: 'notes',
     icon: 'BookOpen',
@@ -31,7 +31,7 @@ export const noteAchievements = [
   {
     id: 'word_warrior',
     name: 'WORD WARRIOR',
-    description: 'Write 100 words total',
+    description: 'Write 100 words total in logs',
     tier: 'common', 
     category: 'notes',
     icon: 'Edit3',
@@ -45,7 +45,7 @@ export const noteAchievements = [
   {
     id: 'tag_rookie',
     name: 'TAG ROOKIE',
-    description: 'Use your first tag',
+    description: 'Use your first tag in a log',
     tier: 'common',
     category: 'notes',
     icon: 'Tag',
@@ -59,7 +59,7 @@ export const noteAchievements = [
   {
     id: 'daily_logger',
     name: 'DAILY LOGGER',
-    description: 'Create a note today',
+    description: 'Create a log today',
     tier: 'common',
     category: 'notes',
     icon: 'Calendar',
@@ -73,7 +73,7 @@ export const noteAchievements = [
   {
     id: 'basic_editor',
     name: 'BASIC EDITOR',
-    description: 'Edit your first note',
+    description: 'Edit your first log',
     tier: 'common',
     category: 'notes',
     icon: 'Edit',
@@ -89,7 +89,7 @@ export const noteAchievements = [
   {
     id: 'journeyman_writer',
     name: 'JOURNEYMAN WRITER',
-    description: 'Collect 10 quest scrolls', 
+    description: 'Collect 10 logs', 
     tier: 'uncommon',
     category: 'notes',
     icon: 'BookOpen',
@@ -103,7 +103,7 @@ export const noteAchievements = [
   {
     id: 'verbose_victor',
     name: 'VERBOSE VICTOR',
-    description: 'Write 500 words total',
+    description: 'Write 500 words total in logs',
     tier: 'uncommon',
     category: 'notes', 
     icon: 'Edit3',
@@ -117,7 +117,7 @@ export const noteAchievements = [
   {
     id: 'tag_apprentice',
     name: 'TAG APPRENTICE',
-    description: 'Use 5 different tags',
+    description: 'Use 5 different tags in logs',
     tier: 'uncommon',
     category: 'notes',
     icon: 'Tag',
@@ -131,7 +131,7 @@ export const noteAchievements = [
   {
     id: 'night_owl',
     name: 'NIGHT OWL', 
-    description: 'Write between 11 PM and 5 AM',
+    description: 'Write a log between 11 PM and 5 AM',
     tier: 'uncommon',
     category: 'notes',
     icon: 'Moon',
@@ -146,7 +146,7 @@ export const noteAchievements = [
   {
     id: 'early_bird',
     name: 'EARLY BIRD',
-    description: 'Write between 5 AM and 8 AM',
+    description: 'Write a log between 5 AM and 8 AM',
     tier: 'uncommon',
     category: 'notes',
     icon: 'Sun',
@@ -161,7 +161,7 @@ export const noteAchievements = [
   {
     id: 'weekend_warrior',
     name: 'WEEKEND WARRIOR',
-    description: 'Create 5 notes on weekends',
+    description: 'Create 5 logs on weekends',
     tier: 'uncommon',
     category: 'notes',
     icon: 'Calendar',
@@ -190,7 +190,7 @@ export const noteAchievements = [
   {
     id: 'revision_master',
     name: 'REVISION MASTER',
-    description: 'Edit the same note 5 times',
+    description: 'Edit the same log 5 times',
     tier: 'uncommon',
     category: 'notes',
     icon: 'RotateCcw',
@@ -206,7 +206,7 @@ export const noteAchievements = [
   {
     id: 'master_chronicler',
     name: 'MASTER CHRONICLER',
-    description: 'Collect 25 quest scrolls',
+    description: 'Collect 25 logs',
     tier: 'rare',
     category: 'notes',
     icon: 'BookOpen',
@@ -248,7 +248,7 @@ export const noteAchievements = [
   {
     id: 'consistent_writer',
     name: 'CONSISTENT WRITER',
-    description: 'Write for 7 consecutive days',
+    description: 'Write logs for 7 consecutive days',
     tier: 'rare',
     category: 'notes',
     icon: 'Calendar',
@@ -262,7 +262,7 @@ export const noteAchievements = [
   {
     id: 'marathon_scribe',
     name: 'MARATHON SCRIBE',
-    description: 'Write 500+ words in one note',
+    description: 'Write 500+ words in one log',
     tier: 'rare',
     category: 'notes',
     icon: 'FileText',
@@ -276,7 +276,7 @@ export const noteAchievements = [
   {
     id: 'weekly_champion',
     name: 'WEEKLY CHAMPION',
-    description: 'Create 10 notes in one week',
+    description: 'Create 10 logs in one week',
     tier: 'rare',
     category: 'notes',
     icon: 'Trophy',
@@ -290,7 +290,7 @@ export const noteAchievements = [
   {
     id: 'organization_guru',
     name: 'ORGANIZATION GURU',
-    description: 'Use 3+ tags in a single note',
+    description: 'Use 3+ tags in a single log',
     tier: 'rare',
     category: 'notes',
     icon: 'Tags',
@@ -306,7 +306,7 @@ export const noteAchievements = [
   {
     id: 'legendary_archivist',
     name: 'LEGENDARY ARCHIVIST',
-    description: 'Collect 100 quest scrolls',
+    description: 'Create 100 logs',
     tier: 'legendary',
     category: 'notes',
     icon: 'Archive',
@@ -320,7 +320,7 @@ export const noteAchievements = [
   {
     id: 'epic_novelist',
     name: 'EPIC NOVELIST',
-    description: 'Write 1000+ words in one note',
+    description: 'Write 1000+ words in one log',
     tier: 'legendary',
     category: 'notes',
     icon: 'Book',

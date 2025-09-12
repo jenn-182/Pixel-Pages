@@ -1,11 +1,14 @@
 package com.pixelpages.controller;
 
 import com.pixelpages.service.AchievementService;
+import com.pixelpages.service.AchievementInitializationService;
 import com.pixelpages.repository.TaskRepository;
 import com.pixelpages.repository.NoteRepository;
+import com.pixelpages.repository.AchievementRepository; // Add this import
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +22,21 @@ public class AchievementController {
     private final AchievementService achievementService;
     private final TaskRepository taskRepository;
     private final NoteRepository noteRepository;
+    private final AchievementRepository achievementRepository; // Add this field
+
+    @Autowired
+    private AchievementInitializationService achievementInitializationService;
 
     public AchievementController(AchievementService achievementService,
             TaskRepository taskRepository,
-            NoteRepository noteRepository) {
+            NoteRepository noteRepository,
+            AchievementInitializationService achievementInitializationService,
+            AchievementRepository achievementRepository) { // Add this parameter
         this.achievementService = achievementService;
         this.taskRepository = taskRepository;
         this.noteRepository = noteRepository;
+        this.achievementInitializationService = achievementInitializationService;
+        this.achievementRepository = achievementRepository; // Add this assignment
         System.out.println("AchievementController initialized");
     }
 
@@ -155,6 +166,46 @@ public class AchievementController {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
 
+        }
+    }
+
+    // @PostMapping("/initialize/{username}")
+    // @CrossOrigin(origins = "http://localhost:3000")
+    // public ResponseEntity<String> initializeAchievements(@PathVariable String username) {
+    //     try {
+    //         achievementService.initializeAllPlayerAchievements(username);
+    //         return ResponseEntity.ok("Initialized all achievements for " + username);
+    //     } catch (Exception e) {
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    //                 .body("Failed: " + e.getMessage());
+    //     }
+    // }
+
+    @PostMapping("/force-update")
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseEntity<Map<String, Object>> forceUpdateAchievements() {
+        try {
+            System.out.println("🔄 Force update endpoint called");
+            
+            achievementInitializationService.forceUpdateAchievements();
+            
+            // Return detailed response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Achievements updated successfully!");
+            response.put("timestamp", System.currentTimeMillis());
+            response.put("totalAchievements", achievementRepository.count());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Force update failed: " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Failed to update achievements: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 }

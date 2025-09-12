@@ -13,7 +13,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
   const [userStats, setUserStats] = useState({});
   const [selectedAchievement, setSelectedAchievement] = useState(null);
   const [lockedSortBy, setLockedSortBy] = useState('rarity');
-  const [showLockedAchievements, setShowLockedAchievements] = useState(true); // Changed from false
+const [showLockedAchievements, setShowLockedAchievements] = useState(false); 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -208,7 +208,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
         className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center p-4"
         style={{
           alignItems: 'flex-start',
-          paddingTop: '57vh' //centers it in the badge section area
+          paddingTop: '65vh' //centers it in the badge section area
         }}
         onClick={onClose}
       >
@@ -382,7 +382,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
               className="w-6 h-6 border border-gray-600" 
               style={{ backgroundColor: tabColor }}
             />
-            ACHIEVEMENT TERMINAL
+            ACHIEVEMENT SHOWCASE
           </h1>
           <p className="text-gray-400 font-mono text-sm">
             View your badges and unlock achievements by completing logs and missions.
@@ -402,7 +402,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
           whileTap={{ scale: 0.98 }}
         >
           <Lock size={16} />
-          {showLockedAchievements ? 'HIDE LOCKED' : 'VIEW LOCKED BADGES'}
+          {showLockedAchievements ? 'SHOW MY BADGES' : 'VIEW LOCKED BADGES'} 
           <motion.div
             animate={{ rotate: showLockedAchievements ? 180 : 0 }}
             transition={{ duration: 0.2 }}
@@ -492,7 +492,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                 </div>
               </div>
 
-              {/* Badges Total */}
+              {/* Completion Percentage */}
               <div className="bg-black border text-center p-4 relative transition-all duration-200"
                    style={{
                      borderColor: '#4B5563',
@@ -502,9 +502,9 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                      style={{ background: 'linear-gradient(to bottom right, rgba(251, 191, 36, 0.08), rgba(251, 191, 36, 0.12))' }} />
                 <div className="relative z-10">
                   <Trophy size={20} className="text-yellow-400 mx-auto mb-2" />
-                  <div className="text-xs font-mono text-gray-400 mb-1">BADGES TOTAL</div>
+                  <div className="text-xs font-mono text-gray-400 mb-1">COMPLETION RATE</div>
                   <div className="text-2xl font-mono font-bold text-yellow-400">
-                    {allAchievements.length}
+                    {Math.round((unlockedAchievements.length / allAchievements.length) * 100)}%
                   </div>
                 </div>
               </div>
@@ -543,7 +543,8 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-mono font-bold text-white flex items-center">
                       <Award className="mr-2" size={20} style={{ color: tabColor }} />
-                      {username.toUpperCase()}'S BADGES
+                      {/*{username.toUpperCase()}'S BADGES*/}
+                      JROC_182's BADGES
                     </h3>
                     
                     {/* Rarity Filter Buttons */}
@@ -749,15 +750,15 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
 
       {/* Achievement Modal */}
       <AnimatePresence>
-        {selectedAchievement && achievementService.isUnlocked(selectedAchievement.id) && (
+{selectedAchievement && backendAchievementService.isUnlocked(selectedAchievement.id) && (
           <AchievementModal 
             achievement={selectedAchievement} 
             onClose={() => setSelectedAchievement(null)}
           />
         )}
       </AnimatePresence>
-
-      {/* CLEAN debug section */}
+{/* 
+      CLEAN debug section
       <div className="mb-4 p-4 bg-gray-900 border border-gray-600">
         <h3 className="text-gray-300 font-mono font-bold mb-2">🔍 DEBUG STATUS:</h3>
         <div className="text-gray-400 font-mono text-sm space-y-1">
@@ -778,120 +779,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
         >
           LOG SAMPLE DATA
         </button>
-      </div>
-
-      {/* Manual test buttons (REMOVE LATER) */}
-      <div className="flex gap-2">
-        <button 
-          onClick={async () => {
-            try {
-              setLoading(true);
-              // Use the correct method name
-              const result = await apiService.populateTestAchievements(username);
-              console.log('✅ Populate result:', result);
-              await loadAchievementData();
-            } catch (error) {
-              console.error('❌ Populate failed:', error);
-            } finally {
-              setLoading(false);
-            }
-          }} 
-          className="bg-green-600 text-white font-mono text-sm px-4 py-2 rounded shadow-md transition-all duration-200 flex items-center gap-2"
-        >
-          TEST POPULATE
-        </button>
-        
-        <button 
-          onClick={() => {
-            console.log('Unlocked Achievements:', unlockedAchievements);
-            console.log('In Progress Achievements:', inProgressAchievements);
-            console.log('Locked Achievements:', lockedAchievements);
-          }} 
-          className="bg-blue-600 text-white font-mono text-sm px-4 py-2 rounded shadow-md transition-all duration-200 flex items-center gap-2"
-        >
-          LOG SAMPLES
-        </button>
-        
-        <button 
-          onClick={() => {
-            // Detailed check for all achievements
-            allAchievements.forEach(achievement => {
-              const isUnlocked = achievementService.isUnlocked(achievement.id);
-              const playerAchievement = backendAchievementService.playerAchievements.find(pa => pa.achievementId === achievement.id);
-              const progress = playerAchievement ? playerAchievement.progress : 0;
-              console.log(`Achievement: ${achievement.name} | Unlocked: ${isUnlocked} | Progress: ${progress}`);
-            });
-          }} 
-          className="bg-yellow-600 text-white font-mono text-sm px-4 py-2 rounded shadow-md transition-all duration-200 flex items-center gap-2"
-        >
-          DETAILED CHECK
-        </button>
-
-        <button
-          onClick={async () => {
-            try {
-              console.log('🔄 Running detailed achievement check...');
-              const result = await apiService.checkAllAchievements(username);
-              console.log('✅ Check completed:', result);
-              
-              // Reload data
-              await loadAchievementData();
-            } catch (error) {
-              console.error('❌ Check failed:', error);
-            }
-          }}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 font-mono text-sm"
-        >
-          DETAILED CHECK (see backend logs)
-        </button>
-
-        <button
-          onClick={async () => {
-            try {
-              console.log('🔄 Force checking achievements...');
-              await apiService.checkAllAchievements(username);
-              
-              // Wait a moment for backend processing
-              setTimeout(async () => {
-                await loadAchievementData();
-              }, 1000);
-            } catch (error) {
-              console.error('❌ Force check failed:', error);
-            }
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 font-mono text-sm"
-        >
-          FORCE REFRESH
-        </button>
-
-        {/* Add this button to test usernames: */}
-        <button
-          onClick={async () => {
-            try {
-              const response = await fetch('http://localhost:8080/api/achievements/debug/usernames');
-              const data = await response.json();
-              console.log('🔍 Database usernames:', data);
-              
-              // Test each username found
-              if (data.taskUsernames) {
-                for (const testUsername of data.taskUsernames) {
-                  console.log(`🧪 Testing username: ${testUsername}`);
-                  try {
-                    await apiService.checkAllAchievements(testUsername);
-                  } catch (error) {
-                    console.log(`❌ ${testUsername} failed:`, error.message);
-                  }
-                }
-              }
-            } catch (error) {
-              console.error('❌ Debug failed:', error);
-            }
-          }}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 font-mono text-sm"
-        >
-          DEBUG USERNAMES
-        </button>
-      </div>
+      </div> */}
     </div>
   );
 });

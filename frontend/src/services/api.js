@@ -348,25 +348,22 @@ const apiService = {
     }
   },
 
-  // Fix this method:
-  async getPlayerStats(username) {
-    if (!username || username === 'undefined') {
-      console.warn('No username provided for player stats');
-      return { level: 1, xp: 0, totalNotes: 0, totalTasks: 0 };
-    }
-    
+  // UPDATE the getPlayerStats function:
+  async getPlayerStats(username = 'user') {
     try {
+      if (!username) {
+        console.warn('No username provided for player stats, using default');
+        username = 'user';
+      }
+      
       const response = await fetch(`${API_BASE}/players/${username}`);
       if (!response.ok) {
-        if (response.status === 404) {
-          return { level: 1, xp: 0, totalNotes: 0, totalTasks: 0 };
-        }
-        throw new Error('Failed to fetch player stats');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
+      return await response.json();
     } catch (error) {
-      console.warn('Player stats API not available, using defaults');
-      return { level: 1, xp: 0, totalNotes: 0, totalTasks: 0 };
+      console.error('Failed to fetch player stats:', error);
+      throw error;
     }
   },
 
@@ -540,7 +537,37 @@ const apiService = {
     });
     if (!response.ok) throw new Error('Failed to check achievements');
     return response.text();
-  }
+  },
+
+  // ADD this method to your apiService object:
+
+  async updateTask(taskId, taskData, username = 'user') {
+    const requestData = {
+      title: taskData.title,
+      description: taskData.description,
+      priority: taskData.priority,
+      dueDate: taskData.dueDate, // YYYY-MM-DD format
+      tags: taskData.tags,
+      taskListId: taskData.taskListId,
+      completed: taskData.completed
+    };
+
+    const response = await fetch(`${API_BASE}/tasks/${taskId}?username=${username}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Update task error:', errorText);
+      throw new Error(`Failed to update task: ${response.status} - ${errorText}`);
+    }
+
+    return await response.json();
+  },
 };
 
 export default apiService;

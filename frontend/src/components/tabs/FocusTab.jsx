@@ -137,9 +137,9 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
 
   // Get timer status display
   const getTimerStatus = () => {
-    if (!isActive) return { text: 'READY TO FOCUS', color: '#6B7280', icon: Timer };
+    if (!isActive) return { text: 'READY TO START', color: '#6B7280', icon: Timer };
     if (isPaused) return { text: 'PAUSED', color: '#F59E0B', icon: Pause };
-    if (isRunning) return { text: 'FOCUS MODE ACTIVE', color: tabColor, icon: Play };
+    if (isRunning) return { text: 'GRINDING SKILLS', color: tabColor, icon: Play };
     return { text: 'READY', color: '#6B7280', icon: Timer };
   };
 
@@ -155,10 +155,10 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
             className="w-6 h-6 border border-gray-600" 
             style={{ backgroundColor: tabColor }}
           />
-          FOCUS STATION
+          GRIND TERMINAL
         </h1>
         <p className="text-gray-400 font-mono text-sm">
-          Gaming-style focus timer with XP tracking system.
+          Focus timer to level up your skills and keep you on track.
         </p>
       </div>
 
@@ -280,7 +280,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
               >
                 <div className="flex items-center gap-2">
                   <Play size={20} />
-                  <span>START FOCUS</span>
+                  <span>START GRINDING</span>
                 </div>
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
                      style={{ backgroundColor: tabColor }} />
@@ -335,7 +335,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
           <div className="relative z-10">
             <h3 className="text-lg font-mono font-bold text-white mb-6 flex items-center gap-2">
               <Zap size={20} style={{ color: tabColor }} />
-              QUICK START TEMPLATES
+              QUICK GRIND TEMPLATES
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -413,7 +413,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
 
             <div className="mt-6 text-center">
               <div className="text-sm font-mono text-gray-400">
-                Click a template to select it, then hit START FOCUS
+                Click a template to select it, then hit START GRINDING
               </div>
             </div>
           </div>

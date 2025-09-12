@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, Trophy, Target, Calendar, BookOpen, Briefcase, Code, Palette, User } from 'lucide-react';
+import SkillTree from '../SkillTree';
 
 const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
   const [categories, setCategories] = useState([]);
@@ -80,10 +81,10 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
             className="w-6 h-6 border border-gray-600" 
             style={{ backgroundColor: tabColor }}
           />
-          FOCUS TRACKER
+          SKILL TREE
         </h1>
         <p className="text-gray-400 font-mono text-sm">
-          Track your focus sessions and XP across different categories.
+          Track your grind sessions and level up your skills.
         </p>
       </motion.div>
 
@@ -145,7 +146,7 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
         </div>
       </motion.div>
 
-      {/* Category XP Breakdown */}
+      {/* Skill Trees */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -169,78 +170,25 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
                }}>
             <h3 className="text-lg font-mono font-bold text-white flex items-center">
               <Trophy className="mr-2" size={20} style={{ color: tabColor }} />
-              CATEGORY XP BREAKDOWN
+              SKILL TREES
             </h3>
           </div>
           
           <div className="p-6">
             {categories.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categories
-                  .filter(cat => (cat.xp || 0) > 0) // Only show categories with XP
-                  .sort((a, b) => (b.xp || 0) - (a.xp || 0)) // Sort by XP descending
-                  .map(category => {
-                    const IconComponent = getIconComponent(category.iconName);
-                    const maxXp = Math.max(...categories.map(c => c.xp || 0));
-                    const progressWidth = maxXp > 0 ? ((category.xp || 0) / maxXp) * 100 : 0;
-                    
-                    return (
-                      <div
-                        key={category.id}
-                        className="bg-gray-900 border border-gray-600 p-4 relative transition-all duration-300 hover:scale-105"
-                        style={{
-                          borderColor: category.color,
-                          boxShadow: `0 0 10px ${category.color}30, 2px 2px 0px 0px rgba(0,0,0,1)`
-                        }}
-                      >
-                        <div className="absolute inset-0 pointer-events-none opacity-20"
-                             style={{ 
-                               background: `linear-gradient(to bottom right, ${category.color}20, ${category.color}10)` 
-                             }} />
-                        
-                        <div className="relative z-10">
-                          <div className="flex items-center gap-3 mb-3">
-                            <IconComponent 
-                              size={24} 
-                              style={{ color: category.color }}
-                            />
-                            <div>
-                              <div className="font-mono font-bold text-white">
-                                {category.name}
-                              </div>
-                              <div className="text-xs text-gray-400">
-                                {category.xp || 0} minutes XP
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* XP Progress Bar */}
-                          <div className="w-full bg-gray-700 h-2 border border-gray-600">
-                            <div 
-                              className="h-full transition-all duration-500"
-                              style={{ 
-                                width: `${progressWidth}%`,
-                                backgroundColor: category.color
-                              }}
-                            />
-                          </div>
-                          
-                          <div className="text-xs font-mono text-gray-400 mt-2 text-center">
-                            Level {Math.floor((category.xp || 0) / 60) + 1}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
+              <SkillTree 
+                categories={categories} 
+                tabColor={tabColor} 
+                tabColorRgb={tabColorRgb} 
+              />
             ) : (
               <div className="text-center py-8">
                 <Target size={48} className="text-gray-500 mx-auto mb-3" />
                 <div className="text-gray-400 font-mono text-lg font-bold mb-2">
-                  NO FOCUS DATA YET
+                  NO SKILLS UNLOCKED
                 </div>
                 <div className="text-gray-500 font-mono text-sm">
-                  Complete focus sessions to see your XP breakdown!
+                  Complete focus sessions to start building your skill trees!
                 </div>
               </div>
             )}

@@ -16,36 +16,12 @@ class BackendAchievementService {
         apiService.getAchievementPlayerStats(username)
       ]);
 
-      // DEBUG: Log the actual data structure with more detail
-      console.log('🔍 DEBUG - Raw backend data for', username + ':');
-      console.log('First 2 achievements:', achievements.slice(0, 2));
-      console.log('First 5 player achievements:', playerAchievements.slice(0, 5));
-
-      // Show specific fields we're looking for
-      if (playerAchievements.length > 0) {
-        const firstPlayerAch = playerAchievements[0];
-        console.log('🔍 PlayerAchievement fields:', Object.keys(firstPlayerAch));
-        console.log('🔍 Sample PlayerAchievement:', firstPlayerAch);
-      }
-
       this.allAchievements = achievements;
       this.playerAchievements = playerAchievements;
       this.playerStats = stats;
       this.loaded = true;
 
-      console.log('✅ Backend achievement data loaded for', username + ':', {
-        achievements: achievements.length,
-        playerProgress: playerAchievements.length,
-        stats
-      });
-
-      // Debugging completed achievements
-      console.log('🔍 Completed achievements:', 
-        playerAchievements.filter(pa => pa.completed === true)
-      );
-      console.log('🔍 Sample completed achievement:', 
-        playerAchievements.find(pa => pa.completed === true)
-      );
+      console.log('✅ Backend achievement data loaded for', username);
 
       return { achievements, playerAchievements, stats };
     } catch (error) {
@@ -54,25 +30,32 @@ class BackendAchievementService {
     }
   }
 
-  isUnlocked(achievementId) {
-    const playerAchievement = this.playerAchievements.find(pa => 
-      pa.id === achievementId  // Use 'id' not 'achievementId'
-    );
-    return playerAchievement?.completed === true; // Explicit boolean check
-  }
+isUnlocked(achievementId) {
+  const playerAchievement = this.playerAchievements.find(pa => 
+    pa.achievementId === achievementId || pa.id === achievementId 
+  );
+  return playerAchievement?.completed === true;
+}
 
-  getAchievementProgress(achievementId, userStats) {
-    const playerAchievement = this.playerAchievements.find(pa => pa.id === achievementId);
-    
-    if (playerAchievement?.completed) {
-      return 1; // Return 1 (100%) for completed achievements
-    }
-    
-    // For in-progress achievements, use the progress field
-    const progressValue = playerAchievement?.progress || 0;
-    const maxProgress = playerAchievement?.maxProgress || 100;
-    return progressValue / maxProgress; // Convert to decimal
+getAchievementProgress(achievementId, userStats) {
+  const playerAchievement = this.playerAchievements.find(pa => 
+    pa.achievementId === achievementId || pa.id === achievementId  // ✅ Check both fields
+  ); 
+  
+  if (playerAchievement?.completed) {
+    return 1; 
   }
+  
+  // For in-progress achievements, use the progress percentage
+  if (playerAchievement?.progressPercentage) {
+    return playerAchievement.progressPercentage / 100;
+  }
+  
+  // Fallback calculation
+  const progressValue = playerAchievement?.progress || 0;
+  const maxProgress = playerAchievement?.maxProgress || 100;
+  return maxProgress > 0 ? progressValue / maxProgress : 0;
+}
 
   getUnlockedAchievements() {
     return this.playerAchievements
@@ -88,14 +71,34 @@ class BackendAchievementService {
   }
 
   getInProgressAchievements() {
-    return this.playerAchievements
-      .filter(pa => !pa.completed && (pa.progress || 0) > 0)  // Use 'progress' field
-      .map(playerAch => ({
-        ...playerAch,
-        progress: playerAch.progress || 0,
-        currentProgress: playerAch.progress || 0,
-        targetValue: 100
-      }));
+    console.log('🔍 DEBUG: Checking for in-progress achievements...');
+    
+    const filtered = this.playerAchievements.filter(achievement => {
+      const isNotCompleted = !achievement.completed;
+      const hasProgress = (achievement.progressPercentage || 0) > 0;
+      const isNotFullyComplete = (achievement.progressPercentage || 0) < 100;
+      
+      console.log(`🔍 Achievement ${achievement.name}:`, {
+        completed: achievement.completed,
+        progressPercentage: achievement.progressPercentage,
+        isNotCompleted,
+        hasProgress,
+        isNotFullyComplete,
+        willInclude: isNotCompleted && hasProgress && isNotFullyComplete
+      });
+      
+      return isNotCompleted && hasProgress && isNotFullyComplete;
+    });
+    
+    console.log('🔍 Filtered in-progress achievements:', filtered.length);
+    
+    return filtered.map(playerAch => ({
+      ...playerAch,
+      progress: playerAch.progressPercentage || 0,
+      currentProgress: playerAch.progress || 0,
+      targetProgress: playerAch.maxProgress || 100,
+      progressPercentage: playerAch.progressPercentage || 0
+    }));
   }
 
   getStats() {
