@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Briefcase, Palette, Code, User, Trophy, Star } from 'lucide-react';
+import { BookOpen, Briefcase, Palette, Code, User, Trophy, Star, Zap, Crown, Shield } from 'lucide-react';
 
 const SkillTree = ({ categories, tabColor, tabColorRgb }) => {
   
@@ -54,9 +54,9 @@ const SkillTree = ({ categories, tabColor, tabColorRgb }) => {
 
   const getLevelTitle = (category, level) => {
     const titles = {
-      study: ['NOVICE', 'STUDENT', 'LEARNER', 'SCHOLAR', 'RESEARCHER', 'EXPERT', 'SPECIALIST', 'PROFESSOR', 'GENIUS', 'MASTER'],
-      work: ['INTERN', 'EMPLOYEE', 'WORKER', 'SPECIALIST', 'SENIOR', 'LEAD', 'MANAGER', 'DIRECTOR', 'EXECUTIVE', 'CEO'],
-      creative: ['DREAMER', 'ARTIST', 'MAKER', 'CREATOR', 'DESIGNER', 'INNOVATOR', 'VISIONARY', 'PIONEER', 'LEGEND', 'GODLIKE'],
+      study: ['ROOKIE', 'NOVICE', 'STUDENT', 'SCHOLAR', 'RESEARCHER', 'EXPERT', 'SPECIALIST', 'PROFESSOR', 'GENIUS', 'MASTERMIND'],
+      work: ['INTERN', 'TRAINEE', 'WORKER', 'SPECIALIST', 'VETERAN', 'ELITE', 'MANAGER', 'DIRECTOR', 'EXECUTIVE', 'LEGEND'],
+      creative: ['DREAMER', 'ARTIST', 'MAKER', 'CREATOR', 'DESIGNER', 'INNOVATOR', 'VISIONARY', 'PIONEER', 'VIRTUOSO', 'GODLIKE'],
       code: ['NOOB', 'CODER', 'PROGRAMMER', 'DEVELOPER', 'ENGINEER', 'ARCHITECT', 'GURU', 'NINJA', 'WIZARD', 'HACKER'],
       personal: ['SEEKER', 'EXPLORER', 'JOURNEYER', 'WANDERER', 'PATHFINDER', 'GUARDIAN', 'WARRIOR', 'CHAMPION', 'HERO', 'LEGEND']
     };
@@ -65,49 +65,65 @@ const SkillTree = ({ categories, tabColor, tabColorRgb }) => {
     return titles[categoryKey]?.[level - 1] || `LEVEL ${level}`;
   };
 
+  // Gaming rank colors based on level
+  const getRankStyle = (level) => {
+    if (level >= 10) return { color: '#FFD700', glow: 'rgba(255, 215, 0, 0.6)', name: 'LEGENDARY' };
+    if (level >= 8) return { color: '#FF6B6B', glow: 'rgba(255, 107, 107, 0.6)', name: 'EPIC' };
+    if (level >= 6) return { color: '#A78BFA', glow: 'rgba(167, 139, 250, 0.6)', name: 'RARE' };
+    if (level >= 4) return { color: '#34D399', glow: 'rgba(52, 211, 153, 0.6)', name: 'UNCOMMON' };
+    return { color: '#9CA3AF', glow: 'rgba(156, 163, 175, 0.6)', name: 'COMMON' };
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {categories
-        .filter(cat => (cat.xp || 0) >= 0) // Show all categories
+        .filter(cat => (cat.xp || 0) >= 0)
         .sort((a, b) => (b.xp || 0) - (a.xp || 0))
-        .map(category => {
+        .map((category, index) => {
           const IconComponent = getIconComponent(category.iconName);
           const currentLevel = getCurrentLevel(category.xp || 0);
           const progress = getLevelProgress(category.xp || 0);
           const levelTitle = getLevelTitle(category, currentLevel);
+          const rankStyle = getRankStyle(currentLevel);
           
           return (
             <motion.div
               key={category.id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-gray-900 border-2 relative overflow-hidden"
+              transition={{ delay: index * 0.1 }}
+              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
               style={{
                 borderColor: category.color,
-                boxShadow: `0 0 20px ${category.color}40, 4px 4px 0px 0px rgba(0,0,0,1)`
+                boxShadow: `0 0 20px ${category.color}40, 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
             >
-              {/* Cyberpunk background effect */}
-              <div className="absolute inset-0 opacity-20 pointer-events-none">
+              {/* Animated background effects - matching other tabs */}
+              <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
+                   style={{ borderColor: category.color }} />
+              <div className="absolute inset-0 pointer-events-none"
+                   style={{ background: `linear-gradient(to bottom right, rgba(${category.color.replace('#', '').match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.15), rgba(${category.color.replace('#', '').match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.2))` }} />
+              
+              {/* Cyberpunk grid pattern */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <div 
                   className="absolute inset-0"
                   style={{ 
-                    background: `linear-gradient(135deg, ${category.color}30 0%, transparent 50%, ${category.color}20 100%)`,
                     backgroundImage: `
-                      linear-gradient(90deg, transparent 79px, ${category.color}20 81px, ${category.color}20 82px, transparent 84px),
-                      linear-gradient(transparent 79px, ${category.color}20 81px, ${category.color}20 82px, transparent 84px)
+                      linear-gradient(90deg, transparent 79px, ${category.color}30 81px, ${category.color}30 82px, transparent 84px),
+                      linear-gradient(transparent 79px, ${category.color}30 81px, ${category.color}30 82px, transparent 84px)
                     `,
                     backgroundSize: '80px 80px'
                   }}
                 />
               </div>
               
-              {/* Header */}
+              {/* Header - matching other tabs styling */}
               <div 
                 className="px-4 py-3 border-b-2 relative z-10"
                 style={{ 
                   borderColor: category.color,
-                  backgroundColor: '#0a0a0a'
+                  backgroundColor: '#1A0E26'
                 }}
               >
                 <div className="flex items-center justify-between">
@@ -118,31 +134,44 @@ const SkillTree = ({ categories, tabColor, tabColorRgb }) => {
                     />
                     <div>
                       <div className="font-mono font-bold text-white text-lg">
-                        {category.name.toUpperCase()}
+                        {category.name.toUpperCase()} SKILL
                       </div>
                       <div 
                         className="font-mono text-xs font-bold tracking-wider"
-                        style={{ color: category.color }}
+                        style={{ color: rankStyle.color }}
                       >
                         {levelTitle}
                       </div>
                     </div>
                   </div>
                   
-                  {/* Level badge */}
-                  <div 
-                    className="px-3 py-1 font-mono font-bold border-2 bg-black"
-                    style={{ 
-                      borderColor: category.color,
-                      color: category.color
-                    }}
-                  >
-                    LVL {currentLevel}
+                  {/* Rank badge with gaming style */}
+                  <div className="flex flex-col items-end gap-1">
+                    <div 
+                      className="px-3 py-1 font-mono font-bold border-2 bg-black flex items-center gap-1"
+                      style={{ 
+                        borderColor: rankStyle.color,
+                        color: rankStyle.color,
+                        boxShadow: `0 0 10px ${rankStyle.glow}`
+                      }}
+                    >
+                      {currentLevel >= 10 ? <Crown size={12} /> : 
+                       currentLevel >= 8 ? <Trophy size={12} /> :
+                       currentLevel >= 6 ? <Shield size={12} /> :
+                       <Star size={12} />}
+                      LVL {currentLevel}
+                    </div>
+                    <div 
+                      className="text-xs font-mono font-bold"
+                      style={{ color: rankStyle.color }}
+                    >
+                      {rankStyle.name}
+                    </div>
                   </div>
                 </div>
               </div>
               
-              {/* Skill Tree Nodes */}
+              {/* Skill Tree Nodes - Gaming styled */}
               <div className="p-6 relative z-10">
                 <div className="grid grid-cols-5 gap-2 mb-6">
                   {Array.from({ length: 10 }, (_, index) => {
@@ -159,25 +188,49 @@ const SkillTree = ({ categories, tabColor, tabColorRgb }) => {
                         transition={{ delay: index * 0.05 }}
                         className={`
                           relative w-12 h-12 border-2 flex items-center justify-center font-mono font-bold text-xs
+                          transition-all duration-300
                           ${isUnlocked 
-                            ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-green-400 text-green-400' 
-                            : 'bg-gray-800 border-gray-600 text-gray-600'
+                            ? 'bg-black shadow-inner' 
+                            : 'bg-gray-900'
                           }
                           ${isCurrent ? 'animate-pulse' : ''}
-                          ${isMilestone ? 'border-yellow-400' : ''}
                         `}
                         style={{
-                          borderColor: isUnlocked ? category.color : undefined,
-                          color: isUnlocked ? category.color : undefined,
-                          boxShadow: isUnlocked ? `0 0 10px ${category.color}40` : undefined
+                          borderColor: isUnlocked ? category.color : '#4B5563',
+                          color: isUnlocked ? category.color : '#6B7280',
+                          boxShadow: isUnlocked ? `0 0 15px ${category.color}60, inset 0 0 10px ${category.color}20` : '0 0 3px rgba(75, 85, 99, 0.3)',
+                          backgroundColor: isUnlocked ? '#000000' : '#1F2937'
                         }}
                       >
                         {isMilestone && isUnlocked ? (
-                          <Trophy size={16} />
+                          <motion.div
+                            animate={{ 
+                              scale: [1, 1.2, 1],
+                              rotate: [0, 180, 360]
+                            }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              repeatType: 'loop'
+                            }}
+                          >
+                            {nodeLevel === 10 ? <Crown size={16} /> : <Trophy size={16} />}
+                          </motion.div>
                         ) : isUnlocked ? (
-                          <Star size={12} />
+                          <motion.div
+                            animate={{ 
+                              scale: isCurrent ? [1, 1.1, 1] : 1
+                            }}
+                            transition={{ 
+                              duration: 1.5,
+                              repeat: isCurrent ? Infinity : 0,
+                              repeatType: 'loop'
+                            }}
+                          >
+                            <Zap size={12} />
+                          </motion.div>
                         ) : (
-                          nodeLevel
+                          <div className="text-gray-500">{nodeLevel}</div>
                         )}
                         
                         {/* Connecting line to next node */}
@@ -185,10 +238,11 @@ const SkillTree = ({ categories, tabColor, tabColorRgb }) => {
                           <div 
                             className={`
                               absolute top-1/2 -right-1 w-2 h-0.5 transform -translate-y-1/2
-                              ${currentLevel > nodeLevel ? category.color.replace('#', 'bg-') : 'bg-gray-600'}
+                              transition-all duration-500
                             `}
                             style={{
-                              backgroundColor: currentLevel > nodeLevel ? category.color : undefined
+                              backgroundColor: currentLevel > nodeLevel ? category.color : '#4B5563',
+                              boxShadow: currentLevel > nodeLevel ? `0 0 4px ${category.color}` : 'none'
                             }}
                           />
                         )}
@@ -197,42 +251,76 @@ const SkillTree = ({ categories, tabColor, tabColorRgb }) => {
                   })}
                 </div>
                 
-                {/* Progress Bar */}
-                <div className="space-y-2">
+                {/* Progress Bar - Gaming styled */}
+                <div className="space-y-3">
                   <div className="flex justify-between text-xs font-mono">
                     <span className="text-gray-400">
-                      {currentLevel < 10 ? `TO LEVEL ${currentLevel + 1}` : 'MAX LEVEL'}
+                      {currentLevel < 10 ? `NEXT RANK: LEVEL ${currentLevel + 1}` : 'MAX LEVEL ACHIEVED'}
                     </span>
                     <span style={{ color: category.color }}>
                       {currentLevel < 10 ? `${progress.current}/${progress.max} XP` : 'MASTERED'}
                     </span>
                   </div>
                   
-                  <div className="w-full bg-gray-700 h-3 border border-gray-600">
+                  {/* XP Bar with gaming effects */}
+                  <div className="relative">
                     <div 
-                      className="h-full transition-all duration-500 relative overflow-hidden"
-                      style={{ 
-                        width: `${progress.percentage}%`,
-                        backgroundColor: category.color
-                      }}
+                      className="w-full h-4 border-2 bg-gray-900"
+                      style={{ borderColor: category.color }}
                     >
-                      {/* Animated scan line */}
                       <div 
-                        className="absolute inset-0 opacity-50"
-                        style={{
-                          background: `linear-gradient(90deg, transparent 0%, white 50%, transparent 100%)`,
-                          animation: 'scan 2s linear infinite'
+                        className="h-full transition-all duration-1000 relative overflow-hidden"
+                        style={{ 
+                          width: `${progress.percentage}%`,
+                          background: `linear-gradient(90deg, ${category.color}, ${category.color}CC, ${category.color})`
                         }}
-                      />
+                      >
+                        {/* Animated scan line */}
+                        <motion.div 
+                          className="absolute inset-0 opacity-60"
+                          style={{
+                            background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)`
+                          }}
+                          animate={{ x: ['-100%', '200%'] }}
+                          transition={{ 
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: 'loop',
+                            ease: 'linear'
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* XP text overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-mono font-bold text-white drop-shadow-lg">
+                        {progress.percentage}%
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="text-center">
-                    <div className="text-lg font-mono font-bold" style={{ color: category.color }}>
-                      {category.xp || 0} TOTAL XP
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {Math.floor((category.xp || 0) / 60)}h {(category.xp || 0) % 60}m grinded
+                  {/* Stats - Gaming themed */}
+                  <div className="bg-black border-2 p-3" style={{ borderColor: category.color }}>
+                    <div className="grid grid-cols-2 gap-3 text-center">
+                      <div>
+                        <div 
+                          className="text-xl font-mono font-bold"
+                          style={{ color: category.color }}
+                        >
+                          {category.xp || 0}
+                        </div>
+                        <div className="text-xs text-gray-400 font-mono">TOTAL XP</div>
+                      </div>
+                      <div>
+                        <div 
+                          className="text-xl font-mono font-bold"
+                          style={{ color: category.color }}
+                        >
+                          {Math.floor((category.xp || 0) / 60)}h {(category.xp || 0) % 60}m
+                        </div>
+                        <div className="text-xs text-gray-400 font-mono">TIME GRINDED</div>
+                      </div>
                     </div>
                   </div>
                 </div>

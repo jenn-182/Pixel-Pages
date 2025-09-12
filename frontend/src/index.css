@@ -42,9 +42,9 @@ body {
   background: #555;
 }
 
-/* ADD this animation to your CSS: */
+/* ADD this animation: */
 
 @keyframes scan {
   0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  100% { transform: translateX(200%); }
 }
