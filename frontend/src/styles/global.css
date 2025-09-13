@@ -59,3 +59,74 @@ textarea::-webkit-grammar-error {
   text-decoration: underline red !important;
   text-decoration-thickness: 1px !important;
 }
+
+/* Translucent panels for a sleek look */
+.translucent-panel {
+  background-color: rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(2px);
+  border: 2px solid;
+  box-shadow: 0 0 20px rgba(var(--tab-color-rgb), 0.3);
+}
+
+.translucent-panel-darker {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(2px);
+  border: 2px solid;
+  box-shadow: 0 0 20px rgba(var(--tab-color-rgb), 0.3);
+}
+
+.translucent-container {
+  background-color: rgba(0, 0, 0, 0.10) !important;
+  backdrop-filter: blur(1px);
+  min-height: 100vh;
+}
+
+/* New solid panel styles for clean, professional look */
+.solid-panel {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid white !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.solid-panel-darker {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border: 2px solid white !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.solid-panel-light {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border: 2px solid white !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+/* Tab container with translucent background */
+.tab-container {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(2px);
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+/* Content wrapper for main tab content */
+.content-wrapper {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid white !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+  position: relative;
+}
+
+/* Header sections for tabs */
+.tab-header {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border-bottom: 2px solid white !important;
+  padding: 1.5rem;
+}
+
+/* Form sections and input areas */
+.form-section {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border: 2px solid white !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+  padding: 1rem;
+}

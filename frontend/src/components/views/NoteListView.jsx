@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, ArrowLeft, Search, Plus, Edit } from 'lucide-react';
+import { FileText, ArrowLeft, Search, Plus, Edit3, Eye, Trash2 } from 'lucide-react';
+import NoteViewModal from '../notes/NoteViewModal';
 
 const NoteListView = ({ 
   notes, 
   onBack, 
   onCreateNote, 
   onEditNote,
+  onDeleteNote,
   folders = [],
   notebooks = []
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('updated'); // updated, created, title
-  const [sortOrder, setSortOrder] = useState('desc');
-
-  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
-  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
+  const [isNoteViewModalOpen, setIsNoteViewModalOpen] = useState(false);
+  const [viewingNote, setViewingNote] = useState(null);
 
   // Helper function to safely handle tags
   const getNoteTagsAsString = (tags) => {
@@ -32,7 +31,7 @@ const NoteListView = ({
     return '';
   };
 
-  // Filter and sort notes
+  // Filter notes
   const filteredNotes = notes.filter(note => {
     if (!searchTerm) return true;
     
@@ -43,28 +42,6 @@ const NoteListView = ({
     const tagsMatch = getNoteTagsAsString(note.tags).toLowerCase().includes(searchLower);
     
     return titleMatch || contentMatch || tagsMatch;
-  }).sort((a, b) => {
-    let valueA, valueB;
-    
-    switch (sortBy) {
-      case 'title':
-        valueA = a.title.toLowerCase();
-        valueB = b.title.toLowerCase();
-        break;
-      case 'created':
-        valueA = new Date(a.createdAt || '2020-01-01');
-        valueB = new Date(b.createdAt || '2020-01-01');
-        break;
-      case 'updated':
-      default:
-        valueA = new Date(a.updatedAt || a.createdAt || '2020-01-01');
-        valueB = new Date(b.updatedAt || b.createdAt || '2020-01-01');
-        break;
-    }
-
-    if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
-    if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
-    return 0;
   });
 
   const getTags = (tags) => {
@@ -74,265 +51,224 @@ const NoteListView = ({
     return [];
   };
 
+  const handleViewNote = (note) => {
+    setViewingNote(note);
+    setIsNoteViewModalOpen(true);
+  };
+
+  const handleEditNoteFromView = () => {
+    const noteToEdit = viewingNote;
+    setIsNoteViewModalOpen(false);
+    setViewingNote(null);
+    onEditNote(noteToEdit);
+  };
+
+  const handleDeleteNoteFromView = async () => {
+    if (viewingNote && onDeleteNote) {
+      await onDeleteNote(viewingNote.id);
+      setIsNoteViewModalOpen(false);
+      setViewingNote(null);
+    }
+  };
+
+  const handleDeleteNoteFromCard = async (note) => {
+    if (window.confirm(`Are you sure you want to delete "${note.title}"?`)) {
+      try {
+        await onDeleteNote(note.id);
+      } catch (error) {
+        console.error('Failed to delete note:', error);
+        alert('Failed to delete note. Please try again.');
+      }
+    }
+  };
+
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={onBack}
-            className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
-            style={{
-              borderColor: tabColor,
-              color: tabColor,
-              boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.borderColor = tabColor;
-              e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.borderColor = tabColor;
-              e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
-            }}
-          >
-            <div className="flex items-center gap-2">
-              <ArrowLeft size={16} />
-              <span>BACK</span>
+      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg"
+           style={{
+             backgroundColor: 'rgba(0, 0, 0, 0.4)'
+           }}>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={onBack}
+                className="bg-black border-2 border-white p-2 font-mono font-bold text-white hover:scale-105 transition-transform"
+                title="Back to Storage Vault"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div>
+                <h1 className="font-mono font-bold text-white text-2xl">ALL LOG ENTRIES</h1>
+                <p className="font-mono text-sm text-gray-400">
+                  Complete log entry management interface
+                </p>
+              </div>
             </div>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                 style={{ backgroundColor: tabColor }} />
-          </button>
-          
-          <div className="flex-1">
-            <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-              <div 
+            
+            <div className="flex items-center gap-4 text-sm font-mono text-gray-400">
+              <span>
+                <span className="text-white font-bold">{filteredNotes.length}</span> 
+                / {notes.length} LOGS
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-4 items-start">
+            <button
+              onClick={onCreateNote}
+              className="bg-black border-2 border-white px-4 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center gap-2"
+            >
+              <Plus size={16} />
+              <FileText size={16} />
+              <span>NEW LOG</span>
+            </button>
+            
+            <div className="flex-1 relative">
+              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search log entries..."
+                className="w-full pl-10 pr-3 py-2 bg-black border-2 border-gray-600 text-white font-mono text-sm focus:border-white transition-colors"
               />
-              ALL PLAYER LOGS
-            </h1>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Controls */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
-        style={{
-          borderColor: tabColor,
-          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-        }}
-      >
-        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        
-        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between relative z-10">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                    style={{ color: tabColor }} size={20} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search player logs..."
-              className="w-full bg-gray-900 border-2 border-gray-600 text-white pl-10 pr-4 py-2 font-mono text-sm focus:outline-none transition-colors duration-200"
-              style={{ 
-                color: '#fff'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = tabColor;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#4B5563';
-              }}
-            />
-          </div>
-
-          {/* Sort Controls */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold" style={{ color: tabColor }}>SORT BY:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-900 border-2 border-gray-600 text-white px-2 py-1 text-xs font-mono focus:outline-none"
-                style={{
-                  focusBorderColor: tabColor
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = tabColor;
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#4B5563';
-                }}
-              >
-                <option value="updated">Last Updated</option>
-                <option value="created">Date Created</option>
-                <option value="title">Log Title</option>
-              </select>
-            </div>
-
-            <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="transition-colors duration-200 p-1 border"
-              style={{
-                color: tabColor,
-                borderColor: tabColor
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.color = tabColor;
-                e.target.style.borderColor = tabColor;
-              }}
-              title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
-            >
-              {sortOrder === 'asc' ? '↑' : '↓'}
-            </button>
-
-            <button
-              onClick={onCreateNote}
-              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
-              style={{
-                borderColor: tabColor,
-                color: tabColor,
-                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Plus size={16} />
-                <span>NEW LOG</span>
-              </div>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                   style={{ backgroundColor: tabColor }} />
-            </button>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Notes Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-        style={{
-          borderColor: tabColor,
-          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-        }}
-      >
-        <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        
+      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
+           style={{
+             backgroundColor: 'rgba(0, 0, 0, 0.4)'
+           }}>
         <div className="relative z-10">
-          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            PLAYER LOG ENTRIES
-            <span className="ml-3 text-sm" style={{ color: tabColor }}>
-              [{filteredNotes.length}]
-            </span>
-          </h3>
-
           {filteredNotes.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredNotes.map((note, index) => {
-                const tagsArray = getTags(note.tags);
+              {filteredNotes.map((note) => {
                 const noteColor = note.color || note.colorCode || '#4ADE80';
+                const rgbColor = noteColor.startsWith('#') 
+                  ? `${parseInt(noteColor.slice(1, 3), 16)}, ${parseInt(noteColor.slice(3, 5), 16)}, ${parseInt(noteColor.slice(5, 7), 16)}`
+                  : '74, 222, 128';
                 
-                const hexToRgb = (hex) => {
-                  if (!hex || !hex.startsWith('#')) return '74, 222, 128';
-                  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                  return result ? 
-                    `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-                    '74, 222, 128';
-                };
-                
-                const rgbColor = hexToRgb(noteColor);
-                
+                const tagsArray = getTags(note.tags);
+
                 return (
                   <motion.div
                     key={note.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                    className="bg-black bg-opacity-60 border-2 border-white p-4 cursor-pointer group relative transition-all duration-300 rounded-lg"
                     style={{
-                      borderColor: noteColor,
-                      boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                      boxShadow: `0 0 25px rgba(${rgbColor}, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)`
                     }}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -2,
-                      boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                      boxShadow: `0 0 40px rgba(${rgbColor}, 1), 4px 4px 0px 0px rgba(0,0,0,1)`
                     }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => onEditNote(note)}
+                    onClick={() => handleViewNote(note)}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <FileText size={24} style={{ color: noteColor }} />
-                      <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                        {tagsArray.length} TAGS
+                      <div className="text-xs font-mono text-gray-400 bg-black px-2 py-1 border border-white">
+                        LOG
                       </div>
                     </div>
+                    
                     <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
                       {note.title}
                     </h4>
-                    <p className="text-xs text-gray-400 mb-3">
+                    
+                    <p className="text-xs text-gray-400 mb-3 line-clamp-2">
                       {note.content && note.content.length > 100 
                         ? `${note.content.substring(0, 100)}...` 
-                        : note.content}
+                        : note.content || 'No content available'}
                     </p>
-                    
-                    {/* Classification Tags */}
-                    {tagsArray.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {tagsArray.slice(0, 2).map((tag, tagIndex) => (
-                          <span
-                            key={tagIndex}
-                            className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono"
-                            style={{ color: tabColor }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {tagsArray.length > 2 && (
-                          <span className="text-xs text-gray-500 font-mono px-2 py-1">
-                            +{tagsArray.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Edit button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditNote(note);
-                      }}
-                      className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ color: tabColor }}
-                      title="Edit log entry"
-                    >
-                      <Edit size={14} />
-                    </button>
+
+                    <div className="text-xs text-gray-400 mb-2">
+                      {new Date(note.createdAt || note.updatedAt).toLocaleDateString()}
+                    </div>
+
+                    <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewNote(note);
+                        }}
+                        className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
+                        title="View log entry"
+                      >
+                        <Eye size={14} />
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditNote(note);
+                        }}
+                        className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
+                        title="Edit log entry"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+
+                      {onDeleteNote && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNoteFromCard(note);
+                          }}
+                          className="p-1.5 bg-black hover:bg-red-600 border border-white rounded-md transition-colors text-gray-400 hover:text-red-400"
+                          title="Delete log entry"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
                   </motion.div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-400 font-mono">
-              {searchTerm ? 'No logs match your search criteria.' : 'No player logs found.'}
+            <div className="bg-black bg-opacity-60 border border-white p-8 text-center rounded-lg">
+              {searchTerm ? (
+                <>
+                  <Search size={48} className="text-gray-500 mx-auto mb-3" />
+                  <p className="text-gray-400 font-mono mb-2">
+                    No log entries found matching "{searchTerm}"
+                  </p>
+                  <p className="text-xs text-gray-500 font-mono">
+                    Try adjusting your search terms
+                  </p>
+                </>
+              ) : (
+                <>
+                  <FileText size={48} className="text-gray-500 mx-auto mb-3" />
+                  <p className="text-gray-400 font-mono mb-2">
+                    No log entries found
+                  </p>
+                  <p className="text-xs text-gray-500 font-mono">
+                    Create your first log entry to begin storing information
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
+
+      {/* Note View Modal */}
+      <NoteViewModal
+        isOpen={isNoteViewModalOpen}
+        onClose={() => setIsNoteViewModalOpen(false)}
+        onEdit={handleEditNoteFromView}
+        onDelete={handleDeleteNoteFromView}
+        note={viewingNote}
+      />
     </div>
   );
 };

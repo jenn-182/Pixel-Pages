@@ -7,6 +7,7 @@ import useFolders from '../../hooks/useFolders';
 import useNotebooks from '../../hooks/useNotebooks';
 import useNotes from '../../hooks/useNotes';
 import NoteModal from '../notes/NoteModal';
+import NoteViewModal from '../notes/NoteViewModal';
 import FolderModal from '../modals/FolderModal';
 import NotebookModal from '../modals/NotebookModal';
 import FolderView from '../views/FolderView';
@@ -22,12 +23,16 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [isNotebookModalOpen, setIsNotebookModalOpen] = useState(false);
+  const [isNoteViewModalOpen, setIsNoteViewModalOpen] = useState(false);
+  const [viewingNote, setViewingNote] = useState(null);
   const [editingFolder, setEditingFolder] = useState(null);
   const [editingNotebook, setEditingNotebook] = useState(null);
   const [editingNote, setEditingNote] = useState(null);
   const [currentView, setCurrentView] = useState('library');
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedNotebook, setSelectedNotebook] = useState(null);
+  const [defaultFolderId, setDefaultFolderId] = useState(null);
+  const [defaultNotebookId, setDefaultNotebookId] = useState(null);
   
   // Use the hooks
   const { folders, loading: foldersLoading, createFolder, updateFolder, deleteFolder } = useFolders();
@@ -123,6 +128,26 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
     setIsCreateNoteModalOpen(true);
   };
 
+  const handleViewNote = (note) => {
+    setViewingNote(note);
+    setIsNoteViewModalOpen(true);
+  };
+
+  const handleEditNoteFromView = () => {
+    const noteToEdit = viewingNote;
+    setIsNoteViewModalOpen(false);
+    setViewingNote(null);
+    handleEditNote(noteToEdit);
+  };
+
+  const handleDeleteNoteFromView = async () => {
+    if (viewingNote) {
+      await handleDeleteNote(viewingNote.id);
+      setIsNoteViewModalOpen(false);
+      setViewingNote(null);
+    }
+  };
+
   const handleCreateNoteSubmit = async (noteData) => {
     try {
       console.log('Archiving log entry:', { editingNote, noteData });
@@ -162,9 +187,16 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
   };
 
   const handleBackToLibrary = () => {
+    // Clear all states when going back
     setCurrentView('library');
     setSelectedFolder(null);
     setSelectedNotebook(null);
+    setEditingNote(null);
+    setEditingNotebook(null);
+    setEditingFolder(null);
+    setIsCreateNoteModalOpen(false);
+    setIsNotebookModalOpen(false);
+    setIsFolderModalOpen(false);
   };
 
   const handleViewAllNotes = () => {
@@ -261,18 +293,90 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
 
   // View routing remains the same but with updated colors...
   if (currentView === 'folder' && selectedFolder) {
+    // Get notebooks in this folder
+    const folderNotebooks = notebooks.filter(notebook => notebook.folderId === selectedFolder.id);
+    const notebookIds = folderNotebooks.map(nb => nb.id);
+    
+    // Get notes that are either:
+    // 1. Directly assigned to this folder (folderId matches)
+    // 2. Belong to notebooks within this folder (notebookId matches)
+    const folderNotes = notes.filter(note => 
+      note.folderId === selectedFolder.id || 
+      (note.notebookId && notebookIds.includes(note.notebookId))
+    );
+    
     return (
       <div className="library-tab-container p-6">
         <FolderView 
           folder={selectedFolder}
           onBack={handleBackToLibrary}
-          onCreateNote={handleCreateNoteSubmit}
-          onEditNote={handleCreateNoteSubmit}
+          onCreateNote={() => {
+            setEditingNote(null);
+            setDefaultFolderId(selectedFolder.id);  // Set default folder
+            setIsCreateNoteModalOpen(true);
+          }}
+          onEditNote={handleEditNote}
+          onDeleteNote={handleDeleteNote}
+          onDeleteNotebook={handleDeleteNotebook}
           onOpenNotebook={handleOpenNotebook}
-          onCreateNotebook={handleNotebookSave}
+          onCreateNotebook={() => {
+            setEditingNotebook(null);
+            setDefaultFolderId(selectedFolder.id);  // Set default folder
+            setIsNotebookModalOpen(true);
+          }}
+          onEditNotebook={handleEditNotebook}
+          folders={folders}
+          notebooks={folderNotebooks}
+          notes={folderNotes}
+        />
+        
+        {/* Modals - Always render regardless of view */}
+        <NoteViewModal
+          isOpen={isNoteViewModalOpen}
+          onClose={() => setIsNoteViewModalOpen(false)}
+          onEdit={handleEditNoteFromView}
+          onDelete={handleDeleteNoteFromView}
+          note={viewingNote}
+        />
+
+        <NoteModal
+          isOpen={isCreateNoteModalOpen}
+          onClose={() => {
+            setIsCreateNoteModalOpen(false);
+            setEditingNote(null);
+            setDefaultFolderId(null);
+            setDefaultNotebookId(null);
+          }}
+          onSave={handleCreateNoteSubmit}
+          onDelete={handleDeleteNote}
           folders={folders}
           notebooks={notebooks}
-          notes={notes}
+          existingNote={editingNote}
+          defaultFolderId={defaultFolderId}
+          defaultNotebookId={defaultNotebookId}
+        />
+
+        <FolderModal
+          isOpen={isFolderModalOpen}
+          onClose={() => {
+            setIsFolderModalOpen(false);
+            setEditingFolder(null);
+          }}
+          onSave={handleFolderSave}
+          existingFolder={editingFolder}
+        />
+
+        <NotebookModal
+          isOpen={isNotebookModalOpen}
+          onClose={() => {
+            setIsNotebookModalOpen(false);
+            setEditingNotebook(null);
+            setDefaultFolderId(null);
+          }}
+          onSave={handleNotebookSave}
+          existingNotebook={editingNotebook}
+          folders={folders}
+          defaultFolderId={defaultFolderId}
         />
       </div>
     );
@@ -286,10 +390,60 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           onBack={handleBackToLibrary}
           onCreateNote={handleCreateNoteSubmit}
           onEditNote={handleCreateNoteSubmit}
+          onDeleteNote={handleDeleteNote}
           onDeleteNotebook={handleDeleteNotebook}
           folders={folders}
           notebooks={notebooks}
           notes={notes}
+        />
+        
+        {/* Modals - Always render regardless of view */}
+        <NoteViewModal
+          isOpen={isNoteViewModalOpen}
+          onClose={() => setIsNoteViewModalOpen(false)}
+          onEdit={handleEditNoteFromView}
+          onDelete={handleDeleteNoteFromView}
+          note={viewingNote}
+        />
+
+        <NoteModal
+          isOpen={isCreateNoteModalOpen}
+          onClose={() => {
+            setIsCreateNoteModalOpen(false);
+            setEditingNote(null);
+            setDefaultFolderId(null);
+            setDefaultNotebookId(null);
+          }}
+          onSave={handleCreateNoteSubmit}
+          onDelete={handleDeleteNote}
+          folders={folders}
+          notebooks={notebooks}
+          existingNote={editingNote}
+          defaultFolderId={defaultFolderId}
+          defaultNotebookId={defaultNotebookId}
+        />
+
+        <FolderModal
+          isOpen={isFolderModalOpen}
+          onClose={() => {
+            setIsFolderModalOpen(false);
+            setEditingFolder(null);
+          }}
+          onSave={handleFolderSave}
+          existingFolder={editingFolder}
+        />
+
+        <NotebookModal
+          isOpen={isNotebookModalOpen}
+          onClose={() => {
+            setIsNotebookModalOpen(false);
+            setEditingNotebook(null);
+            setDefaultFolderId(null);
+          }}
+          onSave={handleNotebookSave}
+          existingNotebook={editingNotebook}
+          folders={folders}
+          defaultFolderId={defaultFolderId}
         />
       </div>
     );
@@ -306,6 +460,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
             setIsCreateNoteModalOpen(true);
           }}
           onEditNote={handleEditNoteFromList}
+          onDeleteNote={handleDeleteNote}
           folders={folders}
           notebooks={notebooks}
         />
@@ -315,12 +470,16 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           onClose={() => {
             setIsCreateNoteModalOpen(false);
             setEditingNote(null);
+            setDefaultFolderId(null);  // ✅ Reset on close
+            setDefaultNotebookId(null);  // ✅ Reset on close
           }}
           onSave={handleCreateNoteSubmit}
           onDelete={handleDeleteNote}
           folders={folders}
           notebooks={notebooks}
           existingNote={editingNote}
+          defaultFolderId={defaultFolderId}  // ✅ Pass the default folder
+          defaultNotebookId={defaultNotebookId}  // ✅ Pass the default notebook
         />
       </>
     );
@@ -347,10 +506,12 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           onClose={() => {
             setIsNotebookModalOpen(false);
             setEditingNotebook(null);
+            setDefaultFolderId(null);  // ✅ Reset on close
           }}
           onSave={handleNotebookSave}
           existingNotebook={editingNotebook}
           folders={folders}
+          defaultFolderId={defaultFolderId}  // ✅ Pass the default folder
         />
       </>
     );
@@ -366,259 +527,129 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           onEditFolder={handleEditFolder}
           onOpenFolder={handleOpenFolder}
         />
+        
+        {/* Modals */}
+        <FolderModal
+          isOpen={isFolderModalOpen}
+          onClose={() => {
+            setIsFolderModalOpen(false);
+            setEditingFolder(null);
+          }}
+          onSave={handleFolderSave}
+          existingFolder={editingFolder}
+        />
       </div>
     );
   }
 
   return (
     <div className="library-tab-container p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-          <div 
-            className="w-6 h-6 border border-gray-600" 
-            style={{ backgroundColor: tabColor }}
-          />
-          STORAGE VAULT
-        </h1>
-        <p className="text-gray-400 font-mono text-sm">
-          Storage for all player logs, collections, and archive systems.
-        </p>
-      </div>
-      
-      {/* Command Interface - Updated with tab color */}
-      <div className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative"
+      {/* Storage Vault - Simplified */}
+      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg"
            style={{
-             borderColor: tabColor,
-             boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+             backgroundColor: 'rgba(0, 0, 0, 0.4)'
            }}>
-        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        <div className="absolute inset-0 pointer-events-none"
-             style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
-        
         <div className="relative z-10">
-          <div className="flex items-center mb-6">
-            <span className="font-mono font-bold text-white text-2xl">COMMAND INTERFACE</span>
+          {/* Title Row */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="font-mono font-bold text-white text-3xl">STORAGE VAULT</h1>
+              <p className="font-mono text-xs text-gray-400">Storage for logs, collections, and archives</p>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono text-gray-400">
+              <span><span className="text-white font-bold">{folders.length}</span> ARCHIVES</span>
+              <span><span className="text-white font-bold">{notebooks.length}</span> COLLECTIONS</span>
+              <span><span className="text-white font-bold">{notes.length}</span> LOGS</span>
+            </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start justify-between h-32">
-            <div className="w-full lg:w-1/2 flex flex-col justify-end h-full">
-              <p className="font-mono text-sm text-gray-300 mb-4 font-semibold">
-                Create new player log, collection, or archive system.
-              </p>
-              
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 h-12">
-                <button
-                  onClick={() => setIsCreateNoteModalOpen(true)}
-                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
-                  style={{
-                    borderColor: tabColor,
-                    color: tabColor,
-                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
-                  }}
-                >
-                  <div className="absolute inset-0 pointer-events-none"
-                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
-                  <div className="flex items-center justify-center gap-1 h-full">
-                    <Plus size={10} />
-                    <FileText size={12} />
-                    <span className="text-xs">PLAYER LOG</span>
-                  </div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
-                       style={{ backgroundColor: tabColor }} />
-                </button>
+          {/* Controls Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+            <button
+              onClick={() => setIsCreateNoteModalOpen(true)}
+              className="bg-black border border-white px-3 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center justify-center gap-2 text-xs"
+            >
+              <FileText size={14} />
+              <span>NEW LOG</span>
+            </button>
 
-                <button
-                  onClick={() => setIsNotebookModalOpen(true)}
-                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
-                  style={{
-                    borderColor: tabColor,
-                    color: tabColor,
-                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
-                  }}
-                >
-                  <div className="absolute inset-0 pointer-events-none"
-                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
-                  <div className="flex items-center justify-center gap-1 h-full">
-                    <Plus size={10} />
-                    <BookOpen size={12} />
-                    <span className="text-xs">COLLECTION</span>
-                  </div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
-                       style={{ backgroundColor: tabColor }} />
-                </button>
+            <button
+              onClick={() => setIsNotebookModalOpen(true)}
+              className="bg-black border border-white px-3 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center justify-center gap-2 text-xs"
+            >
+              <BookOpen size={14} />
+              <span>NEW COLLECTION</span>
+            </button>
 
-                <button
-                  onClick={() => setIsFolderModalOpen(true)}
-                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
-                  style={{
-                    borderColor: tabColor,
-                    color: tabColor,
-                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
-                  }}
-                >
-                  <div className="absolute inset-0 pointer-events-none"
-                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
-                  <div className="flex items-center justify-center gap-1 h-full">
-                    <Plus size={10} />
-                    <Folder size={12} />
-                    <span className="text-xs">ARCHIVE</span>
-                  </div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
-                       style={{ backgroundColor: tabColor }} />
-                </button>
+            <button
+              onClick={() => setIsFolderModalOpen(true)}
+              className="bg-black border border-white px-3 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center justify-center gap-2 text-xs"
+            >
+              <Folder size={14} />
+              <span>NEW ARCHIVE</span>
+            </button>
 
-                <button
-                  onClick={async () => {
-                    try {
-                      console.log('Exporting all intelligence from Archive Terminal');
-                      
-                      const response = await fetch(`/api/notes/export/all?username=user`);
-                      
-                      if (response.ok) {
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `intelligence_export_${new Date().toISOString().slice(0, 10)}.md`;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
-                        
-                        showNotification('Intelligence data exported successfully! Check your Downloads folder.', 'success');
-                      } else {
-                        throw new Error('Export failed');
-                      }
-                    } catch (error) {
-                      console.error('Export error:', error);
-                      showNotification('Export failed. Please try again later.', 'error');
-                    }
-                  }}
-                  className="bg-black border px-3 py-0.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden h-full"
-                  style={{
-                    borderColor: tabColor,
-                    color: tabColor,
-                    boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.borderColor = tabColor;
-                    e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
-                  }}
-                >
-                  <div className="absolute inset-0 pointer-events-none"
-                       style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
-                  <div className="flex items-center justify-center gap-1 h-full">
-                    <Download size={12} />
-                    <span className="text-xs">EXPORT</span>
-                  </div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
-                       style={{ backgroundColor: tabColor }} />
-                </button>
-              </div>
-            </div>
-            
-            <div className="bg-black border p-4 relative w-full lg:w-1/2 h-full flex flex-col overflow-hidden"
-                 style={{
-                   borderColor: tabColor,
-                   boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-3 h-3" style={{ backgroundColor: tabColor }} />
-                  <span className="font-mono text-sm font-bold" style={{ color: tabColor }}>SEARCH PROTOCOL</span>
-                </div>
-                
-                <div className="relative mb-3 flex-1 flex flex-col justify-center min-h-0">
-                  <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                          style={{ color: tabColor }} />
-                  <input
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search storage vault..."
-                    className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 text-white font-mono text-sm transition-colors"
-                    style={{ 
-                      color: '#fff'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = tabColor;
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#4B5563';
-                    }}
-                  />
-                </div>
-                
-                <div className="text-xs font-mono text-gray-400 flex-shrink-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span>{folders.length} ARCHIVES</span>
-                      <span>{notebooks.length} COLLECTIONS</span>
-                      <span>{notes.length} LOGS</span>
-                    </div>
-                    <div style={{ color: tabColor }}>
-                      {searchTerm ? 'SCANNING...' : 'READY'}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <button
+              onClick={async () => {
+                try {
+                  console.log('Exporting all intelligence from Archive Terminal');
+                  
+                  const response = await fetch(`/api/notes/export/all?username=user`);
+                  
+                  if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `intelligence_export_${new Date().toISOString().slice(0, 10)}.md`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showNotification('Intelligence data exported successfully! Check your Downloads folder.', 'success');
+                  } else {
+                    throw new Error('Export failed');
+                  }
+                } catch (error) {
+                  console.error('Export error:', error);
+                  showNotification('Export failed. Please try again later.', 'error');
+                }
+              }}
+              className="bg-black border border-white px-3 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center justify-center gap-2 text-xs"
+            >
+              <Download size={14} />
+              <span>EXPORT ALL</span>
+            </button>
+
+            <div className="relative">
+              <Search size={14} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search..."
+                className="w-full pl-8 pr-3 py-2 bg-black border border-gray-600 text-white font-mono text-xs focus:border-white transition-colors"
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content Sections - Updated with tab color */}
+      {/* Content Sections remain the same */}
       <div className="space-y-8">
         {/* Archive Systems Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
           style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+            backgroundColor: 'rgba(0, 0, 0, 0.4)'
           }}
         >
-          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none"
-               style={{ borderColor: tabColor }} />
-          <div className="absolute inset-0 pointer-events-none"
-               style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
-          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                <h3 className="text-xl font-mono font-bold text-white flex items-center">
                   ARCHIVES ({folders.length})
                 </h3>
                 <p className="text-sm font-mono text-gray-400">
@@ -627,29 +658,12 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
               </div>
               <button
                 onClick={handleViewAllFolders}
-className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
-                style={{
-                  borderColor: tabColor,
-                  color: tabColor,
-                  boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
-                }}
+                className="bg-black border-2 border-white px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
               >
-                <div className="absolute inset-0 pointer-events-none"
-                     style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
                   <span>VIEW ALL</span>
                 </div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
-                     style={{ backgroundColor: tabColor }} />
               </button>
             </div>
             
@@ -666,27 +680,31 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                   return (
                     <motion.div
                       key={folder.id}
-                      className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                      className="border-2 border-white p-4 cursor-pointer group relative transition-all duration-300 rounded-lg"
                       style={{
-                        borderColor: folderColor,
-                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                        boxShadow: `0 0 25px rgba(${rgbColor}, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)`,
                       }}
                       whileHover={{ 
                         scale: 1.02, 
                         y: -2,
-                        boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                        boxShadow: `0 0 40px rgba(${rgbColor}, 1), 4px 4px 0px 0px rgba(0,0,0,1)`
                       }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleOpenFolder(folder)}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <Folder size={24} style={{ color: folderColor }} />
-                        <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                          {itemCount} ITEMS
+                        <div className="text-xs font-mono text-gray-400 bg-black px-2 py-1 border border-white">
+                          ARCHIVE
                         </div>
                       </div>
                       <h4 className="font-mono font-bold text-white mb-2 truncate">{folder.name}</h4>
-                      <p className="text-xs text-gray-400 mb-3">{folder.description || 'Access archive contents'}</p>
+                      <p className="text-xs text-gray-400 mb-3 line-clamp-2">{folder.description || 'Access archive contents'}</p>
+                      
+                      <div className="text-xs text-gray-400 mb-2">
+                        {itemCount} ITEMS
+                      </div>
                     
                       <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -694,8 +712,7 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                             e.stopPropagation();
                             handleEditFolder(folder);
                           }}
-                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
-                          style={{ color: tabColor }}
+                          className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
                           title="Modify archive"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -709,7 +726,7 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                             e.stopPropagation();
                             handleDeleteFolder(folder.id);
                           }}
-                          className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                          className="p-1.5 bg-black hover:bg-red-600 border border-white rounded-md transition-colors text-gray-400 hover:text-red-400"
                           title="Delete archive"
                         >
                           <Trash2 size={14} />
@@ -720,7 +737,8 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                 })}
               </div>
             ) : (
-              <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+              <div className="border border-white p-8 text-center rounded-lg"
+                   style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
                 <Folder size={48} className="text-gray-500 mx-auto mb-3" />
                 <p className="text-gray-400 font-mono">No archive systems found. Initialize first archive storage.</p>
               </div>
@@ -733,21 +751,15 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
           style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+            backgroundColor: 'rgba(0, 0, 0, 0.4)'
           }}
         >
-          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none"
-               style={{ borderColor: tabColor }} />
-          <div className="absolute inset-0 pointer-events-none"
-               style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
-          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                <h3 className="text-xl font-mono font-bold text-white flex items-center">
                   COLLECTIONS ({notebooks.length})
                 </h3>
                 <p className="text-sm font-mono text-gray-400">
@@ -756,29 +768,12 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
               </div>
               <button
                 onClick={handleViewAllNotebooks}
-className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
-                style={{
-                  borderColor: tabColor,
-                  color: tabColor,
-                  boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
-                }}
+                className="bg-black border-2 border-white px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
               >
-                <div className="absolute inset-0 pointer-events-none"
-                     style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
                   <span>VIEW ALL</span>
                 </div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
-                     style={{ backgroundColor: tabColor }} />
               </button>
             </div>
             
@@ -795,27 +790,31 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                   return (
                     <motion.div
                       key={notebook.id}
-                      className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                      className="border-2 border-white p-4 cursor-pointer group relative transition-all duration-300 rounded-lg"
                       style={{
-                        borderColor: notebookColor,
-                        boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                        boxShadow: `0 0 25px rgba(${rgbColor}, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)`,
                       }}
                       whileHover={{ 
                         scale: 1.02, 
                         y: -2,
-                        boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                        boxShadow: `0 0 40px rgba(${rgbColor}, 1), 4px 4px 0px 0px rgba(0,0,0,1)`
                       }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleOpenNotebook(notebook)}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <BookOpen size={24} style={{ color: notebookColor }} />
-                        <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                          {noteCount} LOGS
+                        <div className="text-xs font-mono text-gray-400 bg-black px-2 py-1 border border-white">
+                          COLLECTION
                         </div>
                       </div>
                       <h4 className="font-mono font-bold text-white mb-2 truncate">{notebook.name}</h4>
-                      <p className="text-xs text-gray-400 mb-3">{notebook.description || 'Access collection database'}</p>
+                      <p className="text-xs text-gray-400 mb-3 line-clamp-2">{notebook.description || 'Access collection database'}</p>
+                      
+                      <div className="text-xs text-gray-400 mb-2">
+                        {noteCount} LOGS
+                      </div>
                     
                       <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -823,8 +822,7 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                             e.stopPropagation();
                             handleEditNotebook(notebook);
                           }}
-                          className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
-                          style={{ color: tabColor }}
+                          className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
                           title="Edit collection"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -838,7 +836,7 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                             e.stopPropagation();
                             handleDeleteNotebook(notebook.id);
                           }}
-                          className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                          className="p-1.5 bg-black hover:bg-red-600 border border-white rounded-md transition-colors text-gray-400 hover:text-red-400"
                           title="Delete collection"
                         >
                           <Trash2 size={14} />
@@ -849,7 +847,8 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                 })}
               </div>
             ) : (
-              <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+              <div className="border border-white p-8 text-center rounded-lg"
+                   style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
                 <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
                 <p className="text-gray-400 font-mono">No log collections found. Deploy first collection to begin.</p>
               </div>
@@ -862,21 +861,15 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
+          className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
           style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+            backgroundColor: 'rgba(0, 0, 0, 0.4)'
           }}
         >
-          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none"
-               style={{ borderColor: tabColor }} />
-          <div className="absolute inset-0 pointer-events-none"
-               style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
-          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                <h3 className="text-xl font-mono font-bold text-white flex items-center">
                   LOG ENTRIES ({notes.length})
                 </h3>
                 <p className="text-sm font-mono text-gray-400">
@@ -885,29 +878,12 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
               </div>
               <button
                 onClick={handleViewAllNotes}
-className="bg-black border px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden"
-                style={{
-                  borderColor: tabColor,
-                  color: tabColor,
-                  boxShadow: `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 8px rgba(${tabColorRgb}, 0.4)`;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 3px rgba(${tabColorRgb}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`;
-                }}
+                className="bg-black border-2 border-white px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
               >
-                <div className="absolute inset-0 pointer-events-none"
-                     style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.08), rgba(${tabColorRgb}, 0.12))` }} />
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
                   <span>VIEW ALL</span>
                 </div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity"
-                     style={{ backgroundColor: tabColor }} />
               </button>
             </div>
             
@@ -925,52 +901,33 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                     return (
                       <motion.div
                         key={note.id}
-                        className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
+                        className="border-2 border-white p-4 cursor-pointer group relative transition-all duration-300 rounded-lg"
                         style={{
-                          borderColor: noteColor,
-                          boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          boxShadow: `0 0 25px rgba(${rgbColor}, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)`,
                         }}
                         whileHover={{ 
                           scale: 1.02, 
                           y: -2,
-                          boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
+                          boxShadow: `0 0 40px rgba(${rgbColor}, 1), 4px 4px 0px 0px rgba(0,0,0,1)`
                         }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleEditNote(note)}
+                        onClick={() => handleViewNote(note)}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <FileText size={24} style={{ color: noteColor }} />
-                          <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                            {tagsArray.length} TAGS
+                          <div className="text-xs font-mono text-gray-400 bg-black px-2 py-1 border border-white">
+                            LOG
                           </div>
                         </div>
                         <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
                           {note.title}
                         </h4>
-                        <p className="text-xs text-gray-400 mb-3">
+                        <p className="text-xs text-gray-400 mb-3 line-clamp-2">
                           {note.content && note.content.length > 100 
                             ? `${note.content.substring(0, 100)}...` 
                             : note.content}
                         </p>
-                      
-                        {tagsArray.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {tagsArray.slice(0, 2).map((tag, tagIndex) => (
-                              <span
-                                key={tagIndex}
-                                className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono"
-                                style={{ color: tabColor }}
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {tagsArray.length > 2 && (
-                              <span className="text-xs text-gray-500 font-mono px-2 py-1">
-                                +{tagsArray.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        )}
                       
                         <div className="text-xs text-gray-400 mb-2">
                           {new Date(note.createdAt || note.updatedAt).toLocaleDateString()}
@@ -980,10 +937,20 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              handleViewNote(note);
+                            }}
+                            className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
+                            title="View log entry"
+                          >
+                            <Eye size={14} />
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleEditNote(note);
                             }}
-                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
-                            style={{ color: tabColor }}
+                            className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
                             title="Edit log entry"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -997,7 +964,7 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                               e.stopPropagation();
                               handleDeleteNote(note.id);
                             }}
-                            className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
+                            className="p-1.5 bg-black hover:bg-red-600 border border-white rounded-md transition-colors text-gray-400 hover:text-red-400"
                             title="Delete log entry"
                           >
                             <Trash2 size={14} />
@@ -1008,27 +975,40 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
                   })}
               </div>
             ) : (
-              <div className="bg-gray-900 border border-gray-600 p-6 text-center">
+              <div className="border border-white p-8 text-center rounded-lg"
+                   style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
                 <FileText size={48} className="text-gray-500 mx-auto mb-3" />
-                <p className="text-gray-400 font-mono">No log entries found. Initialize first player log to begin.</p>
+                <p className="text-gray-400 font-mono">No log entries found. Create your first log entry to begin tracking.</p>
               </div>
             )}
           </div>
         </motion.div>
       </div>
 
-      {/* Modals */}
+      {/* Modals - Always render regardless of view */}
+      <NoteViewModal
+        isOpen={isNoteViewModalOpen}
+        onClose={() => setIsNoteViewModalOpen(false)}
+        onEdit={handleEditNoteFromView}
+        onDelete={handleDeleteNoteFromView}
+        note={viewingNote}
+      />
+
       <NoteModal
         isOpen={isCreateNoteModalOpen}
         onClose={() => {
           setIsCreateNoteModalOpen(false);
           setEditingNote(null);
+          setDefaultFolderId(null);
+          setDefaultNotebookId(null);
         }}
         onSave={handleCreateNoteSubmit}
         onDelete={handleDeleteNote}
         folders={folders}
         notebooks={notebooks}
         existingNote={editingNote}
+        defaultFolderId={defaultFolderId}
+        defaultNotebookId={defaultNotebookId}
       />
 
       <FolderModal
@@ -1046,14 +1026,16 @@ className="bg-black border px-4 py-2 relative group cursor-pointer transition-al
         onClose={() => {
           setIsNotebookModalOpen(false);
           setEditingNotebook(null);
+          setDefaultFolderId(null);
         }}
         onSave={handleNotebookSave}
         existingNotebook={editingNotebook}
         folders={folders}
+        defaultFolderId={defaultFolderId}
       />
     </div>
-
   );
 };
 
 export default LibraryTab;
+                         

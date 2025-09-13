@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Zap, Target, TrendingUp, Award, Clock, BarChart3, X, BookOpen, Briefcase, Code, Palette, PenTool, Search, Calendar, Heart, User } from 'lucide-react';
 
-const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 129', onClose }) => {
+const TimeManagementMatrix = ({ tabColor, tabColorRgb, onClose }) => {
   const [timeRange, setTimeRange] = useState('weekly');
   const [chartData, setChartData] = useState([]);
   const [totalTime, setTotalTime] = useState(0);
@@ -273,7 +273,7 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
               {formatTime(totalTime)}
             </motion.div>
             <motion.div 
-              className="text-base font-mono text-gray-400 tracking-wider leading-tight"
+
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.8 }}
@@ -394,86 +394,66 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-gray-900 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
-      style={{
-        borderColor: tabColor,
-        boxShadow: `0 0 25px ${tabColor}40, 8px 8px 0px 0px rgba(0,0,0,1)`
-      }}
+      className="solid-panel relative rounded-lg"
     >
-      {/* Animated background effects */}
-      <div className="absolute inset-0 opacity-20">
-        <div 
-          className="absolute inset-0 animate-pulse"
-          style={{ 
-            background: `radial-gradient(circle at 20% 20%, ${tabColor}20 0%, transparent 50%),
-                         radial-gradient(circle at 80% 80%, ${tabColor}15 0%, transparent 50%)`
-          }} 
-        />
-      </div>
-
-      {/* Matrix-style border scan */}
-      <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
-           style={{ 
-             borderColor: tabColor,
-             animation: 'borderScan 3s linear infinite'
-           }} />
-
+      {/* Remove all the animated background effects and border scan */}
+      
       <div className="relative z-10">
         {/* Header */}
-        <div 
-          className="px-6 py-4 border-b-2 bg-black bg-opacity-60"
-          style={{ borderColor: tabColor }}
-        >
+        <div className="tab-header">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div>
                 <h2 className="font-mono text-xl font-bold text-white tracking-wider">
                   TIME MATRIX
                 </h2>
-                <p className="font-mono text-xs text-gray-400">
-                  PRODUCTIVITY ANALYSIS
+                <p className="font-mono text-xs text-gray-400 mt-1">
+                  Track your time management and visualize your productivity.
                 </p>
               </div>
             </div>
             
-            {/* Time Range Controls */}
-            <div className="flex gap-1">
-              {ranges.map((range, index) => {
-                const IconComponent = range.icon;
-                return (
-                  <motion.button
-                    key={range.id}
-                    onClick={() => setTimeRange(range.id)}
-                    className={`px-2 py-1 border font-mono text-xs font-bold transition-all relative overflow-hidden ${
-                      timeRange === range.id
-                        ? 'bg-black border-current'
-                        : 'bg-gray-900 border-gray-600 hover:border-gray-500'
-                    }`}
-                    style={{
-                      color: timeRange === range.id ? tabColor : '#9CA3AF',
-                      borderColor: timeRange === range.id ? tabColor : undefined,
-                      boxShadow: timeRange === range.id ? `0 0 10px ${tabColor}40` : undefined
-                    }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <div className="flex items-center gap-1">
-                      <IconComponent size={12} />
-                      <span>{range.label}</span>
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
+            {/* Buttons Container - Time Range Controls and Close Button */}
+            <div className="flex items-center gap-3">
+              {/* Time Range Controls */}
+              <div className="flex gap-1">
+                {ranges.map((range, index) => {
+                  const IconComponent = range.icon;
+                  return (
+                    <motion.button
+                      key={range.id}
+                      onClick={() => setTimeRange(range.id)}
+                      className={`px-2 py-1 border font-mono text-xs font-bold transition-all ${
+                        timeRange === range.id
+                          ? 'bg-black border-white'
+                          : 'bg-gray-900 border-gray-600 hover:border-gray-500'
+                      }`}
+                      style={{
+                        color: timeRange === range.id ? 'white' : '#9CA3AF',
+                        borderColor: timeRange === range.id ? 'white' : undefined,
+                      }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <div className="flex items-center gap-1">
+                        <IconComponent size={12} />
+                        <span>{range.label}</span>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
 
-            <button
-              onClick={onClose}
-              className="p-1 border border-gray-600 hover:border-red-500 transition-colors"
-              style={{ color: '#EF4444' }}
-            >
-              <X size={16} />
-            </button>
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                className="p-1 border border-gray-600 hover:border-red-500 transition-colors"
+                style={{ color: '#EF4444' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -482,7 +462,7 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 items-center">
               
-              {/* Left Column - First half of skills - Wider cards */}
+              {/* Left Column - First half of skills */}
               <div className="lg:col-span-2 space-y-6">
                 {chartData.slice(0, Math.ceil(chartData.length / 2)).map((segment, index) => {
                   const IconComponent = getIconComponent(segment.iconName);
@@ -491,20 +471,15 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
                   return (
                     <motion.div
                       key={`left-${segment.id}`}
-                      className="flex items-center gap-4 p-5 bg-gray-800 border border-gray-700 transition-all duration-200 rounded-lg"
+                      className="solid-panel-light p-4 flex items-center gap-4 transition-all duration-200 rounded-lg"
                       initial={{ opacity: 0, x: -50 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 + 1 }}
-                      style={{
-                        borderColor: segment.color + '40',
-                        boxShadow: `0 0 10px ${segment.color}30`
-                      }}
                     >
                       <div 
-                        className="p-3 rounded-full border-2 bg-gray-900 flex-shrink-0"
+                        className="p-3 rounded-full border-2 bg-black flex-shrink-0"
                         style={{ 
                           borderColor: segment.color,
-                          boxShadow: `0 0 15px ${segment.color}50`
                         }}
                       >
                         <IconComponent size={24} style={{ color: segment.color }} />
@@ -536,7 +511,7 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
                 {generateMatrixChart()}
               </div>
 
-              {/* Right Column - Second half of skills - Wider cards */}
+              {/* Right Column - Second half of skills */}
               <div className="lg:col-span-2 space-y-6">
                 {chartData.slice(Math.ceil(chartData.length / 2)).map((segment, index) => {
                   const IconComponent = getIconComponent(segment.iconName);
@@ -545,20 +520,15 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
                   return (
                     <motion.div
                       key={`right-${segment.id}`}
-                      className="flex items-center gap-4 p-5 bg-gray-800 border border-gray-700 transition-all duration-200 rounded-lg"
+                      className="solid-panel-light p-4 flex items-center gap-4 transition-all duration-200 rounded-lg"
                       initial={{ opacity: 0, x: 50 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 + 1.2 }}
-                      style={{
-                        borderColor: segment.color + '40',
-                        boxShadow: `0 0 10px ${segment.color}30`
-                      }}
                     >
                       <div 
-                        className="p-3 rounded-full border-2 bg-gray-900 flex-shrink-0"
+                        className="p-3 rounded-full border-2 bg-black flex-shrink-0"
                         style={{ 
                           borderColor: segment.color,
-                          boxShadow: `0 0 15px ${segment.color}50`
                         }}
                       >
                         <IconComponent size={24} style={{ color: segment.color }} />
@@ -591,15 +561,12 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 2 }}
-              className="mt-6 pt-4 border-t border-gray-700"
+              className="mt-6 pt-4 border-t border-white"
             >
               <div className="grid grid-cols-4 gap-4 text-center">
-                <div className="p-3 bg-gray-800 border" style={{ borderColor: tabColor + '40' }}>
-                  <Award size={16} className="mx-auto mb-1" style={{ color: tabColor }} />
-                  <div 
-                    className="text-lg font-mono font-bold"
-                    style={{ color: tabColor }}
-                  >
+                <div className="form-section">
+                  <Award size={16} className="mx-auto mb-1 text-white" />
+                  <div className="text-lg font-mono font-bold text-white">
                     {stats.topSkill.toUpperCase()}
                   </div>
                   <div className="text-xs font-mono text-gray-400">
@@ -607,12 +574,9 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
                   </div>
                 </div>
                 
-                <div className="p-3 bg-gray-800 border" style={{ borderColor: tabColor + '40' }}>
-                  <Clock size={16} className="mx-auto mb-1" style={{ color: tabColor }} />
-                  <div 
-                    className="text-lg font-mono font-bold"
-                    style={{ color: tabColor }}
-                  >
+                <div className="form-section">
+                  <Clock size={16} className="mx-auto mb-1 text-white" />
+                  <div className="text-lg font-mono font-bold text-white">
                     {formatTime(stats.avgTime)}
                   </div>
                   <div className="text-xs font-mono text-gray-400">
@@ -620,12 +584,9 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
                   </div>
                 </div>
 
-                <div className="p-3 bg-gray-800 border" style={{ borderColor: tabColor + '40' }}>
-                  <Target size={16} className="mx-auto mb-1" style={{ color: tabColor }} />
-                  <div 
-                    className="text-lg font-mono font-bold"
-                    style={{ color: tabColor }}
-                  >
+                <div className="form-section">
+                  <Target size={16} className="mx-auto mb-1 text-white" />
+                  <div className="text-lg font-mono font-bold text-white">
                     {formatTime(stats.totalTime)}
                   </div>
                   <div className="text-xs font-mono text-gray-400">
@@ -633,12 +594,9 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
                   </div>
                 </div>
 
-                <div className="p-3 bg-gray-800 border" style={{ borderColor: tabColor + '40' }}>
-                  <BarChart3 size={16} className="mx-auto mb-1" style={{ color: tabColor }} />
-                  <div 
-                    className="text-lg font-mono font-bold"
-                    style={{ color: tabColor }}
-                  >
+                <div className="form-section">
+                  <BarChart3 size={16} className="mx-auto mb-1 text-white" />
+                  <div className="text-lg font-mono font-bold text-white">
                     {stats.leastSkill.toUpperCase()}
                   </div>
                   <div className="text-xs font-mono text-gray-400">
@@ -708,15 +666,6 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Custom styles */}
-      <style jsx>{`
-        @keyframes borderScan {
-          0% { border-color: ${tabColor}20; }
-          50% { border-color: ${tabColor}60; }
-          100% { border-color: ${tabColor}20; }
-        }
-      `}</style>
     </motion.div>
   );
 };

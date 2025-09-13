@@ -1,566 +1,407 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Folder, BookOpen, FileText, Plus, Edit, Trash2 } from 'lucide-react';
-import NoteModal from '../notes/NoteModal';
-import NotebookModal from '../modals/NotebookModal';
-import PixelButton from '../PixelButton';
+import { ArrowLeft, Folder, BookOpen, FileText, Plus, Edit3, Trash2, Eye, Search, Archive } from 'lucide-react';
+import NoteViewModal from '../notes/NoteViewModal';
 
-const FolderView = ({ folder, onBack, onCreateNote, onEditNote, onOpenNotebook, onCreateNotebook, onDeleteNotebook, folders, notebooks, notes }) => {
-  const [folderNotes, setFolderNotes] = useState([]);
-  const [folderNotebooks, setFolderNotebooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
-  const [isCreateNotebookModalOpen, setIsCreateNotebookModalOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState(null);
+const FolderView = ({ 
+  folder, 
+  notebooks, 
+  notes, 
+  onBack, 
+  onCreateNotebook, 
+  onCreateNote, 
+  onEditNotebook, 
+  onEditNote, 
+  onDeleteNotebook, 
+  onDeleteNote,
+  onOpenNotebook, // Added this prop for opening notebook view
+  onOpenNote // Added this prop for opening note
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('collections');
+  const [viewingNote, setViewingNote] = useState(null);
+  const [isNoteViewModalOpen, setIsNoteViewModalOpen] = useState(false);
 
-  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
-  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
+  const filteredNotebooks = notebooks.filter(notebook =>
+    notebook.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (notebook.description && notebook.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  useEffect(() => {
-    filterFolderContents();
-  }, [folder.id, notes, notebooks]);
+  const filteredNotes = notes.filter(note =>
+    note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (note.content && note.content.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  const filterFolderContents = () => {
-    try {
-      setLoading(true);
-      
-      // Filter notes that belong to this folder
-      const filteredNotes = notes.filter(note => note.folderId === folder.id);
-      setFolderNotes(filteredNotes);
+  const folderColor = folder?.colorCode || '#FFD700';
+  const rgbColor = folderColor.startsWith('#') 
+    ? `${parseInt(folderColor.slice(1, 3), 16)}, ${parseInt(folderColor.slice(3, 5), 16)}, ${parseInt(folderColor.slice(5, 7), 16)}`
+    : '251, 191, 36';
 
-      // Filter notebooks that belong to this folder
-      const filteredNotebooks = notebooks.filter(notebook => notebook.folderId === folder.id);
-      setFolderNotebooks(filteredNotebooks);
-      
-    } catch (error) {
-      console.error('Error filtering folder contents:', error);
-    } finally {
-      setLoading(false);
-    }
+  // Handlers for note viewing/editing
+  const handleViewNote = (note) => {
+    setViewingNote(note);
+    setIsNoteViewModalOpen(true);
   };
 
-  const handleCreateNote = () => {
-    setEditingNote(null);
-    setIsCreateNoteModalOpen(true);
+  const handleEditNoteFromView = () => {
+    const noteToEdit = viewingNote;  // Save the note reference
+    setIsNoteViewModalOpen(false);   // Close the view modal
+    setViewingNote(null);            // Clear the viewing note state
+    onEditNote(noteToEdit);          // Open edit modal with the saved note
   };
 
-  const handleEditNote = (note) => {
-    setEditingNote(note);
-    setIsCreateNoteModalOpen(true);
+  const handleDeleteNoteFromView = async () => {
+    setIsNoteViewModalOpen(false);
+    await onDeleteNote(viewingNote.id);
+    setViewingNote(null);
   };
 
-  const handleCreateNotebook = () => {
-    setIsCreateNotebookModalOpen(true);
+  const handleCloseNoteView = () => {
+    setIsNoteViewModalOpen(false);
+    setViewingNote(null);
   };
 
-  const handleCreateNoteSubmit = async (noteData) => {
-    try {
-      const noteWithFolder = {
-        ...noteData,
-        folderId: folder.id
-      };
-      
-      if (editingNote) {
-        await onEditNote({ ...noteWithFolder, id: editingNote.id });
-      } else {
-        await onCreateNote(noteWithFolder);
-      }
-      
-      setIsCreateNoteModalOpen(false);
-      setEditingNote(null);
-      filterFolderContents();
-    } catch (error) {
-      console.error('Failed to save note:', error);
-    }
+  const handleBackClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onBack();
   };
-
-  const handleCreateNotebookSubmit = async (notebookData) => {
-    try {
-      const notebookWithFolder = {
-        ...notebookData,
-        folderId: folder.id
-      };
-      
-      await onCreateNotebook(notebookWithFolder);
-      setIsCreateNotebookModalOpen(false);
-      filterFolderContents();
-    } catch (error) {
-      console.error('Failed to save notebook:', error);
-    }
-  };
-
-  const getTags = (tags) => {
-    if (!tags) return [];
-    if (Array.isArray(tags)) return tags;
-    if (typeof tags === 'string') return tags.split(',').map(tag => tag.trim());
-    return [];
-  };
-
-  if (loading) {
-    return (
-      <div className="text-center py-8 font-mono text-white">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="inline-block mb-4"
-        >
-          <Folder size={32} style={{ color: folder.colorCode }} />
-        </motion.div>
-        <div>Loading archive contents...</div>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={onBack}
-            className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
-            style={{
-              borderColor: tabColor,
-              color: tabColor,
-              boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.borderColor = tabColor;
-              e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.borderColor = tabColor;
-              e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
-            }}
-          >
-            <div className="flex items-center gap-2">
-              <ArrowLeft size={16} />
-              <span>BACK TO VAULT</span>
+      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg"
+           style={{
+             backgroundColor: 'rgba(0, 0, 0, 0.4)'
+           }}>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleBackClick}
+                className="bg-black border-2 border-white p-2 font-mono font-bold text-white hover:scale-105 transition-transform cursor-pointer"
+                title="Back to Archives"
+                style={{ zIndex: 100 }}
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div className="flex items-center gap-3">
+                <div 
+                  className="p-2 border-2 border-white"
+                  style={{
+                    backgroundColor: folderColor,
+                    boxShadow: `0 0 10px rgba(${rgbColor}, 0.6)`
+                  }}
+                >
+                  <Folder size={24} className="text-black" />
+                </div>
+                <div>
+                  <h1 className="font-mono font-bold text-white text-2xl">{folder?.name || 'Archive'}</h1>
+                  <p className="font-mono text-sm text-gray-400">
+                    {folder?.description || 'Archive system contents'}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                 style={{ backgroundColor: tabColor }} />
-          </button>
-          
-          <div className="flex items-center gap-3 flex-1">
-            <Folder size={32} style={{ color: folder.colorCode }} />
-            <div>
-              <h1 className="font-mono text-3xl font-bold text-white mb-2">{folder.name}</h1>
-              <p className="text-gray-400 font-mono text-sm">{folder.description}</p>
+            
+            <div className="flex items-center gap-4 text-sm font-mono text-gray-400">
+              <span>
+                <span className="text-white font-bold">{notebooks.length}</span> COLLECTIONS
+              </span>
+              <span>
+                <span className="text-white font-bold">{notes.length}</span> LOGS
+              </span>
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleCreateNote}
-              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
-              style={{
-                borderColor: tabColor,
-                color: tabColor,
-                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Plus size={16} />
-                <FileText size={16} />
-                <span>NEW LOG</span>
-              </div>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                   style={{ backgroundColor: tabColor }} />
-            </button>
-
-            <button
-              onClick={handleCreateNotebook}
-              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
-              style={{
-                borderColor: tabColor,
-                color: tabColor,
-                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
-              }}
-            >
-              <div className="flex items-center gap-2">
+          <div className="flex flex-col lg:flex-row gap-4 items-start">
+            <div className="flex gap-2 relative">
+              <button
+                onClick={() => {
+                  if (onCreateNotebook) {
+                    onCreateNotebook();
+                  }
+                }}
+                className="bg-black border-2 border-white px-4 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer"
+              >
                 <Plus size={16} />
                 <BookOpen size={16} />
                 <span>NEW COLLECTION</span>
-              </div>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                   style={{ backgroundColor: tabColor }} />
-            </button>
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (onCreateNote) {
+                    onCreateNote();
+                  }
+                }}
+                className="bg-black border-2 border-white px-4 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer"
+              >
+                <Plus size={16} />
+                <FileText size={16} />
+                <span>NEW LOG</span>
+              </button>
+            </div>
+            
+            <div className="flex-1 relative">
+              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search archive contents..."
+                className="w-full pl-10 pr-3 py-2 bg-black border-2 border-gray-600 text-white font-mono text-sm focus:border-white transition-colors"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Archive Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6"
-        style={{
-          borderColor: tabColor,
-          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-        }}
-      >
-        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-          <div className="bg-gray-900 border-2 p-4" style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-          }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>COLLECTIONS</div>
-                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>{folderNotebooks.length}</div>
-              </div>
-              <BookOpen style={{ color: tabColor }} size={20} />
-            </div>
-          </div>
-          
-          <div className="bg-gray-900 border-2 p-4" style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-          }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>LOGS</div>
-                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>{folderNotes.length}</div>
-              </div>
-              <FileText style={{ color: tabColor }} size={20} />
-            </div>
-          </div>
-          
-          <div className="bg-gray-900 border-2 p-4" style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-          }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-mono font-bold" style={{ color: tabColor }}>TOTAL ITEMS</div>
-                <div className="text-2xl font-mono font-bold" style={{ color: tabColor }}>
-                  {folderNotebooks.length + folderNotes.length}
-                </div>
-              </div>
-              <Folder style={{ color: tabColor }} size={20} />
-            </div>
-          </div>
+      {/* Tab Navigation */}
+      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg"
+           style={{
+             backgroundColor: 'rgba(0, 0, 0, 0.4)'
+           }}>
+        <div className="relative z-10 flex">
+          <button
+            onClick={() => setActiveTab('collections')}
+            className={`flex-1 px-4 py-3 font-mono font-bold border-r-2 border-white transition-colors ${
+              activeTab === 'collections'
+                ? 'bg-white/40 text-black'
+                : 'text-white hover:bg-black hover:bg-opacity-30'
+            }`}
+            style={{ borderTopLeftRadius: '6px', borderBottomLeftRadius: activeTab === 'collections' ? '0' : '6px' }}
+          >
+            <BookOpen size={16} className="inline mr-2" />
+            COLLECTIONS ({filteredNotebooks.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('logs')}
+            className={`flex-1 px-4 py-3 font-mono font-bold transition-colors ${
+              activeTab === 'logs' 
+                ? 'bg-white/40 text-black'
+                : 'text-white hover:bg-black hover:bg-opacity-30'
+            }`}
+            style={{ borderTopRightRadius: '6px', borderBottomRightRadius: activeTab === 'logs' ? '0' : '6px' }}
+          >
+            <FileText size={16} className="inline mr-2" />
+            LOG ENTRIES ({filteredNotes.length})
+          </button>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Archive Content */}
-      {folderNotes.length === 0 && folderNotebooks.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-          style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-          }}
-        >
-          <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
-               style={{ borderColor: tabColor }} />
-          
-          <div className="relative z-10 text-center py-8">
-            <Folder size={64} style={{ color: folder.colorCode }} className="mx-auto mb-4" />
-            <h3 className="font-mono text-xl font-bold text-white mb-2">
-              Archive "{folder.name}" is empty
-            </h3>
-            <p className="text-gray-400 font-mono mb-6">
-              This archive system is empty. Start by creating your first log entry or collection.
-            </p>
-            
-            <button
-              onClick={handleCreateNote}
-              className="bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
-              style={{
-                borderColor: tabColor,
-                color: tabColor,
-                boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = tabColor;
-                e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <FileText size={18} />
-                <span>CREATE FIRST LOG</span>
-              </div>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                   style={{ backgroundColor: tabColor }} />
-            </button>
-          </div>
-        </motion.div>
-      ) : (
-        <div className="space-y-6">
-          {/* Collections Section */}
-          {folderNotebooks.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-              style={{
-                borderColor: tabColor,
-                boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-              }}
-            >
-              <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
-                   style={{ borderColor: tabColor }} />
-              
-              <div className="relative z-10">
-                <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <BookOpen size={20} style={{ color: tabColor }} className="mr-2" />
-                  COLLECTIONS
-                  <span className="ml-3 text-sm" style={{ color: tabColor }}>
-                    [{folderNotebooks.length}]
-                  </span>
-                </h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {folderNotebooks.map((notebook, index) => {
-                    const notebookColor = notebook.colorCode || '#3B82F6';
-                    
-                    const hexToRgb = (hex) => {
-                      if (!hex || !hex.startsWith('#')) return '59, 130, 246';
-                      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                      return result ? 
-                        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-                        '59, 130, 246';
-                    };
-                    
-                    const rgbColor = hexToRgb(notebookColor);
-                    
-                    return (
-                      <motion.div
-                        key={notebook.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                        style={{
-                          borderColor: notebookColor,
-                          boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                        }}
-                        whileHover={{ 
-                          scale: 1.02, 
-                          y: -2,
-                          boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          console.log('Opening notebook from folder:', notebook);
-                          if (onOpenNotebook) {
-                            onOpenNotebook(notebook);
-                          } else {
-                            console.error('onOpenNotebook function not provided');
-                          }
-                        }}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <BookOpen size={24} style={{ color: notebookColor }} />
-                          <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                            {notebook.noteCount || 0} LOGS
-                          </div>
-                        </div>
-                        <h4 className="font-mono font-bold text-white mb-2 truncate" title={notebook.name}>
-                          {notebook.name}
-                        </h4>
-                        <p className="text-xs text-gray-400 mb-3">
-                          {notebook.description || 'Access collection contents'}
-                        </p>
+      {/* Content */}
+      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
+           style={{
+             backgroundColor: 'rgba(0, 0, 0, 0.4)'
+           }}>
+        <div className="relative z-10">
+          {activeTab === 'collections' ? (
+            filteredNotebooks.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredNotebooks.map((notebook) => {
+                  const notebookColor = notebook.colorCode || '#60A5FA';
+                  const notebookRgb = notebookColor.startsWith('#') 
+                    ? `${parseInt(notebookColor.slice(1, 3), 16)}, ${parseInt(notebookColor.slice(3, 5), 16)}, ${parseInt(notebookColor.slice(5, 7), 16)}`
+                    : '96, 165, 250';
 
-                        {/* Action buttons for edit and delete */}
-                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Handle edit notebook
-                            }}
-                            className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
-                            style={{ color: tabColor }}
-                            title="Edit collection"
-                          >
-                            <Edit size={14} />
-                          </button>
-                          
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (window.confirm(`Are you sure you want to delete "${notebook.name}"?`)) {
-                                onDeleteNotebook(notebook.id);
-                              }
-                            }}
-                            className="p-1.5 bg-gray-700 hover:bg-red-600 rounded text-gray-400 hover:text-red-400 transition-colors"
-                            title="Delete collection"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                  return (
+                    <motion.div
+                      key={notebook.id}
+                      className="bg-black bg-opacity-60 border-2 border-white p-4 cursor-pointer group relative transition-all duration-300 rounded-lg"
+                      style={{
+                        boxShadow: `0 0 25px rgba(${notebookRgb}, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      whileHover={{ 
+                        scale: 1.02, 
+                        y: -2,
+                        boxShadow: `0 0 40px rgba(${notebookRgb}, 1), 4px 4px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => onOpenNotebook ? onOpenNotebook(notebook) : onEditNotebook(notebook)}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <BookOpen size={24} style={{ color: notebookColor }} />
+                        <div className="text-xs font-mono text-gray-400 bg-black px-2 py-1 border border-white">
+                          COLLECTION
                         </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          )}
+                      </div>
+                      
+                      <h4 className="font-mono font-bold text-white mb-2 truncate" title={notebook.name}>
+                        {notebook.name}
+                      </h4>
+                      
+                      <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+                        {notebook.description || 'Collection for organized log storage'}
+                      </p>
 
-          {/* Direct Notes Section */}
-          {folderNotes.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-              style={{
-                borderColor: tabColor,
-                boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-              }}
-            >
-              <div className="absolute inset-0 border-2 opacity-50 animate-pulse pointer-events-none" 
-                   style={{ borderColor: tabColor }} />
-              
-              <div className="relative z-10">
-                <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <FileText size={20} className="text-green-400 mr-2" />
-                  LOG ENTRIES
-                  <span className="ml-3 text-sm" style={{ color: tabColor }}>
-                    [{folderNotes.length}]
-                  </span>
-                </h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {folderNotes.map((note, index) => {
-                    const tagsArray = getTags(note.tags);
-                    const noteColor = note.color || note.colorCode || '#4ADE80';
-                    
-                    const hexToRgb = (hex) => {
-                      if (!hex || !hex.startsWith('#')) return '74, 222, 128';
-                      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                      return result ? 
-                        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
-                        '74, 222, 128';
-                    };
-                    
-                    const rgbColor = hexToRgb(noteColor);
-                    
-                    return (
-                      <motion.div
-                        key={note.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="bg-gray-900 border-2 p-4 cursor-pointer group relative transition-all duration-300"
-                        style={{
-                          borderColor: noteColor,
-                          boxShadow: `0 0 10px rgba(${rgbColor}, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)`,
-                        }}
-                        whileHover={{ 
-                          scale: 1.02, 
-                          y: -2,
-                          boxShadow: `0 0 20px rgba(${rgbColor}, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)`
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleEditNote(note)}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <FileText size={24} style={{ color: noteColor }} />
-                          <div className="text-xs font-mono text-gray-400 bg-gray-700 px-2 py-1 border border-gray-600">
-                            {tagsArray.length} TAGS
-                          </div>
-                        </div>
-                        <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
-                          {note.title}
-                        </h4>
-                        <p className="text-xs text-gray-400 mb-3">
-                          {note.content && note.content.length > 100 
-                            ? `${note.content.substring(0, 100)}...` 
-                            : note.content}
-                        </p>
-                        
-                        {/* Classification Tags */}
-                        {tagsArray.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {tagsArray.slice(0, 2).map((tag, tagIndex) => (
-                              <span
-                                key={tagIndex}
-                                className="px-2 py-1 bg-gray-700 border border-gray-600 text-xs font-mono"
-                                style={{ color: tabColor }}
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {tagsArray.length > 2 && (
-                              <span className="text-xs text-gray-500 font-mono px-2 py-1">
-                                +{tagsArray.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        
-                        {/* Edit button */}
+                      <div className="text-xs text-gray-400 mb-2">
+                        {new Date(notebook.createdAt || notebook.updatedAt).toLocaleDateString()}
+                      </div>
+
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEditNote(note);
+                            onOpenNotebook ? onOpenNotebook(notebook) : onEditNotebook(notebook);
                           }}
-                          className="absolute bottom-2 right-2 p-1.5 bg-gray-700 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                          style={{ color: tabColor }}
-                          title="Edit log entry"
+                          className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
+                          title="Open collection"
                         >
-                          <Edit size={14} />
+                          <Eye size={14} />
                         </button>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditNotebook(notebook);
+                          }}
+                          className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
+                          title="Edit collection"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteNotebook(notebook.id);
+                          }}
+                          className="p-1.5 bg-black hover:bg-red-600 border border-white rounded-md text-gray-400 hover:text-red-400 transition-colors"
+                          title="Delete collection"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
-            </motion.div>
+            ) : (
+              <div className="bg-black bg-opacity-60 border border-white p-8 text-center rounded-lg">
+                <BookOpen size={48} className="text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400 font-mono mb-2">
+                  {searchTerm ? `No collections found matching "${searchTerm}"` : 'No collections in this archive'}
+                </p>
+                <p className="text-xs text-gray-500 font-mono">
+                  Create your first collection to organize log entries
+                </p>
+              </div>
+            )
+          ) : (
+            filteredNotes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredNotes.map((note) => {
+                  const noteColor = note.color || '#4ADE80';
+                  const noteRgb = noteColor.startsWith('#') 
+                    ? `${parseInt(noteColor.slice(1, 3), 16)}, ${parseInt(noteColor.slice(3, 5), 16)}, ${parseInt(noteColor.slice(5, 7), 16)}`
+                    : '74, 222, 128';
+
+                  return (
+                    <motion.div
+                      key={note.id}
+                      className="bg-black bg-opacity-60 border-2 border-white p-4 cursor-pointer group relative transition-all duration-300 rounded-lg"
+                      style={{
+                        boxShadow: `0 0 25px rgba(${noteRgb}, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      whileHover={{ 
+                        scale: 1.02, 
+                        y: -2,
+                        boxShadow: `0 0 40px rgba(${noteRgb}, 1), 4px 4px 0px 0px rgba(0,0,0,1)`
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleViewNote(note);
+                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <FileText size={24} style={{ color: noteColor }} />
+                        <div className="text-xs font-mono text-gray-400 bg-black px-2 py-1 border border-white">
+                          LOG
+                        </div>
+                      </div>
+                      
+                      <h4 className="font-mono font-bold text-white mb-2 truncate" title={note.title}>
+                        {note.title}
+                      </h4>
+                      
+                      <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+                        {note.content && note.content.length > 100 
+                          ? `${note.content.substring(0, 100)}...` 
+                          : note.content || 'No content available'}
+                      </p>
+
+                      <div className="text-xs text-gray-400 mb-2">
+                        {new Date(note.createdAt || note.updatedAt).toLocaleDateString()}
+                      </div>
+
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewNote(note);
+                          }}
+                          className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
+                          title="View log"
+                        >
+                          <Eye size={14} />
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditNote(note);
+                          }}
+                          className="p-1.5 bg-black hover:bg-gray-800 border border-white rounded-md transition-colors text-white"
+                          title="Edit log"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteNote(note.id);
+                          }}
+                          className="p-1.5 bg-black hover:bg-red-600 border border-white rounded-md text-gray-400 hover:text-red-400 transition-colors"
+                          title="Delete log"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-black bg-opacity-60 border border-white p-8 text-center rounded-lg">
+                <FileText size={48} className="text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400 font-mono mb-2">
+                  {searchTerm ? `No log entries found matching "${searchTerm}"` : 'No log entries in this archive'}
+                </p>
+                <p className="text-xs text-gray-500 font-mono">
+                  Create your first log entry to begin storing information
+                </p>
+              </div>
+            )
           )}
         </div>
-      )}
+      </div>
 
-      {/* Note Creation/Edit Modal */}
-      <NoteModal
-        isOpen={isCreateNoteModalOpen}
-        onClose={() => {
-          setIsCreateNoteModalOpen(false);
-          setEditingNote(null);
-        }}
-        onSave={handleCreateNoteSubmit}
-        folders={folders}
-        notebooks={notebooks}
-        existingNote={editingNote}
-        defaultFolderId={folder.id}
-      />
-
-      <NotebookModal
-        isOpen={isCreateNotebookModalOpen}
-        onClose={() => setIsCreateNotebookModalOpen(false)}
-        onSave={handleCreateNotebookSubmit}
-        existingNotebook={null}
-        folders={folders}
+      {/* Note View Modal */}
+      <NoteViewModal
+        isOpen={isNoteViewModalOpen}
+        onClose={handleCloseNoteView}
+        onEdit={handleEditNoteFromView}
+        onDelete={handleDeleteNoteFromView}
+        note={viewingNote}
       />
     </div>
   );

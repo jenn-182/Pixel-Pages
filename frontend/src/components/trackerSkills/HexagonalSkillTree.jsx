@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Briefcase, Palette, Code, User, Trophy, Star, Zap, Crown, Shield, Plus, Award, Target, Clock, Flame, PenTool, Search, Calendar, Heart } from 'lucide-react';
+import { BookOpen, Briefcase, Palette, Code, User, Trophy, Star, Zap, Crown, Shield, Plus, Award, Target, Clock, Flame, PenTool, Search, Calendar, Heart, Activity } from 'lucide-react';
 
 const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
   const [hoveredNode, setHoveredNode] = useState(null);
@@ -270,12 +270,13 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
   const totalHours = Math.floor(totalXP / 60);
 
   return (
-    <div className="bg-gray-900 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
-         style={{
-           borderColor: tabColor,
-           boxShadow: `0 0 20px ${tabColor}40, 8px 8px 0px 0px rgba(0,0,0,1)`
-         }}>
-      
+    <div 
+      className="translucent-panel relative overflow-hidden rounded-lg"
+      style={{
+        borderColor: tabColor,
+        '--tab-color-rgb': tabColorRgb
+      }}
+    >
       {/* Background effects */}
       <div className="absolute inset-0 border-2 opacity-20 animate-pulse pointer-events-none" 
            style={{ borderColor: tabColor }} />
@@ -292,33 +293,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
         }}
       >
         <div className="flex items-center justify-between">
-          {/* Create Branch Button */}
-          <motion.button
-            className="px-4 py-2 border-2 bg-black font-mono font-bold text-sm flex items-center gap-2 hover:scale-105 transition-transform"
-            style={{ 
-              borderColor: tabColor,
-              color: tabColor,
-              boxShadow: `0 0 10px ${tabColor}40`
-            }}
-            whileHover={{ boxShadow: `0 0 20px ${tabColor}60` }}
-            onClick={() => setShowCreateBranch(!showCreateBranch)}
-          >
-            <Plus size={16} />
-            CREATE SKILL BRANCH
-          </motion.button>
-
-          <div className="text-center">
-            <div className="font-mono font-bold text-white text-3xl mb-2">
-              SKILL TREE MATRIX
-            </div>
-            <div 
-              className="font-mono text-sm font-bold tracking-wider"
-              style={{ color: tabColor }}
-            >
-              {sortedCategories.length} ACTIVE SKILL BRANCHES
-            </div>
-          </div>
-
+          {/* Left side - Stats */}
           <div className="flex gap-8">
             <div className="text-center">
               <div 
@@ -332,7 +307,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
             <div className="text-center">
               <div 
                 className="text-2xl font-mono font-bold"
-                style={{ color: '#FFD700' }}
+                style={{ color: 'white' }}
               >
                 {maxedBranches}
               </div>
@@ -341,12 +316,78 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
             <div className="text-center">
               <div 
                 className="text-2xl font-mono font-bold"
-                style={{ color: tabColor }}
+                style={{ color: 'white' }}
               >
                 {totalHours}h
               </div>
               <div className="text-xs text-gray-400 font-mono">TOTAL GRIND TIME</div>
             </div>
+          </div>
+
+          {/* Center - Header */}
+          <div className="text-center">
+            <div className="font-mono font-bold text-white text-3xl mb-2">
+              SKILL TREE MATRIX
+            </div>
+            <div className="text-gray-400 font-mono text-sm">
+              Track your grind sessions and level up your skills.
+            </div>
+            <div 
+              className="font-mono text-sm font-bold tracking-wider mt-1"
+              style={{ color: tabColor }}
+            >
+              {sortedCategories.length} ACTIVE SKILL BRANCHES
+            </div>
+          </div>
+
+          {/* Right side - Buttons */}
+          <div className="flex items-center gap-2">
+            {/* Create Branch Button */}
+            <motion.button
+              className="px-3 py-1.5 border-2 bg-black font-mono font-bold text-xs flex items-center gap-1.5 hover:scale-105 transition-transform"
+              style={{ 
+                borderColor: tabColor,
+                color: tabColor,
+                boxShadow: `0 0 8px ${tabColor}40`
+              }}
+              whileHover={{ boxShadow: `0 0 15px ${tabColor}60` }}
+              onClick={() => setShowCreateBranch(!showCreateBranch)}
+            >
+              <Plus size={25} />
+              NEW BRANCH
+            </motion.button>
+
+            {/* View Time Matrix Button */}
+            <motion.button
+              className="px-3 py-1.5 border-2 bg-black font-mono font-bold text-xs flex items-center gap-1.5 hover:scale-105 transition-transform relative overflow-hidden"
+              style={{ 
+                borderColor: 'white',
+                color: 'white',
+                boxShadow: `0 0 8px rgba(255, 255, 255, 0.4)`
+              }}
+              whileHover={{ 
+                boxShadow: `0 0 15px rgba(255, 255, 255, 0.6)`,
+                borderColor: 'white' 
+              }}
+              onClick={() => {
+                // This will be passed from TrackerTab
+                if (window.toggleMatrix) {
+                  window.toggleMatrix();
+                }
+              }}
+            >
+              <div 
+                className="absolute inset-0 opacity-30"
+                style={{
+                  background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%)`,
+                  width: '100%',
+                  animation: 'scan 3s linear infinite'
+                }}
+              />
+              
+              <Activity size={25} className="relative z-10" />
+              <span className="relative z-10">TIME MATRIX</span>
+            </motion.button>
           </div>
         </div>
 
@@ -355,7 +396,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mt-4 p-4 bg-gray-800 border-2 rounded"
+            className="mt-4 p-4 bg-black-800 border-2 rounded"
             style={{ borderColor: tabColor }}
           >
             <div className="flex gap-4 items-end">
@@ -365,7 +406,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                   type="text"
                   value={newBranch.name}
                   onChange={(e) => setNewBranch(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2 bg-black border-2 text-white font-mono text-sm"
+                  className="w-full px-3 py-2 bg-black border-2 text-white font-mono text-sm rounded"
                   style={{ borderColor: tabColor }}
                   placeholder="Enter skill name..."
                 />
@@ -550,7 +591,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                             ) : isCompleted ? (
                               <Zap size={12} style={{ color: '#000000' }} />
                             ) : (
-                              <div className="font-mono font-bold text-xs text-gray-400">
+                              <div className="font-mono font-bold text-xs text-black-400">
                                 {nodeLevel}
                               </div>
                             )}
@@ -583,7 +624,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                                 Level {nodeLevel} {nodeLevel === 10 ? '- MASTERY' : ''}
                                 {isCurrent && ` (${fillPercentage}%)`}
                               </div>
-                              <div className="text-xs text-gray-300">
+                              <div className="text-xs text-black-300">
                                 {getNodeDescription(category, nodeLevel)}
                               </div>
                             </motion.div>
@@ -599,7 +640,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                   <span>
                     {currentLevel < 10 ? `NEXT: LEVEL ${currentLevel + 1}` : 'BRANCH MASTERED'}
                   </span>
-                  <span style={{ color: branchColor }}>
+                  <span style={{ color: 'branchColor' }}>
                     {currentLevel < 10 ? `${progress.current}/${progress.max} XP` : 'COMPLETED'}
                   </span>
                 </div>

@@ -39,7 +39,7 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
       '16, 185, 129';
   };
 
-  const tabColorRgb = hexToRgb(tabColor);
+  const tabColorRgb = hexToRgb('white');
 
   useEffect(() => {
     const loadTrackerData = () => {
@@ -132,60 +132,17 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
     loadTrackerData();
   }, [username]);
 
+  useEffect(() => {
+    // Set up global function for HexagonalSkillTree to access
+    window.toggleMatrix = () => setShowMatrix(!showMatrix);
+    
+    return () => {
+      delete window.toggleMatrix;
+    };
+  }, [showMatrix]);
+
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-              <div 
-                className="w-6 h-6 border border-gray-600" 
-                style={{ backgroundColor: tabColor }}
-              />
-              SKILL TREE
-            </h1>
-            <p className="text-gray-400 font-mono text-sm">
-              Track your grind sessions and level up your skills.
-            </p>
-          </div>
-
-          {/* View Matrix Button */}
-          <motion.button
-            className="px-6 py-3 border-2 bg-black font-mono font-bold text-sm flex items-center gap-3 hover:scale-105 transition-transform relative overflow-hidden"
-            style={{ 
-              borderColor: tabColor,
-              color: tabColor,
-              boxShadow: `0 0 15px ${tabColor}40`
-            }}
-            whileHover={{ 
-              boxShadow: `0 0 25px ${tabColor}60`,
-              borderColor: tabColor 
-            }}
-            onClick={() => setShowMatrix(!showMatrix)}
-          >
-            {/* Animated background scan line */}
-            <div 
-              className="absolute inset-0 opacity-30"
-              style={{
-                background: `linear-gradient(90deg, transparent 0%, ${tabColor}80 50%, transparent 100%)`,
-                width: '100%',
-                animation: showMatrix ? 'none' : 'scan 3s linear infinite'
-              }}
-            />
-            
-            <Activity size={18} className="relative z-10" />
-            <span className="relative z-10">
-              {showMatrix ? 'VIEW SKILL TREE' : 'VIEW TIME MATRIX'}
-            </span>
-          </motion.button>
-        </div>
-      </motion.div>
-
+    <div className="p-6 space-y-6 translucent-container">
       {/* Content - Either Skill Tree or Matrix */}
       <motion.div
         key={showMatrix ? 'matrix' : 'skilltree'}
@@ -195,8 +152,8 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
       >
         {showMatrix ? (
           <TimeManagementMatrix 
-            tabColor={tabColor} 
-            tabColorRgb={tabColorRgb}
+            tabColor={'white'} 
+            tabColorRgb={'white'}
             onClose={() => setShowMatrix(false)}
           />
         ) : (
@@ -204,24 +161,22 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
+            className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg"
             style={{
-              borderColor: tabColor,
-              boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+              backgroundColor: 'rgba(0, 0, 0, 0.4)', // Less translucent, more opaque
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)', // Remove glow, keep drop shadow
             }}
           >
-            <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-                 style={{ borderColor: tabColor }} />
-            <div className="absolute inset-0 pointer-events-none"
-                 style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
+            {/* Remove the animated border overlay */}
+            {/* Remove the gradient overlay */}
             
             <div className="relative z-10">
               <div className="p-6">
                 {categories.length > 0 ? (
                   <HexagonalSkillTree 
                     categories={categories} 
-                    tabColor={tabColor} 
-                    tabColorRgb={tabColorRgb} 
+                    tabColor={'white'} 
+                    tabColorRgb={'white'} 
                   />
                 ) : (
                   <div className="text-center py-8">
@@ -239,14 +194,6 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
           </motion.div>
         )}
       </motion.div>
-
-      {/* Add CSS for scan animation */}
-      <style jsx>{`
-        @keyframes scan {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-      `}</style>
     </div>
   );
 };

@@ -7,9 +7,6 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
   const [description, setDescription] = useState('');
   const [colorCode, setColorCode] = useState('#FFD700');
 
-  const tabColor = '#3B82F6'; // Blue color to match LibraryTab
-  const tabColorRgb = '59, 130, 246'; // RGB values for #3B82F6
-
   const predefinedColors = [
     '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
     '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE'
@@ -21,7 +18,6 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
       setDescription(existingFolder.description || '');
       setColorCode(existingFolder.colorCode || '#FFD700');
     } else {
-      // Reset form for new folder
       setName('');
       setDescription('');
       setColorCode('#FFD700');
@@ -40,7 +36,7 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
       name: name.trim(),
       description: description.trim(),
       colorCode,
-      parentFolderId: null // For now, we're not supporting nested folders
+      parentFolderId: null
     };
 
     try {
@@ -78,21 +74,17 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
           initial={{ scale: 0.8, opacity: 0, y: -50 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.8, opacity: 0, y: -50 }}
-          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-md relative max-h-[90vh] overflow-y-auto"
+          className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-md relative max-h-[90vh] overflow-y-auto"
           style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
+            backgroundColor: 'rgba(0, 0, 0, 0.4)'
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-               style={{ borderColor: tabColor }} />
-
           {/* Header */}
           <div className="relative z-10 mb-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Folder size={24} style={{ color: tabColor }} />
+                <Folder size={24} className="text-white" />
                 <h3 className="font-mono text-xl font-bold text-white">
                   {existingFolder ? 'MODIFY ARCHIVE' : 'NEW ARCHIVE'}
                 </h3>
@@ -113,7 +105,7 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
           <form onSubmit={handleSubmit} className="relative z-10 space-y-4">
             {/* Archive Name */}
             <div>
-              <label className="block text-sm font-mono font-bold mb-2" style={{ color: tabColor }}>
+              <label className="block text-sm font-mono font-bold text-white mb-2">
                 <Archive size={16} className="inline mr-1" />
                 ARCHIVE NAME
               </label>
@@ -122,16 +114,7 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter archive name..."
-                className="w-full px-3 py-2 bg-gray-900 border-2 border-gray-600 text-white font-mono text-sm transition-colors focus:outline-none"
-                style={{
-                  color: '#fff'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = tabColor;
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#4B5563';
-                }}
+                className="w-full px-3 py-2 bg-black border-2 border-gray-600 text-white font-mono text-sm transition-colors focus:outline-none focus:border-white"
                 required
               />
               <p className="text-xs text-gray-400 mt-1 font-mono">
@@ -141,7 +124,7 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-mono font-bold mb-2" style={{ color: tabColor }}>
+              <label className="block text-sm font-mono font-bold text-white mb-2">
                 ARCHIVE DESCRIPTION
               </label>
               <textarea
@@ -149,16 +132,7 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Optional archive description..."
                 rows={3}
-                className="w-full px-3 py-2 bg-gray-900 border-2 border-gray-600 text-white font-mono text-sm resize-none transition-colors focus:outline-none"
-                style={{
-                  color: '#fff'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = tabColor;
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#4B5563';
-                }}
+                className="w-full px-3 py-2 bg-black border-2 border-gray-600 text-white font-mono text-sm resize-none transition-colors focus:outline-none focus:border-white"
               />
               <p className="text-xs text-gray-400 mt-1 font-mono">
                 Brief description of archive purpose and organization strategy
@@ -167,7 +141,7 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
 
             {/* Color Selection */}
             <div>
-              <label className="block text-sm font-mono font-bold mb-2" style={{ color: tabColor }}>
+              <label className="block text-sm font-mono font-bold text-white mb-2">
                 <Palette size={16} className="inline mr-1" />
                 ARCHIVE COLOR
               </label>
@@ -200,10 +174,10 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
             </div>
 
             {/* Archive Info */}
-            <div className="bg-gray-900 border border-gray-600 p-3 rounded">
+            <div className="bg-black border-2 border-gray-600 p-3">
               <div className="flex items-center gap-2 mb-2">
-                <Archive size={16} style={{ color: tabColor }} />
-                <span className="text-sm font-mono font-bold" style={{ color: tabColor }}>
+                <Archive size={16} className="text-white" />
+                <span className="text-sm font-mono font-bold text-white">
                   WHAT IS ARCHIVE 
                 </span>
               </div>
@@ -219,32 +193,15 @@ const FolderModal = ({ isOpen, onClose, onSave, existingFolder = null }) => {
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 bg-gray-900 border-2 border-gray-600 px-4 py-2 font-mono text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+                className="flex-1 bg-black border-2 border-gray-600 px-4 py-2 font-mono text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
               >
                 CANCEL
               </button>
               <button
                 type="submit"
-                className="flex-1 bg-gray-900 border-2 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
-                style={{
-                  borderColor: tabColor,
-                  color: tabColor,
-                  boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 15px rgba(${tabColorRgb}, 0.3)`;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = tabColor;
-                  e.target.style.boxShadow = `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`;
-                }}
+                className="flex-1 bg-black border-2 border-white px-4 py-2 font-mono font-bold text-white hover:scale-105 transition-transform"
               >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                     style={{ backgroundColor: tabColor }} />
-                <span className="relative z-10">
-                  {existingFolder ? 'UPDATE ARCHIVE' : 'CREATE ARCHIVE'}
-                </span>
+                {existingFolder ? 'UPDATE ARCHIVE' : 'CREATE ARCHIVE'}
               </button>
             </div>
           </form>
