@@ -12,9 +12,9 @@ const TimeManagementMatrix = ({ tabColor = '#10B981', tabColorRgb = '16, 185, 12
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const ranges = [
-    { id: 'weekly', label: '7D', icon: Target },
-    { id: 'monthly', label: '30D', icon: BarChart3 },
-    { id: 'yearly', label: '365D', icon: TrendingUp }
+    { id: 'weekly', label: 'Week', icon: Target },
+    { id: 'monthly', label: 'Month', icon: BarChart3 },
+    { id: 'yearly', label: 'Year', icon: TrendingUp }
   ];
 
   // Icon mapping function
