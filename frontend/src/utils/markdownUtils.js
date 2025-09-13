@@ -136,8 +136,8 @@ export const formatInlineText = (text) => {
         let className = '';
         let style = {};
         
-        if (isBold) className += ' font-bold text-cyan-400';
-        if (isItalic) className += ' italic text-purple-400';
+        if (isBold) className += ' font-bold text-purple-400';
+        if (isItalic) className += ' italic text-white-400';
         if (isUnderline) {
           className += ' underline';
           style.textDecoration = 'underline';
@@ -166,21 +166,21 @@ export const formatMarkdownContent = (text) => {
     // Headers
     if (line.startsWith('# ')) {
       return (
-        <div key={index} className="text-2xl font-bold text-cyan-400 mb-4 border-b border-cyan-400 pb-2">
+        <div key={index} className="text-2xl font-bold text-white-400 mb-4 border-b border-white-400 pb-2">
           {formatInlineText(line.substring(2))}
         </div>
       );
     }
     if (line.startsWith('## ')) {
       return (
-        <div key={index} className="text-xl font-bold text-cyan-400 mb-3">
+        <div key={index} className="text-xl font-bold text-white-400 mb-3">
           {formatInlineText(line.substring(3))}
         </div>
       );
     }
     if (line.startsWith('### ')) {
       return (
-        <div key={index} className="text-lg font-bold text-cyan-400 mb-2">
+        <div key={index} className="text-lg font-bold text-white-400 mb-2">
           {formatInlineText(line.substring(4))}
         </div>
       );
@@ -190,7 +190,7 @@ export const formatMarkdownContent = (text) => {
     if (line.startsWith('- ') || line.startsWith('* ')) {
       return (
         <div key={index} className="flex items-start mb-1">
-          <span className="text-cyan-400 mr-2 flex-shrink-0">•</span>
+          <span className="text-white-400 mr-2 flex-shrink-0">•</span>
           <span className="flex-1">{formatInlineText(line.substring(2))}</span>
         </div>
       );
@@ -202,7 +202,7 @@ export const formatMarkdownContent = (text) => {
       if (match) {
         return (
           <div key={index} className="flex items-start mb-1">
-            <span className="text-cyan-400 mr-2 flex-shrink-0">{match[1]}.</span>
+            <span className="text-white-400 mr-2 flex-shrink-0">{match[1]}.</span>
             <span className="flex-1">{formatInlineText(match[2])}</span>
           </div>
         );

@@ -103,33 +103,42 @@ const TaskSearch = ({ tasks, onFilteredResults, onQuickAction, onShowAllMissions
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gray-900 border-2 border-cyan-400 p-4 space-y-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] relative"
+      className="border-2 border-white p-6 space-y-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg"
       style={{
-        boxShadow: '0 0 10px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        boxShadow: '0 0 20px rgba(255, 255, 255, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
       }}
     >
-      <div className="absolute inset-0 border-2 border-cyan-400 opacity-20 animate-pulse pointer-events-none" />
+      <div className="absolute inset-0 border-2 border-white opacity-30 animate-pulse pointer-events-none rounded-lg" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/20 pointer-events-none rounded-lg" />
       
       {/* Search Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <Target size={20} className="text-cyan-400" />
+      <div className="relative z-10 flex items-center gap-2 mb-4">
+        <Target size={20} className="text-white" />
         <h4 className="text-lg font-mono font-bold text-white">SEARCH & FILTER</h4>
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400" size={20} />
+      <div className="relative z-10">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" size={20} />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search missions, descriptions, tags..."
-          className="w-full bg-gray-800 border-2 border-gray-600 text-white pl-10 pr-10 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400 transition-colors duration-200"
+          spellCheck={false}
+          className="w-full bg-black border-2 border-white text-white pl-12 pr-12 py-3 font-mono text-sm focus:outline-none transition-colors duration-200 rounded"
+          style={{ 
+            color: '#ffffff !important',
+            WebkitTextFillColor: '#ffffff !important',
+            caretColor: '#ffffff !important',
+            boxShadow: '0 0 10px rgba(255, 255, 255, 0.2)'
+          }}
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition-colors duration-200"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
           >
             <X size={16} />
           </button>

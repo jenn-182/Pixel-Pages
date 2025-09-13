@@ -148,17 +148,19 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
     }
   };
 
-  const handleCreateNoteSubmit = async (noteData) => {
+  const handleCreateNoteSubmit = async (idOrData, noteData = null) => {
     try {
-      console.log('Archiving log entry:', { editingNote, noteData });
+      console.log('Archiving log entry:', { idOrData, noteData, editingNote });
       
-      if (editingNote) {
-        console.log('Updating log entry with ID:', editingNote.id);
-        await updateNote(editingNote.id, noteData);
+      if (noteData) {
+        // If noteData is provided, it means we're updating (idOrData is the ID)
+        console.log('Updating log entry with ID:', idOrData);
+        await updateNote(idOrData, noteData);
         console.log('Log entry updated successfully');
       } else {
+        // If only idOrData is provided, it means we're creating (idOrData is the data)
         console.log('Creating new log entry');
-        await createNote(noteData);
+        await createNote(idOrData);
         console.log('Log entry archived successfully');
       }
       
@@ -278,14 +280,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
     return (
       <div className="library-tab-container p-6">
         <div className="text-center py-8 font-mono text-white">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="inline-block mb-4"
-          >
-            <Archive size={32} style={{ color: tabColor }} />
-          </motion.div>
-          <div>Accessing intelligence archives...</div>
+          <div>Accessing storage vault...</div>
         </div>
       </div>
     );
@@ -545,7 +540,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
   return (
     <div className="library-tab-container p-6">
       {/* Storage Vault - Simplified */}
-      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg"
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg"
            style={{
              backgroundColor: 'rgba(0, 0, 0, 0.4)'
            }}>
@@ -641,7 +636,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
+          className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
           style={{
             backgroundColor: 'rgba(0, 0, 0, 0.4)'
           }}
@@ -658,7 +653,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
               </div>
               <button
                 onClick={handleViewAllFolders}
-                className="bg-black border-2 border-white px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
+                className="bg-black border-2 border-white/60 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
               >
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
@@ -751,7 +746,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
+          className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
           style={{
             backgroundColor: 'rgba(0, 0, 0, 0.4)'
           }}
@@ -768,7 +763,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
               </div>
               <button
                 onClick={handleViewAllNotebooks}
-                className="bg-black border-2 border-white px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
+                className="bg-black border-2 border-white/60 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
               >
                 <div className="flex items-center gap-2">
                   <Eye size={16} />
@@ -861,7 +856,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
+          className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
           style={{
             backgroundColor: 'rgba(0, 0, 0, 0.4)'
           }}
@@ -878,7 +873,7 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
               </div>
               <button
                 onClick={handleViewAllNotes}
-                className="bg-black border-2 border-white px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
+                className="bg-black border-2 border-white/60 px-4 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden text-white hover:scale-105"
               >
                 <div className="flex items-center gap-2">
                   <Eye size={16} />

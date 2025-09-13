@@ -33,6 +33,12 @@ const NoteModal = ({
   const isEditing = existingNote !== null;
   const modalTitle = customTitle || (isEditing ? 'MODIFY LOG ENTRY' : 'CREATE NEW LOG ENTRY');
 
+  // Calculate RGB values for dynamic theming
+  const noteColor = noteData.color || '#4ADE80';
+  const noteRgb = noteColor.startsWith('#') 
+    ? `${parseInt(noteColor.slice(1, 3), 16)}, ${parseInt(noteColor.slice(3, 5), 16)}, ${parseInt(noteColor.slice(5, 7), 16)}`
+    : '74, 222, 128';
+
   const colors = [
     '#4ADE80', '#60A5FA', '#F472B6', '#FBBF24',
     '#A78BFA', '#FB7185', '#34D399', '#FCD34D'
@@ -114,7 +120,13 @@ const NoteModal = ({
     e.preventDefault();
     try {
       console.log('Submitting note data:', noteData);
-      await onSave(noteData);
+      if (existingNote) {
+        // For existing notes, pass the ID and data separately
+        await onSave(existingNote.id, noteData);
+      } else {
+        // For new notes, just pass the data
+        await onSave(noteData);
+      }
       onClose(); // Close modal 
     } catch (error) {
       console.error('Failed to save note:', error);
@@ -141,36 +153,56 @@ const NoteModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-gray-900 z-50 flex flex-col"
+          className="fixed inset-0 bg-black z-[9999] flex flex-col p-2"
         >
-          {/* Header Bar */}
-          <motion.div 
+          <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="bg-gray-800 border-b-2 border-cyan-400 p-4 flex items-center justify-between flex-shrink-0"
-            style={{
-              boxShadow: '0 2px 20px rgba(34,211,238,0.3)'
-            }}
+            exit={{ y: -50, opacity: 0 }}
+            className="w-full h-full overflow-hidden relative"
           >
+            {/* Main Container */}
+            <div 
+              className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg h-full flex flex-col"
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                borderColor: noteColor,
+                boxShadow: `0 0 20px rgba(${noteRgb}, 0.6), 8px 8px 0px 0px rgba(0,0,0,1)`
+              }}
+            >
+              {/* Header Bar */}
+              <motion.div 
+                initial={{ y: -50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="border-b-2 border-white p-4 flex items-center justify-between flex-shrink-0 bg-black bg-opacity-60"
+                style={{
+                  borderColor: noteColor
+                }}
+              >
             <div className="flex items-center gap-4">
-              {/* Back button - already correct */}
+              {/* Back button */}
               <button
                 onClick={onClose}
-                className="bg-gray-900 border-2 border-cyan-400 p-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] text-cyan-400"
-                style={{
-                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                }}
+                className="bg-black border-2 border-white p-2 font-mono font-bold text-white hover:scale-105 transition-transform"
                 title="Back to Library (ESC)"
               >
-                <ArrowLeft size={20} className="text-cyan-400" />
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                <ArrowLeft size={20} className="text-white" />
               </button>
               
-              <div className="flex items-center gap-3">
-                <h1 className="font-mono text-2xl font-bold text-white">
-                  {modalTitle}
-                </h1>
-              </div>
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="p-2 border-2 border-white rounded"
+                    style={{
+                      backgroundColor: noteColor,
+                      boxShadow: `0 0 10px rgba(${noteRgb}, 0.6)`
+                    }}
+                  >
+                    <FileText size={24} className="text-black" />
+                  </div>
+                  <h1 className="font-mono text-2xl font-bold text-white">
+                    {modalTitle}
+                  </h1>
+                </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -183,168 +215,157 @@ const NoteModal = ({
               {isEditing && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="bg-gray-900 border-2 border-red-500 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] font-mono font-bold text-red-500"
-                  style={{
-                    boxShadow: '0 0 5px rgba(239, 68, 68, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                  }}
+                  className="bg-black border-2 border-red-500 px-4 py-2 font-mono font-bold text-red-400 hover:scale-105 transition-transform flex items-center gap-2"
                   title="Delete Log Entry"
                 >
-                  <div className="flex items-center gap-2">
-                    <Trash2 size={16} className="text-red-500" />
-                    <span className="text-red-500">DELETE</span>
-                  </div>
-                  <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+                  <Trash2 size={16} className="text-red-400" />
+                  <span>DELETE</span>
                 </button>
               )}
               
-              {/* Save/Create button - fix the text color */}
+              {/* Save/Create button */}
               <button
                 type="submit"
                 form="note-form"
-                className="bg-gray-900 border-2 border-cyan-400 px-6 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400"
-                style={{
-                  boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
-                }}
+                className="bg-black border-2 border-white px-6 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center gap-2"
               >
-                <div className="flex items-center gap-2">
-                  {isEditing ? <Save size={18} className="text-cyan-400" /> : <Plus size={18} className="text-cyan-400" />}
-                  <span className="text-cyan-400">{isEditing ? 'SAVE CHANGES' : 'CREATE ENTRY'}</span>
-                </div>
-                <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+                {isEditing ? <Save size={18} className="text-white" /> : <Plus size={18} className="text-white" />}
+                <span>{isEditing ? 'SAVE CHANGES' : 'CREATE ENTRY'}</span>
               </button>
             </div>
           </motion.div>
 
-          {/* Main Content Area - Full screen usage */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="w-full h-full p-3 overflow-hidden flex flex-col"
-            >
-              <form id="note-form" onSubmit={handleSubmit} className="h-full flex flex-col space-y-3">
-                {/* Title Input */}
-                <div className="flex-shrink-0">
-                  <input
-                    value={noteData.title}
-                    onChange={(e) => setNoteData({ ...noteData, title: e.target.value })}
-                    placeholder="Enter your log title..."
-                    className="w-full text-3xl font-mono font-bold bg-transparent border-none outline-none text-white placeholder-gray-500 p-0"
-                    style={{ 
-                      color: '#ffffff !important',
-                      WebkitTextFillColor: '#ffffff',
-                      textFillColor: '#ffffff'
-                    }}
-                    required
-                    autoFocus
-                  />
-                  <div className="h-1 bg-gradient-to-r from-cyan-400 to-purple-400 mt-2" />
-                </div>
+              {/* Main Content Area */}
+              <div className="flex-1 overflow-hidden flex flex-col p-6">
+                <form id="note-form" onSubmit={handleSubmit} className="h-full flex flex-col space-y-4">
+                  {/* Title Input */}
+                  <div className="flex-shrink-0">
+                    <input
+                      value={noteData.title}
+                      onChange={(e) => setNoteData({ ...noteData, title: e.target.value })}
+                      placeholder="Enter your log title..."
+                      className="w-full text-3xl font-mono font-bold bg-transparent border-none outline-none text-white placeholder-gray-500 p-0"
+                      required
+                      autoFocus
+                    />
+                    <div 
+                      className="h-1 mt-2 rounded"
+                      style={{ backgroundColor: noteColor }}
+                    />
+                  </div>
 
-                {/* Main Content Layout - More space for content, smaller sidebar */}
-                <div className="flex-1 grid grid-cols-1 lg:grid-cols-6 gap-3 overflow-hidden">
-                  {/* Content Area - Takes up 5/6 of space */}
-                  <div className="lg:col-span-5 flex flex-col overflow-hidden">
-                    <div className="bg-gray-800 border-2 border-cyan-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative flex-1 flex flex-col overflow-hidden">
-                      <div className="absolute inset-0 border-2 border-cyan-400 opacity-20 animate-pulse pointer-events-none" />
+                  {/* Main Content Layout */}
+                  <div className="flex-1 grid grid-cols-1 lg:grid-cols-6 gap-4 overflow-hidden">
+                    {/* Content Area - Takes up 5/6 of space */}
+                    <div className="lg:col-span-5 flex flex-col overflow-hidden">
+                      <div 
+                        className="border-2 border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative flex-1 flex flex-col overflow-hidden rounded-lg"
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          borderColor: noteColor,
+                          boxShadow: `0 0 15px rgba(${noteRgb}, 0.4), 4px 4px 0px 0px rgba(0,0,0,1)`
+                        }}
+                      >
                       
-                      {/* Header with formatting toolbar */}
-                      <div className="flex items-center justify-between p-3 border-b-2 border-gray-700 relative z-10 flex-shrink-0">
-                        <div className="flex items-center gap-2">
-                          <FileText size={18} className="text-cyan-400" />
-                          <span className="font-mono text-sm font-bold text-cyan-400">LOG CONTENT</span>
-                        </div>
+                        {/* Header with formatting toolbar */}
+                        <div 
+                          className="flex items-center justify-between p-3 border-b-2 border-white relative z-10 flex-shrink-0"
+                          style={{ borderColor: noteColor }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText size={18} style={{ color: noteColor }} />
+                            <span className="font-mono text-sm font-bold text-white">LOG CONTENT</span>
+                          </div>
                         
                         {/* Formatting Toolbar */}
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('**', '**', 'bold text')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Bold (Ctrl+B)"
                           >
-                            <Bold size={14} />
+                            <Bold size={14} className="text-white" />
                           </button>
                           
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('*', '*', 'italic text')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Italic (Ctrl+I)"
                           >
-                            <Italic size={14} />
+                            <Italic size={14} className="text-white" />
                           </button>
                           
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('<u>', '</u>', 'underlined text')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Underline (Ctrl+U)"
                           >
-                            <Underline size={14} />
+                            <Underline size={14} className="text-white" />
                           </button>
                           
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('==', '==', 'highlighted text')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Highlight"
                           >
-                            <Highlighter size={14} />
+                            <Highlighter size={14} className="text-white" />
                           </button>
                           
-                          <div className="w-px h-5 bg-gray-600" />
+                          <div className="w-px h-5 bg-white" />
                           
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('- ', '', '')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Bullet List"
                           >
-                            <List size={14} />
+                            <List size={14} className="text-white" />
                           </button>
                           
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('1. ', '', '')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Numbered List"
                           >
-                            <ListOrdered size={14} />
+                            <ListOrdered size={14} className="text-white" />
                           </button>
                           
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('> ', '', '')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Quote"
                           >
-                            <Quote size={14} />
+                            <Quote size={14} className="text-white" />
                           </button>
                           
                           <button
                             type="button"
                             onClick={() => insertFormattingHandler('`', '`', 'code')}
-                            className="p-1.5 bg-gray-700 border border-gray-600 text-gray-300 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
+                            className="p-1.5 bg-black border-2 border-white text-white hover:scale-105 transition-transform rounded"
                             title="Inline Code (Ctrl+`)"
                           >
-                            <Code size={14} />
+                            <Code size={14} className="text-white" />
                           </button>
                           
-                          <div className="w-px h-5 bg-gray-600" />
+                          <div className="w-px h-5 bg-white" />
                           
                           <button
                             type="button"
                             onClick={() => setShowPreview(!showPreview)}
-                            className={`p-1.5 bg-gray-700 border border-gray-600 transition-colors ${
+                            className={`p-1.5 bg-black border-2 border-white transition-transform hover:scale-105 rounded ${
                               showPreview 
-                                ? 'text-cyan-400 border-cyan-400' 
-                                : 'text-gray-300 hover:text-cyan-400 hover:border-cyan-400'
+                                ? 'text-white' 
+                                : 'text-white'
                             }`}
                             title="Toggle Preview"
                           >
-                            {showPreview ? <EyeOff size={14} /> : <Eye size={14} />}
+                            {showPreview ? <EyeOff size={14} className="text-white" /> : <Eye size={14} className="text-white" />}
                           </button>
                         </div>
                       </div>
@@ -352,7 +373,7 @@ const NoteModal = ({
                       {/* Content Area */}
                       <div className="flex-1 flex relative z-10 overflow-hidden">
                         {/* Editor Side */}
-                        <div className={`${showPreview ? 'w-1/2 border-r-2 border-gray-700' : 'w-full'} flex flex-col`}>
+                        <div className={`${showPreview ? 'w-1/2' : 'w-full'} flex flex-col`}>
                           <textarea
                             id="content-textarea"
                             value={noteData.content}
@@ -384,7 +405,13 @@ Use the toolbar above or keyboard shortcuts:
                         
                         {/* Preview Side */}
                         {showPreview && (
-                          <div className="w-1/2 overflow-y-auto p-4 bg-gray-900">
+                          <div 
+                            className="w-1/2 overflow-y-auto p-4 border-l-2 border-white"
+                            style={{
+                              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                              borderColor: noteColor
+                            }}
+                          >
                             <div className="font-mono text-white leading-relaxed text-base">
                               <MarkdownPreview content={noteData.content || '*Start typing to see preview...*'} />
                             </div>
@@ -398,35 +425,44 @@ Use the toolbar above or keyboard shortcuts:
                   <div className="lg:col-span-1 overflow-y-auto">
                     <div className="space-y-2">
                       {/* Tags */}
-                      <div className="bg-gray-800 border-2 border-gray-600 p-2">
-                        <label className="block text-xs font-mono font-bold text-cyan-400 mb-1">
-                          <Tag size={12} className="inline mr-1" />
+                      <div 
+                        className="border-2 border-white p-3 rounded-lg"
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          borderColor: noteColor,
+                          boxShadow: `0 0 10px rgba(${noteRgb}, 0.3)`
+                        }}
+                      >
+                        <label className="block text-xs font-mono font-bold text-white mb-2">
+                          <Tag size={12} className="inline mr-1" style={{ color: noteColor }} />
                           TAGS
                         </label>
                         <input
                           value={noteData.tags}
                           onChange={(e) => setNoteData({ ...noteData, tags: e.target.value })}
                           placeholder="work, ideas..."
-                          className="w-full px-2 py-1 bg-gray-900 border-2 border-gray-600 text-white font-mono text-xs focus:border-cyan-400 focus:outline-none transition-colors"
-                          style={{ 
-                            color: '#ffffff !important',
-                            WebkitTextFillColor: '#ffffff',
-                            textFillColor: '#ffffff'
-                          }}
+                          className="w-full px-2 py-1 bg-black border border-white text-white font-mono text-xs focus:border-white focus:outline-none transition-colors rounded"
                         />
                       </div>
 
                       {/* Color Picker */}
-                      <div className="bg-gray-800 border-2 border-gray-600 p-2">
-                        <label className="block text-xs font-mono font-bold text-cyan-400 mb-1">
-                          <Palette size={12} className="inline mr-1" />
+                      <div 
+                        className="border-2 border-white p-3 rounded-lg"
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          borderColor: noteColor,
+                          boxShadow: `0 0 10px rgba(${noteRgb}, 0.3)`
+                        }}
+                      >
+                        <label className="block text-xs font-mono font-bold text-white mb-2">
+                          <Palette size={12} className="inline mr-1" style={{ color: noteColor }} />
                           COLOR
                         </label>
                         
                         {/* Current Color Display */}
                         <div className="flex items-center gap-2 mb-2">
                           <div 
-                            className="w-6 h-4 border-2 border-gray-600"
+                            className="w-6 h-4 border border-white rounded"
                             style={{ backgroundColor: noteData.color }}
                             title="Current color"
                           />
@@ -434,7 +470,7 @@ Use the toolbar above or keyboard shortcuts:
                             type="color"
                             value={noteData.color}
                             onChange={(e) => setNoteData({ ...noteData, color: e.target.value })}
-                            className="w-6 h-4 border-2 border-gray-600 bg-transparent cursor-pointer"
+                            className="w-6 h-4 border border-white bg-transparent cursor-pointer rounded"
                             title="Custom color picker"
                           />
                           <span className="text-xs font-mono text-gray-400">Custom</span>
@@ -480,9 +516,16 @@ Use the toolbar above or keyboard shortcuts:
                       </div>
 
                       {/* Archive Assignment */}
-                      <div className="bg-gray-800 border-2 border-gray-600 p-2">
-                        <label className="block text-xs font-mono font-bold text-cyan-400 mb-1">
-                          <Folder size={12} className="inline mr-1" />
+                      <div 
+                        className="border-2 border-white p-3 rounded"
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          borderColor: noteColor,
+                          boxShadow: `0 0 10px rgba(${noteRgb}, 0.3)`
+                        }}
+                      >
+                        <label className="block text-xs font-mono font-bold text-white mb-2">
+                          <Folder size={12} className="inline mr-1" style={{ color: noteColor }} />
                           ARCHIVE
                         </label>
                         <select
@@ -491,9 +534,11 @@ Use the toolbar above or keyboard shortcuts:
                             ...noteData, 
                             folderId: e.target.value ? parseInt(e.target.value) : null 
                           })}
-                          className="w-full px-2 py-1 bg-gray-900 border-2 border-gray-600 text-white font-mono text-xs focus:border-cyan-400 focus:outline-none transition-colors"
-                          style={{ 
-                            color: '#ffffff !important',
+                          className="w-full px-3 py-2 bg-black border-2 border-white text-white font-mono text-xs focus:outline-none transition-colors rounded"
+                          style={{
+                            borderColor: noteColor,
+                            boxShadow: `0 0 10px rgba(${noteRgb}, 0.3)`,
+                            color: '#ffffff',
                             WebkitTextFillColor: '#ffffff',
                             textFillColor: '#ffffff'
                           }}
@@ -508,9 +553,16 @@ Use the toolbar above or keyboard shortcuts:
                       </div>
 
                       {/* Collection Assignment */}
-                      <div className="bg-gray-800 border-2 border-gray-600 p-2">
-                        <label className="block text-xs font-mono font-bold text-cyan-400 mb-1">
-                          <BookOpen size={12} className="inline mr-1" />
+                      <div 
+                        className="border-2 border-white p-3 rounded"
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          borderColor: noteColor,
+                          boxShadow: `0 0 10px rgba(${noteRgb}, 0.3)`
+                        }}
+                      >
+                        <label className="block text-xs font-mono font-bold text-white mb-2">
+                          <BookOpen size={12} className="inline mr-1" style={{ color: noteColor }} />
                           COLLECTION
                         </label>
                         <select
@@ -519,9 +571,11 @@ Use the toolbar above or keyboard shortcuts:
                             ...noteData, 
                             notebookId: e.target.value ? parseInt(e.target.value) : null 
                           })}
-                          className="w-full px-2 py-1 bg-gray-900 border-2 border-gray-600 text-white font-mono text-xs focus:border-cyan-400 focus:outline-none transition-colors"
-                          style={{ 
-                            color: '#ffffff !important',
+                          className="w-full px-3 py-2 bg-black border-2 border-white text-white font-mono text-xs focus:outline-none transition-colors rounded"
+                          style={{
+                            borderColor: noteColor,
+                            boxShadow: `0 0 10px rgba(${noteRgb}, 0.3)`,
+                            color: '#ffffff',
                             WebkitTextFillColor: '#ffffff',
                             textFillColor: '#ffffff'
                           }}
@@ -541,10 +595,15 @@ Use the toolbar above or keyboard shortcuts:
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
-                          className="bg-gray-800 border-2 border-gray-600 p-2"
+                          className="border-2 border-white p-3 rounded"
+                          style={{
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            borderColor: noteColor,
+                            boxShadow: `0 0 10px rgba(${noteRgb}, 0.3)`
+                          }}
                         >
-                          <div className="flex items-center gap-1 mb-1">
-                            <h3 className="font-mono text-xs font-bold text-cyan-400">EXPORT</h3>
+                          <div className="flex items-center gap-1 mb-2">
+                            <h3 className="font-mono text-xs font-bold text-white">EXPORT</h3>
                           </div>
                           
                           <button
@@ -568,14 +627,15 @@ Use the toolbar above or keyboard shortcuts:
                                 showNotification('Export failed. Please try again.', 'error');
                               }
                             }}
-                            className="w-full bg-gray-900 border-2 border-cyan-400 px-2 py-1 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] font-mono font-bold text-cyan-400 text-xs"
+                            className="w-full bg-black border-2 border-white px-3 py-2 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white text-xs rounded"
                             style={{
-                              boxShadow: '0 0 5px rgba(34, 211, 238, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                              borderColor: noteColor,
+                              boxShadow: `0 0 10px rgba(${noteRgb}, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)`
                             }}
                           >
                             <div className="flex items-center justify-center gap-1">
-                              <FileDown size={10} className="text-cyan-400" />
-                              <span className="text-cyan-400">EXPORT</span>
+                              <FileDown size={12} className="text-white" />
+                              <span className="text-white">EXPORT</span>
                             </div>
                             <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
                           </button>
@@ -585,10 +645,10 @@ Use the toolbar above or keyboard shortcuts:
                   </div>
                 </div>
               </form>
-            </motion.div>
-          </div>
-
-          {/* Delete Confirmation Modal */}
+            </div>
+            </div>
+            
+            {/* Delete Confirmation Modal */}
           {showDeleteConfirm && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -629,9 +689,9 @@ Use the toolbar above or keyboard shortcuts:
                     </button>
                   </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
+              </motion.div>              </motion.div>
+            )}
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

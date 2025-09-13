@@ -108,7 +108,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
       setQuickContent('');
       setQuickTags('');
       // Keep color, folder, and notebook selections for convenience
-      setSaveStatus('LOG ARCHIVED!');
+      setSaveStatus('LOG SAVED!');
       
       setTimeout(() => setSaveStatus('TERMINAL READY'), 2000);
       
@@ -136,9 +136,15 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateNote = async (noteData) => {
+  const handleUpdateNote = async (idOrData, noteData = null) => {
     try {
-      await updateNote(activeNote.id, noteData);
+      if (noteData) {
+        // If noteData is provided, it means we're updating (idOrData is the ID)
+        await updateNote(idOrData, noteData);
+      } else {
+        // If only idOrData is provided and we have activeNote, update it
+        await updateNote(activeNote.id, idOrData);
+      }
       setIsEditModalOpen(false);
       setActiveNote(null);
     } catch (error) {
@@ -148,9 +154,15 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
   };
 
   //  fullscreen modal save 
-  const handleFullscreenSave = async (noteData) => {
+  const handleFullscreenSave = async (idOrData, noteData = null) => {
     try {
-      await createNote(noteData);
+      if (noteData) {
+        // If noteData is provided, it means we're updating (idOrData is the ID)
+        await updateNote(idOrData, noteData);
+      } else {
+        // If only idOrData is provided, it means we're creating (idOrData is the data)
+        await createNote(idOrData);
+      }
       setIsFullscreenModalOpen(false);
       
       
@@ -160,7 +172,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
       // Keep color, folder, and notebook for convenience
       
       // Update the status indicators
-      setSaveStatus('LOG ARCHIVED!');
+      setSaveStatus('LOG SAVED!');
       setTimeout(() => setSaveStatus('TERMINAL READY'), 2000);
 
     } catch (error) {
@@ -268,19 +280,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
       `}</style>
       
       <div className="notes-tab-container p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <div 
-              className="w-6 h-6 border border-gray-600" 
-              style={{ backgroundColor: tabColor }}
-            />
-            PLAYER LOGS
-          </h1>
-          <p className="text-gray-400 font-mono text-sm">
-            Quick entry terminal for creating notes, ideas and reports.
-          </p>
-        </div>
+        {/* Header - Removed PLAYER LOGS header and description */}
 
         {/* Error Display */}
         {error && (
@@ -304,40 +304,45 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
           {/* Left Side - Quick Entry Terminal (70% width) */}
           <div className="lg:col-span-7">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative min-h-full flex flex-col"
-              style={{
-                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
-              
-              <div className="relative z-10 flex flex-col h-full">
+  initial={{ opacity: 0, x: -20 }}
+  animate={{ opacity: 1, x: 0 }}
+  className="border-2 border-white/30 
+             shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] 
+             p-6 relative min-h-full flex flex-col 
+             rounded-lg bg-black/40 backdrop-blur-md"
+>
+  <div className="absolute inset-0 border-2 border-white/20 animate-pulse pointer-events-none rounded-lg" />
+  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+
+  <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
-                    <h2 className="text-xl font-mono font-bold text-white">LOG ENTRY TERMINAL</h2>
+                    <h2 className="text-3xl font-mono font-bold text-white">LOG ENTRY TERMINAL</h2>
                   </div>
                   <div className="flex items-center">
                     <button
                       onClick={toggleFullscreen}
-                      className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+                      className="bg-black border-2 border-white px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
                       style={{
-                        boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                        boxShadow: `0 0 10px rgba(255, 255, 255, 0.3), 2px 2px 0px 0px rgba(0,0,0,0)`
                       }}
                       title="Extended Terminal Mode (F11)"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                       <div className="relative z-10 flex items-center gap-2">
-                        <Maximize2 size={16} className="text-cyan-400" />
-                        <span className="text-cyan-400">EXTENDED MODE</span>
+                        <Maximize2 size={16} className="text-white" />
+                        <span className="text-white">EXTENDED MODE</span>
                       </div>
-                      <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-white" />
                     </button>
                   </div>
                 </div>
+
+                {/* Description */}
+                <p className="text-white font-mono text-sm mb-4">
+                  Quick entry terminal for creating notes, ideas and reports.
+                </p>
 
                 {/* Terminal Status - moved below header */}
                 <div className="flex justify-end mb-4">
@@ -346,10 +351,10 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                       saveStatus === 'TERMINAL READY' ? 'bg-green-400' :
                       saveStatus === 'INPUT DETECTED...' ? 'bg-yellow-400' :
                       saveStatus === 'TRANSMITTING...' ? 'bg-blue-400' :
-                      saveStatus === 'LOG ARCHIVED!' ? 'bg-green-400' :
+                      saveStatus === 'LOG SAVED!' ? 'bg-green-400' :
                       'bg-red-400'
                     }`} />
-                    <span className="text-cyan-400">{saveStatus}</span>
+                    <span className="text-green-400">{saveStatus}</span>
                   </div>
                 </div>
 
@@ -363,12 +368,13 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                       onChange={(e) => setQuickTitle(e.target.value)}
                       placeholder="Enter title..."
                       spellCheck={false}
-                      className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
+                      className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-black border-2 border-white font-mono text-sm focus:outline-none rounded"
                       style={{ 
                         color: '#ffffff !important',
                         WebkitTextFillColor: '#ffffff !important',
                         textFillColor: '#ffffff !important',
-                        caretColor: '#ffffff !important'
+                        caretColor: '#ffffff !important',
+                        boxShadow: `0 0 10px rgba(255, 255, 255, 0.2)`
                       }}
                       autoFocus
                     />
@@ -386,158 +392,207 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                       onChange={(e) => setQuickContent(e.target.value)}
                       placeholder="Enter content here..."
                       spellCheck={false}
-                      className="w-full px-4 py-3 transition-colors resize-none placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none flex-1"
+                      className="w-full px-4 py-3 transition-colors resize-none placeholder-gray-500 bg-black border-2 border-white font-mono text-sm focus:outline-none flex-1 rounded"
                       style={{ 
                         color: '#ffffff !important',
                         WebkitTextFillColor: '#ffffff !important',
                         textFillColor: '#ffffff !important',
-                        minHeight: '400px',
-                        caretColor: '#22d3ee !important'
+                        minHeight: '500px',
+                        caretColor: '#22d3ee !important',
+                        boxShadow: `0 0 10px rgba(255, 255, 255, 0.2)`
                       }}
                     />
                   </div>
 
-                  {/* Tags Input */}
-                  <div>
-                    <label className="block text-sm font-mono text-gray-400 mb-2">CLASSIFICATION TAGS</label>
-                    <input
-                      value={quickTags}
-                      onChange={(e) => setQuickTags(e.target.value)}
-                      placeholder="personal, work, idea, important..."
-                      spellCheck={false}
-                      className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                      style={{ 
-                        color: '#ffffff !important',
-                        WebkitTextFillColor: '#ffffff !important',
-                        textFillColor: '#ffffff !important',
-                        caretColor: '#ffffff !important'
-                      }}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Side - Color Picker */}
                     <div>
-                      <label className="block text-sm font-mono text-gray-400 mb-2 flex items-center gap-2">
+                      <label className="block text-sm font-mono text-gray-400 mb-3 flex items-center gap-2">
                         <Palette size={14} />
-                        LOG COLOR
+                        LOG COLOR SIGNATURE
                       </label>
-                      <div className="bg-gray-900 border-2 border-gray-600 p-3">
-                        <div className="flex items-center gap-2 mb-3">
+                      <div 
+                        className="border-2 border-white p-4 rounded-lg"
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                          boxShadow: `0 0 10px rgba(255, 255, 255, 0.2)`
+                        }}
+                      >
+                        {/* Selected Color Display */}
+                        <div className="flex items-center gap-3 mb-4 p-2 border border-gray-600 rounded bg-black/40">
                           <div 
-                            className="w-6 h-6 border-2 border-gray-500"
-                            style={{ backgroundColor: quickColor }}
+                            className="w-8 h-8 border-2 border-white rounded-full flex-shrink-0"
+                            style={{ 
+                              backgroundColor: quickColor,
+                              boxShadow: `0 0 15px ${quickColor}60`
+                            }}
                           />
-                          <span className="text-xs font-mono text-gray-400">Selected</span>
+                          <div className="flex-1">
+                            <div className="text-xs font-mono text-gray-400 uppercase">ACTIVE COLOR</div>
+                            <div className="text-sm font-mono text-white font-bold">{quickColor.toUpperCase()}</div>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-5 gap-1">
-                          {colorOptions.map((color, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setQuickColor(color)}
-                              className={`w-6 h-6 border-2 transition-all hover:scale-110 ${
-                                quickColor === color ? 'border-white' : 'border-gray-600'
-                              }`}
-                              style={{ backgroundColor: color }}
-                              title={`Select ${color}`}
+                        
+                        {/* Color Palette Grid */}
+                        <div className="mb-4">
+                          <div className="text-xs font-mono text-gray-400 mb-2 uppercase">PRESET SIGNATURES</div>
+                          <div className="grid grid-cols-5 gap-2">
+                            {colorOptions.map((color, index) => (
+                              <button
+                                key={index}
+                                onClick={() => setQuickColor(color)}
+                                className={`w-8 h-8 border-2 transition-all hover:scale-110 hover:rotate-12 rounded-lg relative group ${
+                                  quickColor === color ? 'border-white' : 'border-gray-600'
+                                }`}
+                                style={{ 
+                                  backgroundColor: color,
+                                  boxShadow: quickColor === color ? `0 0 15px ${color}80` : `0 0 8px ${color}40`
+                                }}
+                                title={`Color: ${color}`}
+                              >
+                                {quickColor === color && (
+                                  <div className="absolute inset-0 rounded-lg border-2 border-white animate-pulse" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Custom Color Picker */}
+                        <div className="border border-gray-600 p-2 rounded bg-black/40">
+                          <div className="text-xs font-mono text-gray-400 mb-2 uppercase">CUSTOM SIGNATURE</div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={quickColor}
+                              onChange={(e) => setQuickColor(e.target.value)}
+                              className="w-8 h-8 border-2 border-gray-500 bg-transparent cursor-pointer rounded"
+                              style={{
+                                boxShadow: `0 0 8px ${quickColor}40`
+                              }}
                             />
-                          ))}
-                        </div>
-                        <div className="mt-2 flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={quickColor}
-                            onChange={(e) => setQuickColor(e.target.value)}
-                            className="w-6 h-6 border-2 border-gray-600 bg-transparent cursor-pointer"
-                          />
-                          <span className="text-xs font-mono text-gray-400">Custom</span>
+                            <input
+                              type="text"
+                              value={quickColor}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (/^#[0-9A-Fa-f]{0,6}$/.test(value)) {
+                                  setQuickColor(value);
+                                }
+                              }}
+                              className="flex-1 px-2 py-1 bg-black border border-gray-600 text-white font-mono text-xs rounded focus:outline-none focus:border-white"
+                              placeholder="#FFFFFF"
+                              maxLength={7}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Right Side - Archive/Collection + Centered Buttons */}
-                    <div className="flex flex-col">
-                      <div className="space-y-4 flex-1">
-                        {/* Archive Assignment */}
-                        <div>
-                          <label className="block text-sm font-mono text-gray-400 mb-2 flex items-center gap-2">
-                            <Archive size={14} />
-                            ARCHIVE
-                          </label>
-                          <select
-                            value={quickFolderId}
-                            onChange={(e) => setQuickFolderId(e.target.value)}
-                            className="w-full px-3 py-3 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                            style={{ 
-                              color: '#ffffff !important',
-                              WebkitTextFillColor: '#ffffff !important'
-                            }}
-                          >
-                            <option value="">No Archive</option>
-                            {folders.map(folder => (
-                              <option key={folder.id} value={folder.id}>
-                                {folder.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Collection Assignment */}
-                        <div>
-                          <label className="block text-sm font-mono text-gray-400 mb-2 flex items-center gap-2">
-                            <FileText size={14} />
-                            COLLECTION
-                          </label>
-                          <select
-                            value={quickNotebookId}
-                            onChange={(e) => setQuickNotebookId(e.target.value)}
-                            className="w-full px-3 py-3 bg-gray-900 border-2 border-gray-600 font-mono text-sm focus:border-cyan-400 focus:outline-none"
-                            style={{ 
-                              color: '#ffffff !important',
-                              WebkitTextFillColor: '#ffffff !important'
-                            }}
-                          >
-                            <option value="">No Collection</option>
-                            {notebooks.map(notebook => (
-                              <option key={notebook.id} value={notebook.id}>
-                                {notebook.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                    {/* Right Side - Tags, Archive/Collection + Action Buttons */}
+                    <div className="space-y-4">
+                      {/* Tags Input - moved here above dropdowns */}
+                      <div>
+                        <label className="block text-sm font-mono text-gray-400 mb-2">CLASSIFICATION TAGS</label>
+                        <input
+                          value={quickTags}
+                          onChange={(e) => setQuickTags(e.target.value)}
+                          placeholder="personal, work, idea, important..."
+                          spellCheck={false}
+                          className="w-full px-4 py-3 transition-colors placeholder-gray-500 bg-black border-2 border-white font-mono text-sm focus:outline-none rounded"
+                          style={{ 
+                            color: '#ffffff !important',
+                            WebkitTextFillColor: '#ffffff !important',
+                            textFillColor: '#ffffff !important',
+                            caretColor: '#ffffff !important',
+                            boxShadow: `0 0 10px rgba(255, 255, 255, 0.2)`
+                          }}
+                        />
                       </div>
 
-                      {/* Action Buttons under dropdowns */}
-                      <div className="flex gap-3 pt-4 justify-center">
+                      {/* Archive Assignment */}
+                      <div>
+                        <label className="block text-sm font-mono text-gray-400 mb-2 flex items-center gap-2">
+                          <Archive size={14} />
+                          ARCHIVE
+                        </label>
+                        <select
+                          value={quickFolderId}
+                          onChange={(e) => setQuickFolderId(e.target.value)}
+                          className="w-full px-3 py-3 bg-black border-2 border-white font-mono text-sm focus:outline-none rounded"
+                          style={{ 
+                            color: '#ffffff !important',
+                            WebkitTextFillColor: '#ffffff !important',
+                            boxShadow: `0 0 10px rgba(255, 255, 255, 0.2)`
+                          }}
+                        >
+                          <option value="">No Archive</option>
+                          {folders.map(folder => (
+                            <option key={folder.id} value={folder.id}>
+                              {folder.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Collection Assignment */}
+                      <div>
+                        <label className="block text-sm font-mono text-gray-400 mb-2 flex items-center gap-2">
+                          <FileText size={14} />
+                          COLLECTION
+                        </label>
+                        <select
+                          value={quickNotebookId}
+                          onChange={(e) => setQuickNotebookId(e.target.value)}
+                          className="w-full px-3 py-3 bg-black border-2 border-white font-mono text-sm focus:outline-none rounded"
+                          style={{ 
+                            color: '#ffffff !important',
+                            WebkitTextFillColor: '#ffffff !important',
+                            boxShadow: `0 0 10px rgba(255, 255, 255, 0.2)`
+                          }}
+                        >
+                          <option value="">No Collection</option>
+                          {notebooks.map(notebook => (
+                            <option key={notebook.id} value={notebook.id}>
+                              {notebook.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Action Buttons - Made the same size */}
+                      <div className="grid grid-cols-2 gap-3">
                         <button
                           onClick={handleQuickSave}
                           disabled={isSaving || (!quickTitle.trim() && !quickContent.trim())}
-                          className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                          className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden rounded"
                           style={{
-                            boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                            boxShadow: `0 0 10px rgba(255, 255, 255, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                            minHeight: '48px'
                           }}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
-                          <div className="relative z-10 flex items-center gap-2">
-                            <Save size={16} className="text-cyan-400" />
-                            <span className="text-cyan-400">{isSaving ? 'ARCHIVING...' : 'ARCHIVE LOG'}</span>
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                          <div className="relative z-10 flex items-center justify-center gap-2">
+                            <Save size={16} className="text-white" />
+                            <span className="text-white text-sm">{isSaving ? 'SAVING...' : 'SAVE LOG ENTRY'}</span>
                           </div>
-                          <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-white" />
                         </button>
 
                         <button
                           onClick={handleClearForm}
-                          className="bg-gray-900 border border-cyan-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+                          className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
                           style={{
-                            boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                            boxShadow: `0 0 10px rgba(255, 255, 255, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)`,
+                            minHeight: '48px'
                           }}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
-                          <div className="relative z-10 flex items-center gap-2">
-                            <X size={16} className="text-cyan-400" />
-                            <span className="text-cyan-400">CLEAR TERMINAL</span>
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                          <div className="relative z-10 flex items-center justify-center gap-2">
+                            <X size={16} className="text-white" />
+                            <span className="text-white text-sm">CLEAR TERMINAL</span>
                           </div>
-                          <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-white" />
                         </button>
                       </div>
                     </div>
@@ -550,16 +605,15 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
           {/* Right Side - Recent Activity Feed (30% width) */}
           <div className="lg:col-span-3">
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative h-full"
-              style={{
-                boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="absolute inset-0 border-2 border-cyan-400 opacity-30 animate-pulse pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
+  initial={{ opacity: 0, x: -20 }}
+  animate={{ opacity: 1, x: 0 }}
+  className="border-2 border-white/30 
+             shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] 
+             p-6 relative min-h-full flex flex-col 
+             rounded-lg bg-black/40 backdrop-blur-md"
+>
+  <div className="absolute inset-0 border-2 border-white/20 animate-pulse pointer-events-none rounded-lg" />
+  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
               
               <div className="relative z-10">
                 {/* Header */}
@@ -577,7 +631,7 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                     >
                       <FileText size={24} className="text-cyan-400" />
                     </motion.div>
-                    <div className="text-sm">Accessing archives...</div>
+                    <div className="text-sm">Accessing logs...</div>
                   </div>
                 ) : recentNotes.length > 0 ? (
                   <div className="space-y-3">
@@ -595,19 +649,19 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                       return (
                         <motion.div
                           key={note.id || note.filename || note.title}
-                          className="bg-gray-900 border p-3 cursor-pointer group transition-all duration-300 hover:scale-[1.02] relative overflow-hidden"
+                          className="border-2 border-white p-3 cursor-pointer group transition-all duration-300 hover:scale-[1.02] relative overflow-hidden rounded-lg"
                           style={{
-                            borderColor: noteColor,
-                            boxShadow: `0 0 5px rgba(${rgbColor}, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)`,
+                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                            boxShadow: `0 0 25px rgba(${rgbColor}, 0.8), 2px 2px 0px 0px rgba(0,0,0,1)`,
                           }}
                           whileHover={{
-                            boxShadow: `0 0 10px rgba(${rgbColor}, 0.6), 1px 1px 0px 0px rgba(0,0,0,1)`
+                            scale: 1.02,
+                            y: -2,
+                            boxShadow: `0 0 40px rgba(${rgbColor}, 1), 2px 2px 0px 0px rgba(0,0,0,1)`
                           }}
+                          whileTap={{ scale: 0.98 }}
                           onClick={() => handleEditNote(note)}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity" style={{ backgroundColor: noteColor }} />
-                          
                           <div className="relative z-10 flex items-start gap-2">
                             <FileText size={14} style={{ color: noteColor }} className="mt-0.5 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -632,17 +686,17 @@ const NotesTab = ({ tabColor = '#22D3EE' }) => {
                     <div className="pt-4 border-t border-gray-600">
                       <button 
                         onClick={handleViewAllArchives}
-                        className="w-full bg-gray-900 border border-cyan-400 px-3 py-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-cyan-400 overflow-hidden"
+                        className="w-full bg-black border-2 border-white px-3 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
                         style={{
-                          boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                          boxShadow: `0 0 10px rgba(255, 255, 255, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)`
                         }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                         <div className="relative z-10 flex items-center justify-center gap-2">
-                          <Eye size={16} className="text-cyan-400" />
-                          <span className="text-cyan-400">ACCESS ALL LOGS</span>
+                          <Eye size={16} className="text-white" />
+                          <span className="text-white">ACCESS ALL LOGS</span>
                         </div>
-                        <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-white" />
                       </button>
                     </div>
                   </div>

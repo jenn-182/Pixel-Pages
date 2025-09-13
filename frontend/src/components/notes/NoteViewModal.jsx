@@ -25,21 +25,21 @@ const NoteViewModal = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-75 z-[9999] flex items-center justify-center p-2"
+          className="fixed inset-0 bg-black z-[9999] flex flex-col p-2"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="w-full max-w-7xl max-h-[99vh] overflow-hidden relative"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            className="w-full h-full overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Main Container */}
             <div 
-              className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
+              className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg h-full flex flex-col"
               style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
                 borderColor: noteColor,
                 boxShadow: `0 0 20px rgba(${noteRgb}, 0.6), 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
@@ -102,16 +102,30 @@ const NoteViewModal = ({
               </div>
 
               {/* Content */}
-              <div className="relative z-10 max-h-[calc(99vh-10rem)] overflow-y-auto">
+              <div className="flex-1 overflow-y-auto relative z-10">
                 <div className="p-8">
                   {note.content ? (
-                    <div className="bg-black border-2 border-gray-600 p-8 rounded">
+                    <div 
+                      className="border-2 border-white p-8 rounded"
+                      style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        borderColor: noteColor,
+                        boxShadow: `0 0 15px rgba(${noteRgb}, 0.4)`
+                      }}
+                    >
                       <div className="text-white font-mono text-lg leading-loose max-w-none">
                         <MarkdownPreview content={note.content} />
                       </div>
                     </div>
                   ) : (
-                    <div className="border border-gray-600 p-8 text-center bg-black">
+                    <div 
+                      className="border-2 border-white p-8 text-center rounded"
+                      style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        borderColor: noteColor,
+                        boxShadow: `0 0 15px rgba(${noteRgb}, 0.4)`
+                      }}
+                    >
                       <FileText size={48} className="text-gray-500 mx-auto mb-3" />
                       <p className="text-gray-400 font-mono">This log entry is empty</p>
                     </div>
@@ -121,7 +135,13 @@ const NoteViewModal = ({
 
               {/* Footer */}
               {(note.createdAt || note.updatedAt) && (
-                <div className="border-t-2 border-white p-3 text-xs font-mono text-gray-400 bg-black bg-opacity-50">
+                <div 
+                  className="border-t-2 border-white p-3 text-xs font-mono text-gray-400 flex-shrink-0"
+                  style={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: noteColor
+                  }}
+                >
                   <div className="flex justify-between">
                     {note.createdAt && (
                       <span>Created: {new Date(note.createdAt).toLocaleString()}</span>

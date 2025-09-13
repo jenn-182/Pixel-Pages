@@ -600,7 +600,7 @@ const TimeManagementMatrix = ({ tabColor, tabColorRgb, onClose }) => {
                     {stats.leastSkill.toUpperCase()}
                   </div>
                   <div className="text-xs font-mono text-gray-400">
-                    LEAST SKILL
+                    LEAST TIME SPENT
                   </div>
                 </div>
               </div>

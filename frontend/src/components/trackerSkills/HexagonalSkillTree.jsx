@@ -278,7 +278,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
       }}
     >
       {/* Background effects */}
-      <div className="absolute inset-0 border-2 opacity-20 animate-pulse pointer-events-none" 
+      <div className="absolute inset-0 opacity-20 pointer-events-none" 
            style={{ borderColor: tabColor }} />
       <div className="absolute inset-0 pointer-events-none opacity-10"
            style={{ 
@@ -417,13 +417,13 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                   type="color"
                   value={newBranch.color}
                   onChange={(e) => setNewBranch(prev => ({ ...prev, color: e.target.value }))}
-                  className="w-16 h-10 border-2 bg-black cursor-pointer"
+                  className="w-16 h-10 border-2 bg-black cursor-pointer rounded"
                   style={{ borderColor: tabColor }}
                 />
               </div>
               <button
                 onClick={handleCreateBranch}
-                className="px-4 py-2 border-2 bg-black font-mono font-bold text-sm hover:scale-105 transition-transform"
+                className="px-4 py-2 border-2 bg-black font-mono font-bold text-sm hover:scale-105 transition-transform rounded"
                 style={{ 
                   borderColor: tabColor,
                   color: tabColor,

@@ -144,7 +144,7 @@ const NotebookView = ({
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative rounded-lg"
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative rounded-lg"
            style={{
              backgroundColor: 'rgba(0, 0, 0, 0.4)'
            }}>
@@ -153,7 +153,7 @@ const NotebookView = ({
             <div className="flex items-center gap-4">
               <button
                 onClick={onBack}
-                className="bg-black border-2 border-white p-2 font-mono font-bold text-white hover:scale-105 transition-transform cursor-pointer"
+                className="bg-black border-2 border-white/60 p-2 font-mono font-bold text-white hover:scale-105 transition-transform cursor-pointer"
                 title="Back to Archives"
               >
                 <ArrowLeft size={16} />
@@ -192,7 +192,7 @@ const NotebookView = ({
           <div className="flex flex-col lg:flex-row gap-4 items-start justify-between">
             <button
               onClick={handleCreateNote}
-              className="bg-black border-2 border-white px-4 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer"
+              className="bg-black border-2 border-white/60 px-4 py-2 font-mono font-bold text-white hover:scale-105 transition-transform flex items-center gap-2 cursor-pointer"
             >
               <Plus size={16} />
               <FileText size={16} />
@@ -201,7 +201,7 @@ const NotebookView = ({
             
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="bg-black border-2 border-white px-3 py-2 font-mono font-bold text-white hover:scale-105 hover:border-red-500 hover:text-red-400 transition-all flex items-center gap-2 cursor-pointer text-sm"
+              className="bg-black border-2 border-white/60 px-3 py-2 font-mono font-bold text-white hover:scale-105 hover:border-red-500 hover:text-red-400 transition-all flex items-center gap-2 cursor-pointer text-sm"
               title="Delete Collection"
             >
               <Trash2 size={14} />
@@ -212,7 +212,7 @@ const NotebookView = ({
       </div>
 
       {/* Collection Content */}
-      <div className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
            style={{
              backgroundColor: 'rgba(0, 0, 0, 0.4)'
            }}>

@@ -6,7 +6,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    priority: 'medium',
+    priority: '',
     dueDate: '',
     tags: '',
     taskListId: null
@@ -20,7 +20,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
       setFormData({
         title: editTask.title || '',
         description: editTask.description || '',
-        priority: editTask.priority || 'medium',
+        priority: editTask.priority || '',
         dueDate: editTask.dueDate ? editTask.dueDate.split('T')[0] : '',
         tags: editTask.tags || '',
         taskListId: editTask.taskListId || null
@@ -29,7 +29,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
       setFormData({
         title: '',
         description: '',
-        priority: 'medium',
+        priority: '',
         dueDate: '',
         tags: '',
         taskListId: null
@@ -59,7 +59,13 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
       taskListId: formData.taskListId === '' ? null : formData.taskListId
     };
 
-    onSubmit(taskData);
+    if (editTask) {
+      // For existing tasks, pass the ID and data separately
+      onSubmit(editTask.id, taskData);
+    } else {
+      // For new tasks, just pass the data
+      onSubmit(taskData);
+    }
     onClose();
     setErrors({});
   };
@@ -86,40 +92,50 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
     <>
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 pt-20"
-          style={{ zIndex: 2147483647 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-16"
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: -50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            exit={{ opacity: 0, scale: 0.95, y: -50 }}
             transition={{ duration: 0.2 }}
-            className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative w-full max-w-lg overflow-hidden rounded-lg"
             style={{
-              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)',
-              zIndex: 2147483647
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+              boxShadow: '0 0 20px rgba(255, 255, 255, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="absolute inset-0 border-2 border-white/60 opacity-20 animate-pulse pointer-events-none rounded-lg" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+            
             {/* Header */}
-            <div className="bg-gray-900 px-6 py-4 border-b-2 border-cyan-400 flex items-center justify-between">
+            <div className="relative z-10 flex items-center justify-between p-4 border-b-2 border-white">
               <h2 className="text-xl font-mono font-bold text-white">
                 {editTask ? 'EDIT MISSION' : 'NEW MISSION'}
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="bg-black border-2 border-white/60 px-3 py-2 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                style={{
+                  boxShadow: '0 0 10px rgba(255, 255, 255, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                }}
               >
-                <X size={24} />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                <div className="relative z-10 flex items-center gap-2">
+                  <X size={16} className="text-white" />
+                  <span className="text-white">CLOSE</span>
+                </div>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-white" />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-gray-800">
+            <form onSubmit={handleSubmit} className="relative z-10 p-4 space-y-4">
               {/* Title */}
               <div>
-                <label className="block text-sm font-mono font-bold text-cyan-400 mb-2">
+                <label className="block text-sm font-mono font-bold text-white mb-2">
                   MISSION NAME
                 </label>
                 <input
@@ -127,12 +143,19 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
                   placeholder="Enter mission name..."
-                  className={`w-full bg-gray-900 border-2 text-white px-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400 ${
-                    errors.title ? 'border-red-500' : 'border-gray-600'
+                  spellCheck={false}
+                  className={`w-full px-3 py-2 transition-colors placeholder-gray-500 bg-black border-2 border-white/60 font-mono text-sm focus:outline-none rounded ${
+                    errors.title ? 'border-red-400' : ''
                   }`}
+                  style={{ 
+                    color: '#ffffff !important',
+                    WebkitTextFillColor: '#ffffff !important',
+                    caretColor: '#ffffff !important',
+                    boxShadow: '0 0 10px rgba(255, 255, 255, 0.2)'
+                  }}
                 />
                 {errors.title && (
-                  <p className="text-red-400 text-xs font-mono mt-1 flex items-center">
+                  <p className="text-red-400 text-xs font-mono mt-2 flex items-center">
                     <AlertCircle size={12} className="mr-1" />
                     {errors.title}
                   </p>
@@ -141,7 +164,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-mono font-bold text-cyan-400 mb-2 flex items-center">
+                <label className="block text-sm font-mono font-bold text-white mb-2 flex items-center">
                   <FileText size={16} className="mr-2" />
                   MISSION DETAILS
                 </label>
@@ -150,34 +173,44 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
                   onChange={(e) => handleChange('description', e.target.value)}
                   placeholder="Optional mission details..."
                   rows="3"
-                  className="w-full bg-gray-900 border-2 border-gray-600 text-white px-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400 resize-none"
+                  spellCheck={false}
+                  className="w-full px-3 py-2 transition-colors placeholder-gray-500 bg-black border-2 border-white/60 font-mono text-sm focus:outline-none resize-none rounded"
+                  style={{ 
+                    color: '#ffffff !important',
+                    WebkitTextFillColor: '#ffffff !important',
+                    caretColor: '#ffffff !important',
+                    boxShadow: '0 0 10px rgba(255, 255, 255, 0.2)'
+                  }}
                 />
               </div>
 
               {/* Priority & Due Date Row */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Priority */}
                 <div>
-                  <label className="block text-sm font-mono font-bold text-cyan-400 mb-2">
+                  <label className="block text-sm font-mono font-bold text-white mb-2">
                     PRIORITY LEVEL
                   </label>
                   <select
                     value={formData.priority}
                     onChange={(e) => handleChange('priority', e.target.value)}
-                    className="w-full bg-gray-900 border-2 border-gray-600 text-white px-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3 py-2 bg-black border-2 border-white/60 font-mono text-sm focus:outline-none rounded"
                     style={{
-                      color: getPriorityColor(formData.priority)
+                      color: getPriorityColor(formData.priority),
+                      WebkitTextFillColor: getPriorityColor(formData.priority),
+                      boxShadow: '0 0 10px rgba(255, 255, 255, 0.2)'
                     }}
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <option value="" style={{ color: '#ffffff' }}>No Priority</option>
+                    <option value="low" style={{ color: '#10B981' }}>Low Priority</option>
+                    <option value="medium" style={{ color: '#F59E0B' }}>Medium Priority</option>
+                    <option value="high" style={{ color: '#EF4444' }}>High Priority</option>
                   </select>
                 </div>
 
                 {/* Due Date */}
                 <div>
-                  <label className="block text-sm font-mono font-bold text-cyan-400 mb-2 flex items-center">
+                  <label className="block text-sm font-mono font-bold text-white mb-2 flex items-center">
                     <Calendar size={16} className="mr-2" />
                     DEADLINE
                   </label>
@@ -185,23 +218,34 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
                     type="date"
                     value={formData.dueDate}
                     onChange={(e) => handleChange('dueDate', e.target.value)}
-                    className="w-full bg-gray-900 border-2 border-gray-600 text-white px-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3 py-2 bg-black border-2 border-white/60 font-mono text-sm focus:outline-none rounded"
+                    style={{ 
+                      color: '#ffffff !important',
+                      WebkitTextFillColor: '#ffffff !important',
+                      caretColor: '#ffffff !important',
+                      boxShadow: '0 0 10px rgba(255, 255, 255, 0.2)'
+                    }}
                   />
                 </div>
               </div>
 
               {/* Task List */}
               <div>
-                <label className="block text-sm font-mono font-bold text-cyan-400 mb-2 flex items-center">
+                <label className="block text-sm font-mono font-bold text-white mb-2 flex items-center">
                   <FolderOpen size={16} className="mr-2" />
                   OPERATION
                 </label>
                 <select
                   value={formData.taskListId || ''}
                   onChange={(e) => handleChange('taskListId', e.target.value ? parseInt(e.target.value) : null)}
-                  className="w-full bg-gray-900 border-2 border-gray-600 text-white px-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400"
+                  className="w-full px-3 py-2 bg-black border-2 border-white/60 font-mono text-sm focus:outline-none rounded"
+                  style={{ 
+                    color: '#ffffff !important',
+                    WebkitTextFillColor: '#ffffff !important',
+                    boxShadow: '0 0 10px rgba(255, 255, 255, 0.2)'
+                  }}
                 >
-                  <option value="">General Player Missions</option>
+                  <option value="">Player Missions</option>
                   {taskLists.map(list => (
                     <option key={list.id} value={list.id}>
                       {list.name}
@@ -212,7 +256,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
 
               {/* Tags */}
               <div>
-                <label className="block text-sm font-mono font-bold text-cyan-400 mb-2 flex items-center">
+                <label className="block text-sm font-mono font-bold text-white mb-2 flex items-center">
                   <Tag size={16} className="mr-2" />
                   MISSION TAGS
                 </label>
@@ -221,27 +265,50 @@ const TaskModal = ({ isOpen, onClose, onSubmit, taskLists = [], editTask = null 
                   value={formData.tags}
                   onChange={(e) => handleChange('tags', e.target.value)}
                   placeholder="to-do, ideas, work..."
-                  className="w-full bg-gray-900 border-2 border-gray-600 text-white px-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-400"
+                  spellCheck={false}
+                  className="w-full px-3 py-2 bg-black border-2 border-white/60 font-mono text-sm focus:outline-none rounded"
+                  style={{ 
+                    color: '#ffffff !important',
+                    WebkitTextFillColor: '#ffffff !important',
+                    caretColor: '#ffffff !important',
+                    boxShadow: '0 0 10px rgba(255, 255, 255, 0.2)'
+                  }}
                 />
-                <p className="text-gray-400 text-xs font-mono mt-1">
+                <p className="text-gray-400 text-xs font-mono mt-2">
                   Separate tags with commas
                 </p>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-2 mt-auto">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 border-2 border-gray-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] font-mono font-bold"
+                  className="flex-1 bg-black border-2 border-white/60 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 10px rgba(255, 255, 255, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
                 >
-                  ABORT MISSION
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                  <div className="relative z-10 flex items-center justify-center gap-2">
+                    <X size={16} className="text-white" />
+                    <span className="text-white">ABORT</span>
+                  </div>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-white" />
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] font-mono font-bold"
+                  className="flex-1 bg-black border-2 border-white/60 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 10px rgba(255, 255, 255, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
                 >
-                  {editTask ? 'UPDATE' : 'DEPLOY'} MISSION
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                  <div className="relative z-10 flex items-center justify-center gap-2">
+                    <Calendar size={16} className="text-white" />
+                    <span className="text-white">{editTask ? 'UPDATE' : 'DEPLOY'}</span>
+                  </div>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-white" />
                 </button>
               </div>
             </form>

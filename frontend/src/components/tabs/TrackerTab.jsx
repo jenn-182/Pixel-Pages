@@ -161,7 +161,7 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="border-2 border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg"
+            className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg"
             style={{
               backgroundColor: 'rgba(0, 0, 0, 0.4)', // Less translucent, more opaque
               boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)', // Remove glow, keep drop shadow
