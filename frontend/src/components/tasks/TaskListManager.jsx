@@ -50,7 +50,7 @@ const TaskListManager = ({ taskLists, onCreateTaskList, onDeleteTaskList, onSele
         <div className="mb-6">
           <h3 className="text-xl font-mono font-bold text-white flex items-center mb-2">
             <List className="mr-2" size={20} />
-            MISSION OPERATIONS
+            OPERATIONS
           </h3>
           <p className="text-sm font-mono text-gray-400">
             Organize missions into separate operations.

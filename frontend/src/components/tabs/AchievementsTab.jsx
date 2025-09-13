@@ -13,7 +13,8 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
   const [userStats, setUserStats] = useState({});
   const [selectedAchievement, setSelectedAchievement] = useState(null);
   const [lockedSortBy, setLockedSortBy] = useState('rarity');
-const [showLockedAchievements, setShowLockedAchievements] = useState(false); 
+  const [showLockedAchievements, setShowLockedAchievements] = useState(false);
+  const [showInProgressSection, setShowInProgressSection] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -94,7 +95,7 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
     return [...achievements].sort((a, b) => {
       switch (sortBy) {
         case 'rarity':
-          return getRarityOrder(a.tier) - getRarityOrder(b.tier);
+          return getRarityOrder(a.tier) - getRarityOrder(b.tier); // Common first, legendary last
         case 'progress':
           // Use backend progress data instead of local service
           const playerAchA = backendAchievementService.playerAchievements.find(pa => pa.achievementId === a.id);
@@ -119,14 +120,15 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
     backendAchievementService.getLockedAchievements() || []
   , [achievementStats]);
 
-  const inProgressAchievements = useMemo(() => 
-    backendAchievementService.getInProgressAchievements() || []
-  , [achievementStats]);
+  const inProgressAchievements = useMemo(() => {
+    const achievements = backendAchievementService.getInProgressAchievements() || [];
+    return sortAchievements(achievements, 'rarity'); // Default sort by rarity
+  }, [achievementStats, sortAchievements]);
 
   const filteredAchievements = useMemo(() => {
-    if (selectedTier === 'all') return unlockedAchievements;
-    return unlockedAchievements.filter(a => a.tier === selectedTier);
-  }, [unlockedAchievements, selectedTier]);
+    const filtered = selectedTier === 'all' ? unlockedAchievements : unlockedAchievements.filter(a => a.tier === selectedTier);
+    return sortAchievements(filtered, 'rarity'); // Default sort by rarity
+  }, [unlockedAchievements, selectedTier, sortAchievements]);
 
   const filteredLockedAchievements = useMemo(() => {
     if (selectedTier === 'all') return lockedAchievements;
@@ -205,11 +207,7 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center p-4"
-        style={{
-          alignItems: 'flex-start',
-          paddingTop: '65vh' //centers it in the badge section area
-        }}
+        className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
         onClick={onClose}
       >
         <motion.div
@@ -375,28 +373,25 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="mb-8 flex justify-between items-start">
-        <div>
-          <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <div 
-              className="w-6 h-6 border border-gray-600" 
-              style={{ backgroundColor: tabColor }}
-            />
-            ACHIEVEMENT SHOWCASE
-          </h1>
-          <p className="text-gray-400 font-mono text-sm">
-            View your badges and unlock achievements by completing logs and missions.
-          </p>
-        </div>
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
         
-        <motion.button
+        <div className="relative z-10 flex justify-between items-start">
+          <div>
+            <h1 className="font-mono text-3xl font-bold text-white mb-2">
+              ACHIEVEMENT SHOWCASE
+            </h1>
+            <p className="text-gray-400 font-mono text-sm">
+              View your badges and unlock achievements by completing logs and missions.
+            </p>
+          </div>
+          
+          <motion.button
           onClick={() => setShowLockedAchievements(!showLockedAchievements)}
-          className="bg-black border-2 px-4 py-2 font-mono font-bold transition-all duration-200 flex items-center gap-2"
+          className="bg-black border-2 border-white/60 px-4 py-2 font-mono font-bold transition-all duration-200 flex items-center gap-2 text-white hover:scale-105"
           style={{
-            borderColor: tabColor,
-            color: showLockedAchievements ? '#000' : tabColor,
-            backgroundColor: showLockedAchievements ? tabColor : 'black',
-            boxShadow: `0 0 10px rgba(${tabColorRgb}, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)`
+            boxShadow: `2px 2px 0px 0px rgba(0,0,0,1)`
           }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -410,31 +405,26 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
             <ChevronDown size={16} />
           </motion.div>
         </motion.button>
+        </div>
       </div>
 
-      {/* Progress Summary - Simplified animations */}
+      {/* Progress Summary */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
-        style={{
-          borderColor: tabColor,
-          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-        }}
+        className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg bg-black/40 backdrop-blur-md"
       >
-        <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        <div className="absolute inset-0 pointer-events-none"
-             style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
         
         <div className="relative z-10">
-          <div className="border-b px-4 py-3"
+          <div className="border-b px-4 py-3 rounded-t-lg"
                style={{ 
-                 borderColor: tabColor,
-                 backgroundColor: '#1A0E26'
+                 borderColor: 'white',
+                 backgroundColor: 'rgba(0, 0, 0, 0.6)'
                }}>
             <h3 className="text-lg font-mono font-bold text-white flex items-center">
-              <Trophy className="mr-2" size={20} style={{ color: tabColor }} />
+              <Trophy className="mr-2" size={20} color="white" />
               BADGE METRICS
             </h3>
           </div>
@@ -442,13 +432,11 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Badges Earned */}
-              <div className="bg-black border text-center p-4 relative transition-all duration-200"
+              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
                    style={{
-                     borderColor: '#4B5563',
-                     boxShadow: '0 0 3px rgba(34, 197, 94, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                     boxShadow: '0 0 25px rgba(34, 197, 94, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
                    }}>
-                <div className="absolute inset-0 pointer-events-none"
-                     style={{ background: 'linear-gradient(to bottom right, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.12))' }} />
                 <div className="relative z-10">
                   <CheckCircle size={20} className="text-green-400 mx-auto mb-2" />
                   <div className="text-xs font-mono text-gray-400 mb-1">BADGES EARNED</div>
@@ -459,13 +447,11 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
               </div>
 
               {/* Badges In Progress */}
-              <div className="bg-black border text-center p-4 relative transition-all duration-200"
+              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
                    style={{
-                     borderColor: '#4B5563',
-                     boxShadow: '0 0 3px rgba(59, 130, 246, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                     boxShadow: '0 0 25px rgba(59, 130, 246, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
                    }}>
-                <div className="absolute inset-0 pointer-events-none"
-                     style={{ background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.12))' }} />
                 <div className="relative z-10">
                   <Target size={20} className="text-blue-400 mx-auto mb-2" />
                   <div className="text-xs font-mono text-gray-400 mb-1">BADGES IN PROGRESS</div>
@@ -476,13 +462,11 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
               </div>
 
               {/* Badges Locked */}
-              <div className="bg-black border text-center p-4 relative transition-all duration-200"
+              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
                    style={{
-                     borderColor: '#4B5563',
-                     boxShadow: '0 0 3px rgba(107, 114, 128, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                     boxShadow: '0 0 25px rgba(107, 114, 128, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
                    }}>
-                <div className="absolute inset-0 pointer-events-none"
-                     style={{ background: 'linear-gradient(to bottom right, rgba(107, 114, 128, 0.08), rgba(107, 114, 128, 0.12))' }} />
                 <div className="relative z-10">
                   <Lock size={20} className="text-gray-400 mx-auto mb-2" />
                   <div className="text-xs font-mono text-gray-400 mb-1">BADGES LOCKED</div>
@@ -493,13 +477,11 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
               </div>
 
               {/* Completion Percentage */}
-              <div className="bg-black border text-center p-4 relative transition-all duration-200"
+              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
                    style={{
-                     borderColor: '#4B5563',
-                     boxShadow: '0 0 3px rgba(251, 191, 36, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)'
+                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                     boxShadow: '0 0 25px rgba(251, 191, 36, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
                    }}>
-                <div className="absolute inset-0 pointer-events-none"
-                     style={{ background: 'linear-gradient(to bottom right, rgba(251, 191, 36, 0.08), rgba(251, 191, 36, 0.12))' }} />
                 <div className="relative z-10">
                   <Trophy size={20} className="text-yellow-400 mx-auto mb-2" />
                   <div className="text-xs font-mono text-gray-400 mb-1">COMPLETION RATE</div>
@@ -523,26 +505,20 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: 0.05 }}
-              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative mb-6"
-              style={{
-                borderColor: tabColor,
-                boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-              }}
+              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative mb-6 rounded-lg bg-black/40 backdrop-blur-md"
             >
-              <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
-                   style={{ borderColor: tabColor }} />
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
+              <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
               
               <div className="relative z-10">
-                <div className="border-b px-4 py-3"
+                <div className="border-b px-4 py-3 rounded-t-lg"
                      style={{ 
-                       borderColor: tabColor,
-                       backgroundColor: '#1A0E26'
+                       borderColor: 'white',
+                       backgroundColor: 'rgba(0, 0, 0, 0.6)'
                      }}>
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-mono font-bold text-white flex items-center">
-                      <Award className="mr-2" size={20} style={{ color: tabColor }} />
+                      <Award className="mr-2" size={20} color="white" />
                       {/*{username.toUpperCase()}'S BADGES*/}
                       JROC_182's BADGES
                     </h3>
@@ -586,9 +562,9 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
                   </div>
                 </div>
                 
-                <div className="p-6">
+                <div className="p-4">
                   {filteredAchievements.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       {filteredAchievements.map((achievement, index) => (
                         <div 
                           key={achievement.id}
@@ -599,6 +575,7 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
                             achievement={achievement}
                             isUnlocked={true}
                             onClick={() => {}}
+                            compact={true}
                           />
                         </div>
                       ))}
@@ -621,56 +598,75 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
               </div>
             </motion.div>
 
-            {/* Badges in Progress Section */}
+            {/* Badges in Progress Section - Collapsible */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: 0.1 }}
-              className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
-              style={{
-                borderColor: tabColor,
-                boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-              }}
+              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg bg-black/40 backdrop-blur-md"
             >
-              <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
-                   style={{ borderColor: tabColor }} />
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
+              <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
               
               <div className="relative z-10">
-                <div className="border-b px-4 py-3"
-                     style={{ 
-                       borderColor: tabColor,
-                       backgroundColor: '#1A0E26'
-                     }}>
-                  <h3 className="text-lg font-mono font-bold text-white flex items-center">
-                    <TrendingUp className="mr-2" size={20} style={{ color: tabColor }} />
-                    BADGES IN PROGRESS ({progressMetrics.inProgressCount})
-                  </h3>
+                <div 
+                  className="border-b px-4 py-3 rounded-t-lg cursor-pointer hover:bg-black/20 transition-colors"
+                  style={{ 
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)'
+                  }}
+                  onClick={() => setShowInProgressSection(!showInProgressSection)}
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                      <TrendingUp className="mr-2" size={20} color="white" />
+                      BADGES IN PROGRESS ({progressMetrics.inProgressCount})
+                    </h3>
+                    <motion.div
+                      animate={{ rotate: showInProgressSection ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-white"
+                    >
+                      <ChevronDown size={20} />
+                    </motion.div>
+                  </div>
                 </div>
                 
-                <div className="p-6">
-                  {inProgressAchievements.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {inProgressAchievements.map((achievement, index) => (
-                        <MemoizedAchievementBadge
-                          key={achievement.id}
-                          achievement={achievement}
-                          isUnlocked={false}
-                          showProgress={true}
-                          onClick={() => setSelectedAchievement(achievement)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Target size={48} className="text-gray-500 mx-auto mb-3" />
-                      <h3 className="font-mono text-lg font-bold text-white mb-2">NO ACHIEVEMENTS IN PROGRESS</h3>
-                      <p className="text-gray-400 mb-4 font-mono">Complete more activities to start making progress!</p>
-                    </div>
+                <AnimatePresence>
+                  {showInProgressSection && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-4">
+                        {inProgressAchievements.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            {inProgressAchievements.map((achievement, index) => (
+                              <MemoizedAchievementBadge
+                                key={achievement.id}
+                                achievement={achievement}
+                                isUnlocked={false}
+                                showProgress={true}
+                                onClick={() => setSelectedAchievement(achievement)}
+                                compact={true}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Target size={48} className="text-gray-500 mx-auto mb-3" />
+                            <h3 className="font-mono text-lg font-bold text-white mb-2">NO ACHIEVEMENTS IN PROGRESS</h3>
+                            <p className="text-gray-400 mb-4 font-mono">Complete more activities to start making progress!</p>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
                   )}
-                </div>
+                </AnimatePresence>
               </div>
             </motion.div>
           </motion.div>
@@ -682,25 +678,19 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ delay: 0.05 }}
-            className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
-            style={{
-              borderColor: tabColor,
-              boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-            }}
+            className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg bg-black/40 backdrop-blur-md"
           >
-            <div className="absolute inset-0 border-2 opacity-30 pointer-events-none" 
-                 style={{ borderColor: tabColor }} />
-            <div className="absolute inset-0 pointer-events-none"
-                 style={{ background: `linear-gradient(to bottom right, rgba(${tabColorRgb}, 0.15), rgba(${tabColorRgb}, 0.2))` }} />
+            <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
             
             <div className="relative z-10">
-              <div className="border-b px-4 py-3 flex justify-between items-center"
+              <div className="border-b px-4 py-3 flex justify-between items-center rounded-t-lg"
                    style={{ 
-                     borderColor: tabColor,
-                     backgroundColor: '#1A0E26'
+                     borderColor: 'white',
+                     backgroundColor: 'rgba(0, 0, 0, 0.6)'
                    }}>
                 <h3 className="text-lg font-mono font-bold text-white flex items-center">
-                  <Lock className="mr-2" size={20} style={{ color: tabColor }} />
+                  <Lock className="mr-2" size={20} color="white" />
                   LOCKED ACHIEVEMENTS ({filteredLockedAchievements.length})
                 </h3>
                 
@@ -709,11 +699,7 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
                   <select
                     value={lockedSortBy}
                     onChange={(e) => setLockedSortBy(e.target.value)}
-                    className="bg-black border font-mono text-sm px-2 py-1"
-                    style={{
-                      borderColor: tabColor,
-                      color: tabColor
-                    }}
+                    className="bg-black border font-mono text-sm px-2 py-1 text-white border-white"
                   >
                     <option value="rarity">RARITY</option>
                     <option value="progress">PROGRESS</option>
@@ -722,8 +708,8 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
                 </div>
               </div>
               
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {sortAchievements(filteredLockedAchievements, lockedSortBy).map((achievement, index) => {
                     // Get progress from backend instead of local service
                     const playerAchievement = backendAchievementService.playerAchievements.find(
@@ -738,6 +724,7 @@ const [showLockedAchievements, setShowLockedAchievements] = useState(false);
                         isUnlocked={false}
                         showProgress={progress > 0}
                         onClick={() => setSelectedAchievement(achievement)}
+                        compact={true}
                       />
                     );
                   })}

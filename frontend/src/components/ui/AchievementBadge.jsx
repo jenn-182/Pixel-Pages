@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Star, Award, Shield, Crown, Lock, Trophy } from 'lucide-react';
 import { tierInfo } from '../../data/achievements';
 
-const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, onClick, showProgress = false }) => {
+const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, onClick, showProgress = false, compact = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [shouldShimmer, setShouldShimmer] = useState(false);
   const unlocked = isUnlocked || achievement.unlockedAt;
@@ -88,7 +88,7 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
 
   return (
     <motion.div
-      className="bg-black border-2 p-4 relative transition-all duration-300 hover:scale-105 cursor-pointer group overflow-hidden"
+      className={`bg-black border-2 ${compact ? 'p-3' : 'p-4'} relative transition-all duration-300 cursor-pointer group overflow-hidden`}
       style={{
         borderColor: unlocked ? style.color : (inProgress ? style.lockedColor : '#4B5563'),
         boxShadow: unlocked 
@@ -100,7 +100,15 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ 
+        scale: 1.05,
+        y: -2,
+        boxShadow: unlocked 
+          ? `0 0 30px ${style.shadowColor}, 0 0 60px ${style.color}40, 4px 4px 0px 0px rgba(0,0,0,1)`
+          : inProgress 
+            ? `0 0 15px ${style.lockedColor}60, 4px 4px 0px 0px rgba(0,0,0,1)`
+            : '0 0 8px rgba(75, 85, 99, 0.4), 4px 4px 0px 0px rgba(0,0,0,1)'
+      }}
       whileTap={{ scale: 0.98 }}
       // REMOVED: No automatic pulse for in-progress badges
     >
@@ -184,9 +192,9 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
       
       <div className="relative z-10 text-center">
         {/* Badge Icon Circle - Pulse on hover for in-progress */}
-        <div className="mb-3 flex justify-center">
+        <div className={compact ? "mb-2 flex justify-center" : "mb-3 flex justify-center"}>
           <motion.div 
-            className="w-12 h-12 rounded-full border-2 flex items-center justify-center relative overflow-hidden"
+            className={`${compact ? 'w-10 h-10' : 'w-12 h-12'} rounded-full border-2 flex items-center justify-center relative overflow-hidden`}
             style={{
               borderColor: unlocked ? style.color : (inProgress ? style.lockedColor : '#6B7280'),
               background: unlocked 
@@ -221,7 +229,7 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
           >
             {unlocked ? (
               <IconComponent 
-                size={20} 
+                size={compact ? 16 : 20} 
                 className="text-white filter drop-shadow-lg"
                 style={{ 
                   color: '#ffffff',
@@ -230,7 +238,7 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
               />
             ) : inProgress ? (
               <IconComponent 
-                size={20} 
+                size={compact ? 16 : 20} 
                 className="filter drop-shadow-lg"
                 style={{ 
                   color: style.lockedColor,
@@ -238,23 +246,23 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
                 }}
               />
             ) : (
-              <Lock size={16} className="text-gray-500" />
+              <Lock size={compact ? 12 : 16} className="text-gray-500" />
             )}
           </motion.div>
         </div>
 
         {/* Badge Title */}
-        <h4 className={`font-mono font-bold text-sm mb-2 ${
+        <h4 className={`font-mono font-bold ${compact ? 'text-xs mb-1' : 'text-sm mb-2'} ${
           unlocked ? 'text-white' : inProgress ? 'text-gray-300' : 'text-gray-500'
         }`}>
           {achievement.name}
         </h4>
         
         {/* Badge Description */}
-        <p className={`text-xs font-mono mb-3 ${
+        <p className={`${compact ? 'text-xs mb-2' : 'text-xs mb-3'} font-mono ${
           unlocked ? 'text-gray-300' : inProgress ? 'text-gray-400' : 'text-gray-600'
         }`}>
-          {achievement.description}
+          {compact ? achievement.description.substring(0, 60) + (achievement.description.length > 60 ? '...' : '') : achievement.description}
         </p>
 
         {/* Rarity Badge - HOVER PULSE for in-progress */}
@@ -307,7 +315,7 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
               />
             )}
             <div className="relative z-10 flex items-center gap-1">
-              <IconComponent size={10} />
+              <IconComponent size={compact ? 8 : 10} />
               {style.name}
             </div>
           </motion.div>

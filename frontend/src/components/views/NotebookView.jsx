@@ -144,10 +144,10 @@ const NotebookView = ({
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative rounded-lg"
-           style={{
-             backgroundColor: 'rgba(0, 0, 0, 0.4)'
-           }}>
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+        
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -212,10 +212,10 @@ const NotebookView = ({
       </div>
 
       {/* Collection Content */}
-      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
-           style={{
-             backgroundColor: 'rgba(0, 0, 0, 0.4)'
-           }}>
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+        
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-mono font-bold text-white flex items-center">

@@ -70,10 +70,10 @@ const FolderView = ({
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg"
-           style={{
-             backgroundColor: 'rgba(0, 0, 0, 0.4)'
-           }}>
+      <div className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+        
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -157,19 +157,25 @@ const FolderView = ({
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg"
-           style={{
-             backgroundColor: 'rgba(0, 0, 0, 0.4)'
-           }}>
+      <div className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+        
         <div className="relative z-10 flex">
           <button
             onClick={() => setActiveTab('collections')}
             className={`flex-1 px-4 py-3 font-mono font-bold border-r-2 border-white transition-colors ${
               activeTab === 'collections'
-                ? 'bg-white/40 text-black'
+                ? 'text-black'
                 : 'text-white hover:bg-black hover:bg-opacity-30'
             }`}
-            style={{ borderTopLeftRadius: '6px', borderBottomLeftRadius: activeTab === 'collections' ? '0' : '6px' }}
+            style={{ 
+              borderTopLeftRadius: '6px', 
+              borderBottomLeftRadius: activeTab === 'collections' ? '0' : '6px',
+              ...(activeTab === 'collections' && { 
+                backgroundColor: `rgba(${rgbColor}, 0.8)` 
+              })
+            }}
           >
             <BookOpen size={16} className="inline mr-2" />
             COLLECTIONS ({filteredNotebooks.length})
@@ -178,10 +184,16 @@ const FolderView = ({
             onClick={() => setActiveTab('logs')}
             className={`flex-1 px-4 py-3 font-mono font-bold transition-colors ${
               activeTab === 'logs' 
-                ? 'bg-white/40 text-black'
+                ? 'text-black'
                 : 'text-white hover:bg-black hover:bg-opacity-30'
             }`}
-            style={{ borderTopRightRadius: '6px', borderBottomRightRadius: activeTab === 'logs' ? '0' : '6px' }}
+            style={{ 
+              borderTopRightRadius: '6px', 
+              borderBottomRightRadius: activeTab === 'logs' ? '0' : '6px',
+              ...(activeTab === 'logs' && { 
+                backgroundColor: `rgba(${rgbColor}, 0.8)` 
+              })
+            }}
           >
             <FileText size={16} className="inline mr-2" />
             LOG ENTRIES ({filteredNotes.length})
@@ -190,10 +202,10 @@ const FolderView = ({
       </div>
 
       {/* Content */}
-      <div className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
-           style={{
-             backgroundColor: 'rgba(0, 0, 0, 0.4)'
-           }}>
+      <div className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+        
         <div className="relative z-10">
           {activeTab === 'collections' ? (
             filteredNotebooks.length > 0 ? (

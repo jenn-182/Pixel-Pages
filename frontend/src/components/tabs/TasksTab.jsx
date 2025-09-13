@@ -328,11 +328,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)'
-            }}
+            className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md"
           >
             <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
@@ -414,11 +410,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg"
-              style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)'
-              }}
+              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md"
             >
               <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
@@ -527,11 +519,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6 rounded-lg"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)'
-            }}
+            className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative mb-6 rounded-lg bg-black/40 backdrop-blur-md"
           >
             <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
@@ -683,11 +671,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative space-y-3 rounded-lg"
-              style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)'
-              }}
+              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative space-y-3 rounded-lg bg-black/40 backdrop-blur-md"
             >
               <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />

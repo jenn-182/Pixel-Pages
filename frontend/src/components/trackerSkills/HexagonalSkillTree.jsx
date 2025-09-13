@@ -278,7 +278,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
       }}
     >
       {/* Background effects */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none" 
+      <div className="absolute inset-0 border-2 opacity-20 pointer-events-none" 
            style={{ borderColor: tabColor }} />
       <div className="absolute inset-0 pointer-events-none opacity-10"
            style={{ 

@@ -540,10 +540,10 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
   return (
     <div className="library-tab-container p-6">
       {/* Storage Vault - Simplified */}
-      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg"
-           style={{
-             backgroundColor: 'rgba(0, 0, 0, 0.4)'
-           }}>
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+        
         <div className="relative z-10">
           {/* Title Row */}
           <div className="flex items-center justify-between mb-4">
@@ -636,15 +636,15 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
-          style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.4)'
-          }}
+          className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg bg-black/40 backdrop-blur-md"
         >
+          <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xl font-mono font-bold text-white flex items-center">
+                <h3 className="text-2xl font-mono font-bold text-white flex items-center">
                   ARCHIVES ({folders.length})
                 </h3>
                 <p className="text-sm font-mono text-gray-400">
@@ -746,15 +746,15 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
-          style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.4)'
-          }}
+          className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg bg-black/40 backdrop-blur-md"
         >
+          <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xl font-mono font-bold text-white flex items-center">
+                <h3 className="text-2xl font-mono font-bold text-white flex items-center">
                   COLLECTIONS ({notebooks.length})
                 </h3>
                 <p className="text-sm font-mono text-gray-400">
@@ -856,15 +856,15 @@ const LibraryTab = ({ tabColor = '#3B82F6', navigationParams = {} }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg"
-          style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.4)'
-          }}
+          className="border-2 border-white/60 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative rounded-lg bg-black/40 backdrop-blur-md"
         >
+          <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xl font-mono font-bold text-white flex items-center">
+                <h3 className="text-2xl font-mono font-bold text-white flex items-center">
                   LOG ENTRIES ({notes.length})
                 </h3>
                 <p className="text-sm font-mono text-gray-400">
