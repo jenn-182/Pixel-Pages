@@ -43,10 +43,12 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
         totalXP: backendAchievementService.playerStats.totalXp || 0
       });
 
-      console.log('🎯 Achievement data loaded:', {
+      console.log('🎯 Achievement data loaded (ACHIEVEMENTS TAB):', {
         stats,
         unlocked: backendAchievementService.getUnlockedAchievements().length,
-        inProgress: backendAchievementService.getInProgressAchievements().length
+        inProgress: backendAchievementService.getInProgressAchievements().length,
+        unlockedAchievementIds: backendAchievementService.getUnlockedAchievements(),
+        backendServiceStats: backendAchievementService.getStats()
       });
 
     } catch (error) {

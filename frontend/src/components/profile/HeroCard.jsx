@@ -1,50 +1,20 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, Star, Trophy, X, ChevronDown, Palette, Award, Camera } from 'lucide-react';
+import { Crown, Star, Trophy, X, ChevronDown, Palette, Camera, Code, Heart } from 'lucide-react';
 import PixelPageJenn from '../../assets/icons/PixelPageJenn.PNG';
-import TaskStats from './TaskStats';
 import { getRankByXP, getNextRank } from '../../data/ranks';
-import achievementService from '../../services/achievementService';
 import { useTheme } from '../../contexts/ThemeContext';
-import { allAchievements, tierInfo } from '../../data/achievements';
+import backendAchievementService from '../../services/backendAchievementService';
 import { defaultProfilePics, getSelectedProfilePic, saveProfilePicSelection, getProfilePicById } from '../../data/profilePics';
 
 const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [showStyleDropdown, setShowStyleDropdown] = useState(false);
-  const [showBadgeSelector, setShowBadgeSelector] = useState(false);
   const [showProfilePicEditor, setShowProfilePicEditor] = useState(false);
-  const [selectedBadges, setSelectedBadges] = useState(() => {
-    const saved = localStorage.getItem('selectedProfileBadges');
-    return saved ? JSON.parse(saved) : [];
-  });
   const [selectedProfilePic, setSelectedProfilePic] = useState(() => getSelectedProfilePic());
   const { currentTheme, themes, switchTheme, getThemeColors } = useTheme();
   
   const themeColors = getThemeColors();
-
-  // Badge management functions
-  const getUnlockedAchievements = () => {
-    return achievementService.getUnlockedAchievements();
-  };
-
-  const toggleBadgeSelection = (achievementId) => {
-    setSelectedBadges(prev => {
-      let newSelection;
-      if (prev.includes(achievementId)) {
-        // Remove badge
-        newSelection = prev.filter(id => id !== achievementId);
-      } else if (prev.length < 3) {
-        // Add badge (max 3)
-        newSelection = [...prev, achievementId];
-      } else {
-        // Replace oldest badge
-        newSelection = [...prev.slice(1), achievementId];
-      }
-      localStorage.setItem('selectedProfileBadges', JSON.stringify(newSelection));
-      return newSelection;
-    });
-  };
 
   // Profile pic management
   const changeProfilePic = (picId) => {
@@ -172,95 +142,69 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
     }
   };
 
+  // Get achievement stats first
+  const achievementStats = backendAchievementService.getStats();
+
   // Calculate total XP from all sources
   const calculateTotalXP = () => {
     let totalXP = 0;
-    let breakdown = { notes: 0, achievements: 0, focus: 0, missions: 0 };
     
-    // 1. Achievement XP (from unlocked achievements)
+    // 1. Achievement XP
     const achievementXP = achievementStats.totalXP || 0;
     totalXP += achievementXP;
-    breakdown.achievements = achievementXP;
     
     // 2. Notes XP
     let notesXP = 0;
     for (const note of notes) {
-      // Base XP per note
-      notesXP += 10;
-      
-      // Bonus XP for content length
+      notesXP += 10; // Base XP per note
       const wordCount = note.content ? note.content.split(/\s+/).length : 0;
       notesXP += Math.min(Math.floor(wordCount / 10), 50);
-      
-      // Bonus XP for using tags
       const tags = note.tagsString ? note.tagsString.split(',').filter(tag => tag.trim()) : [];
       notesXP += tags.length * 5;
-      
-      // Bonus XP for longer titles
       if (note.title && note.title.length > 20) {
         notesXP += 5;
       }
     }
     totalXP += notesXP;
-    breakdown.notes = notesXP;
     
-    // 3. Focus Timer XP (from tracking sessions)
-    let focusXP = 0;
+    // 3. Focus Timer XP
     try {
       const categories = JSON.parse(localStorage.getItem('focusCategories') || '[]');
-      focusXP = categories.reduce((sum, category) => sum + (category.xp || 0), 0);
-      
-      // Debug check for focus XP inflation
-      if (focusXP > 200) {
-        console.warn('🚨 FOCUS XP IS TOO HIGH!', focusXP, 'Categories:', categories);
-        console.warn('⚠️ TEMPORARILY CAPPING FOCUS XP FROM', focusXP, 'TO 100');
-        focusXP = 100; // Temporary cap until we can fix the focus timer XP system
-      }
-      
+      let focusXP = categories.reduce((sum, category) => sum + (category.xp || 0), 0);
+      // Remove the cap to allow proper leveling
       totalXP += focusXP;
     } catch (error) {
       console.error('Error calculating focus XP:', error);
     }
-    breakdown.focus = focusXP;
     
-    // 4. Mission Completion XP (2 XP per completed task)
+    // 4. Mission XP (Tasks)
     const completedTasks = tasks.filter(task => task.completed);
-    const missionXP = completedTasks.length * 2;
-    totalXP += missionXP;
-    breakdown.missions = missionXP;
+    totalXP += completedTasks.length * 50; // Increased from 2 to 50 for better progression
     
-    // DEBUGGING: Log detailed breakdown
-    console.log('🐛 DETAILED XP BREAKDOWN:');
-    console.log('Notes XP:', breakdown.notes, '(from', notes.length, 'notes)');
-    console.log('Achievement XP:', breakdown.achievements, '(raw achievement stats:', achievementStats, ')');
-    console.log('Focus XP:', breakdown.focus);
-    console.log('Mission XP:', breakdown.missions, '(from', completedTasks.length, 'completed tasks)');
-    console.log('TOTAL XP:', totalXP);
+    // Add bonus XP for active users to ensure proper progression
+    const bonusXP = Math.min(notes.length * 20 + completedTasks.length * 100, 1500); // Generous bonus for progression
+    totalXP += bonusXP;
     
-    // Check if achievement XP is still inflated (old data in localStorage)
-    if (breakdown.achievements > 500) {
-      console.error('🚨 ACHIEVEMENT XP IS STILL TOO HIGH!', achievementStats);
-      console.warn('⚠️ TEMPORARILY CAPPING ACHIEVEMENT XP FROM', breakdown.achievements, 'TO 200');
-      breakdown.achievements = 200;
-      totalXP = breakdown.notes + 200 + breakdown.focus + breakdown.missions;
-    }
+    // Debug logging
+    console.log('🎯 XP Breakdown:', {
+      achievementXP,
+      notesXP,
+      focusXP: JSON.parse(localStorage.getItem('focusCategories') || '[]').reduce((sum, category) => sum + (category.xp || 0), 0),
+      taskXP: completedTasks.length * 50,
+      bonusXP,
+      totalXP,
+      notes: notes.length,
+      completedTasks: completedTasks.length,
+      targetForLevel5: 2000
+    });
     
     return totalXP;
   };
 
   // Calculate player stats
-  const achievementStats = achievementService.getStats();
   const totalXP = calculateTotalXP();
   const currentRank = getRankByXP(totalXP);
   const nextRank = getNextRank(currentRank.level);
-
-  // Debug: Log XP and rank info for balancing (remove after testing)
-  if (totalXP > 0) {
-    console.log(`🎮 XP System Status:
-      Total XP: ${totalXP}
-      Current Rank: Level ${currentRank.level} - ${currentRank.name}
-      Notes: ${notes.length}, Tasks: ${tasks.filter(t => t.completed).length}, Achievement XP: ${achievementStats.totalXP || 0}`);
-  }
 
   // XP progress calculation for current rank (aligned with ranks.js)
   const currentRankMinXP = currentRank.minXP;
@@ -272,6 +216,28 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
   const progressPercentage = nextRank ? 
     Math.min(100, Math.max(0, Math.floor((xpInCurrentRank / xpNeededForNextRank) * 100))) :
     100; // If at max level, show 100%
+
+  // Debug: Log XP and rank info for balancing
+  console.log(`🎮 DETAILED XP SYSTEM STATUS:
+    === XP SOURCES ===
+    Achievement XP: ${achievementStats.totalXP || 0}
+    Notes XP: ${totalXP - (achievementStats.totalXP || 0) - JSON.parse(localStorage.getItem('focusCategories') || '[]').reduce((sum, category) => sum + (category.xp || 0), 0) - tasks.filter(t => t.completed).length * 50}
+    Focus Timer XP: ${JSON.parse(localStorage.getItem('focusCategories') || '[]').reduce((sum, category) => sum + (category.xp || 0), 0)}
+    Task XP: ${tasks.filter(t => t.completed).length * 50}
+    
+    === TOTALS ===
+    Total XP: ${totalXP}
+    Current Rank: Level ${currentRank.level} - ${currentRank.name} (requires ${currentRank.minXP} XP)
+    Next Rank: ${nextRank ? `Level ${nextRank.level} - ${nextRank.name} (requires ${nextRank.minXP} XP)` : 'MAX RANK'}
+    
+    === PROGRESS ===
+    XP needed for next rank: ${nextRank ? nextRank.minXP - totalXP : 0}
+    Progress: ${progressPercentage}%
+    
+    === DATA COUNTS ===
+    Notes: ${notes.length}
+    Completed Tasks: ${tasks.filter(t => t.completed).length}
+    Achievement Stats: ${JSON.stringify(achievementStats)}`);
     
   console.log('📊 PROGRESS BAR DEBUG:');
   console.log('Current Rank XP:', currentRankMinXP);
@@ -288,7 +254,6 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
   };
 
   const currentPlayer = player || mockPlayer;
-  const highestSkill = getHighestSkill();
 
   return (
     <div className="space-y-6">
@@ -300,10 +265,10 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
         style={{
           backgroundColor: themeColors.backgroundColor,
           border: `2px solid ${themeColors.borderColor}`,
-          borderRadius: themeColors.borderRadius,
+          borderRadius: '12px', // Fixed - use consistent rounding for all themes
           boxShadow: currentTheme === 'default' 
             ? `0 0 15px rgba(255, 255, 255, 0.2), 4px 4px 0px 0px rgba(0,0,0,1)` 
-            : `0 0 3px ${themeColors.primary}50, 1px 1px 0px 0px rgba(0,0,0,1)`
+            : `0 0 3px ${themeColors.primary}50, 4px 4px 0px 0px rgba(0,0,0,1)`
         }}
       >
         {/* Gradient overlay with theme colors */}
@@ -312,33 +277,11 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                background: currentTheme === 'default' 
                  ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.1))'
                  : `linear-gradient(to bottom right, ${themeColors.secondary}15, ${themeColors.secondary}20)`,
-               borderRadius: themeColors.borderRadius
+               borderRadius: '12px' // Fixed - use consistent rounding for all themes
              }} />
         
         {/* Profile Controls - Top Right */}
         <div className="absolute top-4 right-4 z-20 flex gap-2">
-          {/* Select Profile Badges Button */}
-          {getUnlockedAchievements().length > 0 && (
-            <button
-              onClick={() => setShowBadgeSelector(true)}
-              className="px-3 py-2 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden flex items-center gap-2"
-              style={{
-                backgroundColor: themeColors.backgroundColor,
-                border: `2px solid ${themeColors.controlColor}`,
-                borderRadius: themeColors.borderRadius,
-                color: themeColors.controlColor,
-                boxShadow: currentTheme === 'default' 
-                  ? '0 0 10px rgba(255, 255, 255, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)' 
-                  : `0 0 6px ${themeColors.controlColor}50, 2px 2px 0px 0px rgba(0,0,0,1)`
-              }}
-            >
-              <div className="relative z-10 flex items-center gap-2">
-                <Award size={14} style={{ color: themeColors.controlColor }} />
-                <span className="text-xs">BADGES</span>
-              </div>
-            </button>
-          )}
-          
           {/* Theme Dropdown */}
           <div className="relative">
             <button
@@ -347,7 +290,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               style={{
                 backgroundColor: themeColors.backgroundColor,
                 border: `2px solid ${themeColors.controlColor}`,
-                borderRadius: themeColors.borderRadius,
+                borderRadius: '12px', // Fixed - use consistent rounding for all themes
                 color: themeColors.controlColor,
                 boxShadow: currentTheme === 'default' 
                   ? '0 0 10px rgba(255, 255, 255, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)' 
@@ -376,7 +319,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                   style={{
                     backgroundColor: themeColors.backgroundColor,
                     border: `2px solid ${themeColors.controlColor}`,
-                    borderRadius: themeColors.borderRadius,
+                    borderRadius: '12px', // Fixed - use consistent rounding for all themes
                     boxShadow: currentTheme === 'default' 
                       ? '0 0 20px rgba(255, 255, 255, 0.4), 4px 4px 0px 0px rgba(0,0,0,1)' 
                       : `0 0 15px ${themeColors.controlColor}50, 4px 4px 0px 0px rgba(0,0,0,1)`
@@ -392,7 +335,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                         <button
                           key={key}
                           onClick={() => {
-                            console.log(`Switching to theme: ${key}`); // Debug log
+                            console.log(`Switching to theme: ${key}`);
                             switchTheme(key);
                             setShowStyleDropdown(false);
                           }}
@@ -404,7 +347,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                           style={{
                             color: currentTheme === key ? theme.controlColor : '#9CA3AF',
                             border: `1px solid ${currentTheme === key ? theme.controlColor : '#4B5563'}`,
-                            borderRadius: theme.borderRadius,
+                            borderRadius: '12px', // Fixed - use consistent rounding for all themes
                             backgroundColor: currentTheme === key ? theme.backgroundColor : 'transparent'
                           }}
                         >
@@ -426,7 +369,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="w-32 h-32 lg:w-40 lg:h-40 border-2 flex items-center justify-center relative overflow-hidden bg-gray-700"
                    style={{
                      borderColor: themeColors.borderColor,
-                     borderRadius: themeColors.borderRadius,
+                     borderRadius: '12px', // Fixed - use consistent rounding for all themes
                      boxShadow: currentTheme === 'default' 
                        ? '0 0 15px rgba(255, 255, 255, 0.3), 6px 6px 0px 0px rgba(0,0,0,1)' 
                        : `0 0 10px ${themeColors.secondary}30, 6px 6px 0px 0px rgba(0,0,0,1)`
@@ -439,7 +382,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                   className="w-full h-full object-cover relative z-10"
                   style={{ 
                     imageRendering: 'pixelated',
-                    borderRadius: themeColors.borderRadius
+                    borderRadius: '12px' // Fixed - use consistent rounding for all themes
                   }}
                 />
 
@@ -459,51 +402,40 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     )`,
                     animation: 'shimmer-slide 5s ease-in-out infinite',
                     backgroundSize: '200% 100%',
-                    borderRadius: themeColors.borderRadius
+                    borderRadius: '12px' // Fixed - use consistent rounding for all themes
                   }}
                 />
-                
-                {/* Level decorations overlay */}
-                <div className="absolute inset-0 flex items-center justify-center z-30">
-                  {/* Crown for high levels */}
-                  {currentRank.level >= 8 && (
-                    <Crown size={20} className="absolute -top-4 -right-3 text-yellow-400 drop-shadow-lg" />
-                  )}
-                  {/* Star effects for legendary levels */}
-                  {currentRank.level >= 10 && (
-                    <>
-                      <Star size={16} className="absolute -top-2 -left-4 text-yellow-300 animate-pulse drop-shadow-lg" />
-                      <Star size={14} className="absolute -bottom-2 -right-4 text-yellow-300 animate-pulse drop-shadow-lg" style={{ animationDelay: '0.5s' }} />
-                    </>
-                  )}
-                </div>
-                
+
                 {/* Level ring around avatar for high levels */}
                 {currentRank.level >= 5 && (
                   <div className="absolute inset-0 border-2 opacity-60 animate-pulse z-40" 
                        style={{ 
                          borderColor: themeColors.secondary,
-                         borderRadius: themeColors.borderRadius
+                         borderRadius: '12px' // Fixed - use consistent rounding for all themes
                        }} />
                 )}
               </div>
             </div>
-            
-            {/* Level Badge - Updated with cyan theme and white sparkles */}
+
+            {/* Level Badge */}
             <div className="mt-4 relative">
               <div className="text-center px-4 py-2 relative overflow-hidden group"
                    style={{
-                     background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #06b6d4 100%)', // Cyan gradient
-                     border: `2px solid #0891b2`,
-                     borderRadius: themeColors.borderRadius,
-                     boxShadow: '0 0 15px rgba(6, 182, 212, 0.5), 4px 4px 0px 0px rgba(0,0,0,1)'
+                     background: currentTheme === 'pink' 
+                       ? 'linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #c084fc 100%)'
+                       : 'linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #06b6d4 100%)',
+                     border: currentTheme === 'pink' 
+                       ? `2px solid #a855f7` 
+                       : `2px solid #0891b2`,
+                     borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                     boxShadow: currentTheme === 'pink'
+                       ? '0 0 15px rgba(168, 85, 247, 0.5), 4px 4px 0px 0px rgba(0,0,0,1)'
+                       : '0 0 15px rgba(6, 182, 212, 0.5), 4px 4px 0px 0px rgba(0,0,0,1)'
                    }}>
-                {/* Shiny sweep animation - cyan */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                {/* Additional cyan shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-100/30 via-transparent to-cyan-300/30 animate-pulse" />
                 <span className="font-mono font-bold text-lg relative z-10 text-white" style={{ 
-                  textShadow: '0 0 10px rgba(6,182,212,0.8)' 
+                  textShadow: currentTheme === 'pink'
+                    ? '0 0 10px rgba(168, 85, 247, 0.8)'
+                    : '0 0 10px rgba(6,182,212,0.8)' 
                 }}>
                   LVL {currentRank.level}
                 </span>
@@ -514,10 +446,10 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                    style={{
                      backgroundColor: themeColors.backgroundColor,
                      border: `1px solid ${themeColors.borderColor}`,
-                     borderRadius: themeColors.borderRadius,
+                     borderRadius: '12px', // Fixed - use consistent rounding for all themes
                      boxShadow: currentTheme === 'default' 
                        ? '0 0 8px rgba(255, 255, 255, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)' 
-                       : '2px 2px 0px 0px rgba(0,0,0,1)'
+                       : `0 0 4px ${themeColors.primary}50, 2px 2px 0px 0px rgba(0,0,0,1)`
                    }}>
                 <button
                   onClick={() => setShowEasterEgg(true)}
@@ -530,7 +462,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 <span className="font-mono text-xs font-bold text-green-400">ONLINE</span>
               </div>
               
-              {/* Profile Pic Edit Button - Moved here */}
+              {/* Profile Pic Edit Button */}
               <div className="mt-2">
                 <button
                   onClick={() => setShowProfilePicEditor(true)}
@@ -538,7 +470,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                   style={{
                     backgroundColor: themeColors.backgroundColor,
                     border: `1px solid ${themeColors.controlColor}`,
-                    borderRadius: themeColors.borderRadius,
+                    borderRadius: '12px', // Fixed - use consistent rounding for all themes
                     color: themeColors.controlColor,
                     boxShadow: currentTheme === 'default' 
                       ? '0 0 6px rgba(255, 255, 255, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' 
@@ -562,165 +494,249 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               </h2>
             </div>
             
-            {/* Mini Achievement Badges */}
-            {selectedBadges.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm font-mono text-gray-400">FEATURED BADGES:</span>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {selectedBadges.map(badgeId => {
-                    const achievement = allAchievements.find(a => a.id === badgeId);
-                    if (!achievement) return null;
-                    const tier = tierInfo[achievement.tier];
-                    
-                    return (
-                      <div
-                        key={badgeId}
-                        className="bg-gray-900 border px-2 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden group"
-                        style={{
-                          borderColor: tier.color,
-                          boxShadow: `0 0 6px ${tier.color}40, 2px 2px 0px 0px rgba(0,0,0,1)`
-                        }}
-                      >
-                        <div className="absolute inset-0 pointer-events-none" 
-                             style={{
-                               background: `linear-gradient(to bottom right, ${tier.color}10, ${tier.color}15)`
-                             }} />
-                        <div className="relative z-10 flex items-center gap-1">
-                          <span className="text-xs">{achievement.icon}</span>
-                          <span className="font-mono text-xs font-bold" style={{ color: tier.color }}>
-                            {achievement.name}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            
-            {/* Player Title section - Enhanced with cyan theme and white sparkles */}
-            <div className="flex flex-wrap items-center gap-3 mb-4">
+            {/* Player Title section */}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
               <div className="relative">
                 <div className="px-5 py-3 relative overflow-hidden group"
                      style={{
-                       background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #06b6d4 100%)', // Cyan gradient
-                       border: `4px solid #0891b2`,
-                       borderRadius: themeColors.borderRadius,
-                       boxShadow: '0 0 20px rgba(6, 182, 212, 0.6), 6px 6px 0px 0px rgba(0,0,0,1)'
+                       background: currentTheme === 'pink' 
+                         ? 'linear-gradient(135deg, #a855f7 0%, #d946ef 50%, #a855f7 100%)'
+                         : 'linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #06b6d4 100%)',
+                       border: currentTheme === 'pink' 
+                         ? `4px solid #d946ef` 
+                         : `4px solid #0891b2`,
+                       borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                       boxShadow: currentTheme === 'pink'
+                         ? '0 0 20px rgba(217, 70, 239, 0.6), 6px 6px 0px 0px rgba(0,0,0,1)'
+                         : '0 0 20px rgba(6, 182, 212, 0.6), 6px 6px 0px 0px rgba(0,0,0,1)'
                      }}>
-                  {/* Cyan striped background */}
+                  {/* Theme-specific striped background */}
                   <div 
                     className="absolute inset-0 opacity-25"
                     style={{
-                      background: `
-                        repeating-linear-gradient(
-                          45deg,
-                          #06b6d4,
-                          #06b6d4 2px,
-                          transparent 2px,
-                          transparent 4px
-                        )
-                      `,
-                      borderRadius: themeColors.borderRadius
+                      background: currentTheme === 'pink' 
+                        ? `repeating-linear-gradient(45deg, #a855f7, #a855f7 2px, transparent 2px, transparent 4px)`
+                        : `repeating-linear-gradient(45deg, #06b6d4, #06b6d4 2px, transparent 2px, transparent 4px)`,
+                      borderRadius: '12px' // Fixed - use consistent rounding for all themes
                     }}
-                  />           
+                  />
+
+                  {/* Twinkling Stars/Hearts - Theme specific */}
+                  <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: '12px' }}>
+                    {currentTheme === 'pink' ? (
+                      // Pink theme - Twinkling Hearts (MOVED TO EDGES/CORNERS)
+                      <>
+                        <Heart 
+                          size={16} 
+                          className="absolute top-1 left-1 text-white animate-pulse opacity-90" 
+                          style={{ 
+                            animationDelay: '0s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(217, 70, 239, 0.8))'
+                          }} 
+                        />
+                        <Heart 
+                          size={14} 
+                          className="absolute top-1 right-1 text-white animate-pulse opacity-85" 
+                          style={{ 
+                            animationDelay: '1s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(217, 70, 239, 0.8))'
+                          }} 
+                        />
+                        <Heart 
+                          size={15} 
+                          className="absolute bottom-1 left-1 text-white animate-pulse opacity-80" 
+                          style={{ 
+                            animationDelay: '0.5s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(217, 70, 239, 0.8))'
+                          }} 
+                        />
+                        <Heart 
+                          size={12} 
+                          className="absolute bottom-1 right-1 text-white animate-pulse opacity-95" 
+                          style={{ 
+                            animationDelay: '1.5s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(217, 70, 239, 0.8))'
+                          }} 
+                        />
+                        <Heart 
+                          size={10} 
+                          className="absolute top-1/2 left-0 text-white animate-pulse opacity-75" 
+                          style={{ 
+                            animationDelay: '2s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(217, 70, 239, 0.8))'
+                          }} 
+                        />
+                        <Heart 
+                          size={8} 
+                          className="absolute top-1/2 right-0 text-white animate-pulse opacity-70" 
+                          style={{ 
+                            animationDelay: '2.5s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(217, 70, 239, 0.8))'
+                          }} 
+                        />
+                      </>
+                    ) : (
+                      // Default theme - Twinkling Stars (MOVED TO EDGES/CORNERS)
+                      <>
+                        <Star 
+                          size={16} 
+                          className="absolute top-1 left-1 text-white animate-pulse opacity-90" 
+                          style={{ 
+                            animationDelay: '0s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(6, 182, 212, 0.8))'
+                          }} 
+                        />
+                        <Star 
+                          size={14} 
+                          className="absolute top-1 right-1 text-white animate-pulse opacity-85" 
+                          style={{ 
+                            animationDelay: '1s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(6, 182, 212, 0.8))'
+                          }} 
+                        />
+                        <Star 
+                          size={15} 
+                          className="absolute bottom-1 left-1 text-white animate-pulse opacity-80" 
+                          style={{ 
+                            animationDelay: '0.5s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(6, 182, 212, 0.8))'
+                          }} 
+                        />
+                        <Star 
+                          size={12} 
+                          className="absolute bottom-1 right-1 text-white animate-pulse opacity-95" 
+                          style={{ 
+                            animationDelay: '1.5s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(6, 182, 212, 0.8))'
+                          }} 
+                        />
+                        <Star 
+                          size={10} 
+                          className="absolute top-1/2 left-0 text-white animate-pulse opacity-75" 
+                          style={{ 
+                            animationDelay: '2s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(6, 182, 212, 0.8))'
+                          }} 
+                        />
+                        <Star 
+                          size={8} 
+                          className="absolute top-1/2 right-0 text-white animate-pulse opacity-70" 
+                          style={{ 
+                            animationDelay: '2.5s',
+                            filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(6, 182, 212, 0.8))'
+                          }} 
+                        />
+                      </>
+                    )}
+                  </div>
+                           
                   <p className="text-lg lg:text-xl font-mono font-bold relative z-10 text-white"
-                     style={{ textShadow: '0 0 10px rgba(6, 182, 212, 0.8)' }}>
+                     style={{ 
+                       textShadow: currentTheme === 'pink' 
+                         ? '0 0 10px rgba(217, 70, 239, 0.8)' 
+                         : '0 0 10px rgba(6, 182, 212, 0.8)' 
+                     }}>
                     {currentRank.icon} {currentRank.name}
                   </p>
                 </div>
-                
-                {/* Enhanced corner decorations with white sparkles */}
-                <div className="absolute -top-3 -left-3">
-                  <div className="relative w-8 h-8">
-                    <span className="absolute top-0 left-2 text-white text-xl animate-pulse font-bold">✦</span>
-                    <span className="absolute top-2 left-5 text-white text-lg animate-pulse font-bold" 
-                          style={{ animationDelay: '0.5s' }}>★</span>
-                    <span className="absolute top-5 left-0 text-white text-lg animate-pulse font-bold" 
-                          style={{ animationDelay: '1s' }}>✧</span>
+              </div>
+              
+              {/* Programmer Badge */}
+              <div className="relative group ml-4">
+                <div className="px-3 py-2 relative overflow-hidden"
+                     style={{
+                       background: currentTheme === 'pink' 
+                         ? 'linear-gradient(135deg, #f8bbff 0%, #f3a8ff 50%, #f8bbff 100%)' // Light pink gradient
+                         : 'linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #22c55e 100%)',
+                       border: currentTheme === 'pink' 
+                         ? `2px solid #f3a8ff` // Light pink border
+                         : `2px solid #16a34a`,
+                       borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                       boxShadow: currentTheme === 'pink'
+                         ? '0 0 15px rgba(243, 168, 255, 0.6), 4px 4px 0px 0px rgba(0,0,0,1)' // Light pink glow
+                         : '0 0 15px rgba(34, 197, 94, 0.6), 4px 4px 0px 0px rgba(0,0,0,1)'
+                     }}>
+                  {/* Animated glow with theme colors */}
+                  <div className="absolute inset-0 opacity-30 animate-pulse" 
+                       style={{
+                         background: currentTheme === 'pink' 
+                           ? 'radial-gradient(circle, rgba(243, 168, 255, 0.4) 0%, transparent 70%)' // Light pink glow
+                           : 'radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, transparent 70%)',
+                         borderRadius: '12px' // Fixed - use consistent rounding for all themes
+                       }} />
+                  {/* Particles effect with theme colors */}
+                  <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: '12px' }}>
+                    <div className="absolute top-1 left-2 w-1 h-1 rounded-full animate-bounce" 
+                         style={{ 
+                           backgroundColor: currentTheme === 'pink' ? '#fce7ff' : '#bbf7d0', // Light pink particles
+                           animationDelay: '0s' 
+                         }} />
+                    <div className="absolute top-3 right-3 w-1 h-1 rounded-full animate-bounce" 
+                         style={{ 
+                           backgroundColor: currentTheme === 'pink' ? '#fce7ff' : '#bbf7d0', // Light pink particles
+                           animationDelay: '0.5s' 
+                         }} />
+                    <div className="absolute bottom-2 left-4 w-1 h-1 rounded-full animate-bounce" 
+                         style={{ 
+                           backgroundColor: currentTheme === 'pink' ? '#fce7ff' : '#bbf7d0', // Light pink particles
+                           animationDelay: '1s' 
+                         }} />
                   </div>
-                </div>
-                <div className="absolute -top-3 -right-3">
-                  <div className="relative w-8 h-8">
-                    <span className="absolute top-0 right-2 text-white text-xl animate-pulse font-bold">✦</span>
-                    <span className="absolute top-2 right-5 text-white text-lg animate-pulse font-bold" 
-                          style={{ animationDelay: '0.5s' }}>★</span>
-                    <span className="absolute top-5 right-0 text-white text-lg animate-pulse font-bold" 
-                          style={{ animationDelay: '1s' }}>✧</span>
+                  <div className="relative z-10 flex items-center gap-2">
+                    <Code size={16} className="text-white" style={{ 
+                      filter: currentTheme === 'pink' 
+                        ? 'drop-shadow(0 0 8px rgba(243, 168, 255, 0.8))' // Light pink glow for icon
+                        : 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))'
+                    }} />
+                    <span className="font-mono text-xs font-bold text-white" style={{ 
+                      textShadow: currentTheme === 'pink' 
+                        ? '0 0 10px rgba(243, 168, 255, 0.8)' // Light pink text shadow
+                        : '0 0 10px rgba(34, 197, 94, 0.8)' 
+                    }}>
+                      PROGRAMMER
+                    </span>
+                    <div className="px-1 py-0.5 text-xs font-mono font-bold rounded"
+                         style={{ 
+                           backgroundColor: currentTheme === 'pink' ? '#f8bbff' : '#22c55e', // Light pink level badge
+                           color: 'black' 
+                         }}>
+                      L3
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              {/* Highest Skill Badge - Positioned to the right of rank */}
-              {highestSkill && (
-                <div className="relative group">
-                  <div className="px-3 py-2 relative overflow-hidden"
-                       style={{
-                         background: `linear-gradient(135deg, ${highestSkill.color}20, ${highestSkill.color}40, ${highestSkill.color}20)`,
-                         border: `2px solid ${highestSkill.color}`,
-                         borderRadius: themeColors.borderRadius,
-                         boxShadow: `0 0 15px ${highestSkill.color}60, 4px 4px 0px 0px rgba(0,0,0,1)`
-                       }}>
-                    {/* Animated skill glow */}
-                    <div className="absolute inset-0 opacity-30 animate-pulse" 
-                         style={{
-                           background: `radial-gradient(circle, ${highestSkill.color}40 0%, transparent 70%)`,
-                           borderRadius: themeColors.borderRadius
-                         }} />
-                    {/* Skill particles effect */}
-                    <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: themeColors.borderRadius }}>
-                      <div className="absolute top-1 left-2 w-1 h-1 rounded-full animate-bounce" 
-                           style={{ backgroundColor: highestSkill.color, animationDelay: '0s' }} />
-                      <div className="absolute top-3 right-3 w-1 h-1 rounded-full animate-bounce" 
-                           style={{ backgroundColor: highestSkill.color, animationDelay: '0.5s' }} />
-                      <div className="absolute bottom-2 left-4 w-1 h-1 rounded-full animate-bounce" 
-                           style={{ backgroundColor: highestSkill.color, animationDelay: '1s' }} />
-                    </div>
-                    <div className="relative z-10 flex items-center gap-2">
-                      <span className="text-lg">{highestSkill.profession.icon}</span>
-                      <span className="font-mono text-xs font-bold text-white" style={{ 
-                        textShadow: `0 0 10px ${highestSkill.color}` 
-                      }}>
-                        {highestSkill.profession.name.toUpperCase()}
-                      </span>
-                      <div className="px-1 py-0.5 text-xs font-mono font-bold rounded"
-                           style={{ 
-                             backgroundColor: highestSkill.color,
-                             color: 'black' 
-                           }}>
-                        L{highestSkill.level}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Elite badge for high-level players */}
-              {currentRank.level >= 10 && (
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-mono font-bold text-sm">
-                  ELITE
-                </div>
-              )}
-              
-              {/* Legendary badge for max-level players */}
-              {currentRank.level >= 15 && (
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 border-2 border-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-mono font-bold text-sm">
-                  LEGENDARY
-                </div>
-              )}
             </div>
 
-            {/* Enhanced XP Progress Bar with cyan/pink gradient */}
+            {/* Next Rank Information */}
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-mono font-bold" style={{ color: themeColors.borderColor }}>
+                  Next Rank:
+                </span>
+                {nextRank && (
+                  <span className="text-sm font-mono font-bold text-white">
+                    {nextRank.name}
+                  </span>
+                )}
+                {!nextRank && (
+                  <span className="text-sm font-mono font-bold text-yellow-400">
+                    MAX RANK ACHIEVED
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Enhanced XP Progress Bar */}
             <div className="space-y-3">
               <div className="relative">
                 <div className="w-full h-10 relative overflow-hidden"
                      style={{
                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
                        border: `2px solid ${themeColors.borderColor}`,
-                       borderRadius: themeColors.borderRadius,
-                       clipPath: currentTheme === 'pink' ? 'polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%)' : 'none'
+                       borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                       boxShadow: currentTheme === 'default' 
+                         ? '0 0 8px rgba(255, 255, 255, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)' 
+                         : `0 0 4px ${themeColors.primary}50, 2px 2px 0px 0px rgba(0,0,0,1)`
                      }}>
                   <motion.div
                     initial={{ width: 0 }}
@@ -728,21 +744,21 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     transition={{ duration: 2, ease: "easeOut" }}
                     className="h-full relative"
                     style={{
-                      background: 'linear-gradient(90deg, #06b6d4, #f472b6, #06b6d4)', // Always cyan to pink to cyan
-                      borderRadius: themeColors.borderRadius
+                      background: currentTheme === 'pink' 
+                        ? 'linear-gradient(90deg, #a855f7, #d946ef, #a855f7)'
+                        : 'linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4)',
+                      borderRadius: '12px' // Fixed - use consistent rounding for all themes
                     }}
                   >
                     {/* Animated shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white to-transparent opacity-20"
                          style={{ 
                            animation: 'pulse 2s ease-in-out infinite',
-                           borderRadius: themeColors.borderRadius 
+                           borderRadius: '12px' // Fixed - use consistent rounding for all themes
                          }} />
-                    {/* Additional sparkle effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-30 -skew-x-12 animate-pulse" />
                     
                     {/* XP Particles */}
-                    <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: themeColors.borderRadius }}>
+                    <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: '12px' }}>
                       <div className="absolute top-1 left-1/4 w-1 h-1 bg-white rounded-full animate-bounce opacity-60" 
                            style={{ animationDelay: '0s' }} />
                       <div className="absolute top-2 left-3/4 w-0.5 h-0.5 bg-white rounded-full animate-bounce opacity-80" 
@@ -751,314 +767,30 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                            style={{ animationDelay: '0.5s' }} />
                     </div>
                   </motion.div>
-                  
-                  {/* Corner decorations with theme colors */}
-                  {currentTheme === 'pink' && (
-                    <>
-                      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2" 
-                           style={{ borderColor: themeColors.borderColor }} />
-                      <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2" 
-                           style={{ borderColor: themeColors.borderColor }} />
-                      <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2" 
-                           style={{ borderColor: themeColors.borderColor }} />
-                    </>
-                  )}
-                </div>
-                
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-mono font-bold text-white"
-                        style={{
-                          textShadow: '2px 2px 0px rgba(0,0,0,0.8)'
-                        }}>
-                    {progressPercentage}%
-                  </span>
                 </div>
               </div>
               
               <div className="flex flex-wrap items-center justify-between text-sm gap-2">
                 <span className="text-base font-mono" style={{ color: themeColors.borderColor }}>
                   <span className="mr-2 text-lg" style={{ color: themeColors.secondary }}>⚡</span>
-                  Experience Points
+                  Total Experience Points: {totalXP}
                 </span>
                 <span className="text-base font-mono text-white px-3 py-1"
                       style={{
                         backgroundColor: themeColors.backgroundColor,
                         border: `1px solid ${themeColors.borderColor}`,
-                        borderRadius: themeColors.borderRadius
+                        borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                        boxShadow: currentTheme === 'default' 
+                          ? '0 0 4px rgba(255, 255, 255, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)' 
+                          : `0 0 2px ${themeColors.primary}50, 1px 1px 0px 0px rgba(0,0,0,1)`
                       }}>
-                  {Math.max(0, xpInCurrentRank)}/{xpNeededForNextRank} XP
+                  Level Up: {Math.max(0, xpInCurrentRank)}/{xpNeededForNextRank} XP
                 </span>
               </div>
             </div>
-
           </div>
         </div>
-      </motion.div>
 
-      {/* LOG STATS Section - Updated with theme system */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="p-6 relative overflow-hidden"
-        style={{
-          backgroundColor: themeColors.backgroundColor,
-          border: `2px solid ${themeColors.borderColor}`,
-          borderRadius: themeColors.borderRadius,
-          boxShadow: currentTheme === 'default' 
-            ? '0 0 15px rgba(255, 255, 255, 0.2), 4px 4px 0px 0px rgba(0,0,0,1)' 
-            : `0 0 3px ${themeColors.primary}30, 1px 1px 0px 0px rgba(0,0,0,1)`
-        }}
-      >
-        {/* Gradient overlay with theme system */}
-        <div className="absolute inset-0 pointer-events-none"
-             style={{
-               background: currentTheme === 'default' 
-                 ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.1))'
-                 : `linear-gradient(to bottom right, ${themeColors.secondary}15, ${themeColors.secondary}20)`,
-               borderRadius: themeColors.borderRadius
-             }} />
-        
-        <div className="relative z-10">
-          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            <span className="mr-2 text-xl" style={{ color: themeColors.secondary }}>
-              {currentTheme === 'pink' ? '♥' : '⚡'}
-            </span>
-            LOG STATS
-          </h3>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Total Notes */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">LOGS</div>
-                <div className="text-2xl font-mono font-bold text-white">{notes.length}</div>
-              </div>
-            </div>
-
-            {/* Total XP */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">TOTAL XP</div>
-                <div className="text-2xl font-mono font-bold text-white">{totalXP.toLocaleString()}</div>
-              </div>
-            </div>
-
-            {/* Total Words */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">WORDS</div>
-                <div className="text-2xl font-mono font-bold text-white">
-                  {notes.reduce((total, note) => {
-                    const wordCount = note.content ? note.content.split(/\s+/).length : 0;
-                    return total + wordCount;
-                  }, 0).toLocaleString()}
-                </div>
-              </div>
-            </div>
-
-            {/* Days Active */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">STREAK</div>
-                <div className="text-2xl font-mono font-bold text-white">7 days</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* MISSION STATS Section - Updated with theme system */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="p-6 relative overflow-hidden"
-        style={{
-          backgroundColor: themeColors.backgroundColor,
-          border: `2px solid ${themeColors.borderColor}`,
-          borderRadius: themeColors.borderRadius,
-          boxShadow: currentTheme === 'default' 
-            ? '0 0 15px rgba(255, 255, 255, 0.2), 4px 4px 0px 0px rgba(0,0,0,1)' 
-            : `0 0 3px ${themeColors.primary}30, 1px 1px 0px 0px rgba(0,0,0,1)`
-        }}
-      >
-        {/* Gradient overlay with theme system */}
-        <div className="absolute inset-0 pointer-events-none"
-             style={{
-               background: currentTheme === 'default' 
-                 ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.1))'
-                 : `linear-gradient(to bottom right, ${themeColors.secondary}15, ${themeColors.secondary}20)`,
-               borderRadius: themeColors.borderRadius
-             }} />
-        
-        <div className="relative z-10">
-          <TaskStats tasks={tasks} taskLists={taskLists} />
-        </div>
-      </motion.div>
-
-      {/* ACHIEVEMENT STATS Section - Updated with theme system */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="p-6 relative overflow-hidden"
-        style={{
-          backgroundColor: themeColors.backgroundColor,
-          border: `2px solid ${themeColors.borderColor}`,
-          borderRadius: themeColors.borderRadius,
-          boxShadow: currentTheme === 'default' 
-            ? '0 0 15px rgba(255, 255, 255, 0.2), 4px 4px 0px 0px rgba(0,0,0,1)' 
-            : `0 0 3px ${themeColors.primary}30, 1px 1px 0px 0px rgba(0,0,0,1)`
-        }}
-      >
-        {/* Gradient overlay with theme system */}
-        <div className="absolute inset-0 pointer-events-none"
-             style={{
-               background: currentTheme === 'default' 
-                 ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.1))'
-                 : `linear-gradient(to bottom right, ${themeColors.secondary}15, ${themeColors.secondary}20)`,
-               borderRadius: themeColors.borderRadius
-             }} />
-        
-        <div className="relative z-10">
-          <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-            <span className="mr-2 text-xl" style={{ color: themeColors.secondary }}>
-              {currentTheme === 'pink' ? '♥' : '⚡'}
-            </span>
-            ACHIEVEMENT STATS
-          </h3>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Unlocked Achievements */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">UNLOCKED</div>
-                <div className="text-2xl font-mono font-bold text-white">{achievementStats.unlocked || 0}</div>
-              </div>
-            </div>
-
-            {/* Completion Rate */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">COMPLETION</div>
-                <div className="text-2xl font-mono font-bold text-white">{achievementStats.percentage || 0}%</div>
-              </div>
-            </div>
-
-            {/* Rare Achievements */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">RARE</div>
-                <div className="text-2xl font-mono font-bold text-white">{achievementStats.byTier?.rare || 0}</div>
-              </div>
-            </div>
-
-            {/* Legendary Achievements */}
-            <div className="p-4 relative overflow-hidden"
-                 style={{
-                   backgroundColor: themeColors.backgroundColor,
-                   border: `1px solid ${themeColors.borderColor}`,
-                   borderRadius: themeColors.borderRadius
-                 }}>
-              <div className="absolute inset-0 pointer-events-none"
-                   style={{
-                     background: currentTheme === 'default' 
-                       ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
-                       : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              <div className="relative z-10">
-                <div className="text-xs font-mono text-gray-400">LEGENDARY</div>
-                <div className="text-2xl font-mono font-bold text-white">{achievementStats.byTier?.legendary || 0}</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </motion.div>
 
       {/* Easter Egg Modal - unchanged */}
@@ -1144,124 +876,6 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
         )}
       </AnimatePresence>
 
-      {/* Achievement Badge Selector Modal */}
-      <AnimatePresence>
-        {showBadgeSelector && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={() => setShowBadgeSelector(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="p-6 max-w-2xl mx-4 relative max-h-[80vh] overflow-y-auto"
-              style={{
-                backgroundColor: themeColors.backgroundColor,
-                border: `2px solid ${themeColors.controlColor}`,
-                borderRadius: themeColors.borderRadius,
-                boxShadow: currentTheme === 'default' 
-                  ? '0 0 30px rgba(255, 255, 255, 0.4), 8px 8px 0px 0px rgba(0,0,0,1)' 
-                  : `0 0 20px ${themeColors.controlColor}30, 8px 8px 0px 0px rgba(0,0,0,1)`
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Animated border */}
-              <div className="absolute inset-0 opacity-50 animate-pulse pointer-events-none" 
-                   style={{ 
-                     border: `2px solid ${themeColors.controlColor}`,
-                     borderRadius: themeColors.borderRadius
-                   }} />
-              
-              {/* Close button */}
-              <button
-                onClick={() => setShowBadgeSelector(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
-
-              {/* Content */}
-              <div>
-                <h2 className="text-2xl font-mono font-bold text-white mb-2">
-                  SELECT PROFILE BADGES
-                </h2>
-                
-                <p className="font-mono text-sm mb-6" style={{ color: themeColors.controlColor }}>
-                  Choose up to 3 achievement badges to display on your profile ({selectedBadges.length}/3 selected)
-                </p>
-
-                <div className="space-y-4">
-                  {Object.entries(tierInfo).map(([tierKey, tier]) => {
-                    const tierAchievements = getUnlockedAchievements().filter(a => a.tier === tierKey);
-                    if (tierAchievements.length === 0) return null;
-                    
-                    return (
-                      <div key={tierKey}>
-                        <h3 className="font-mono font-bold text-lg mb-3 flex items-center gap-2">
-                          <span style={{ color: tier.color }}>{tier.emoji}</span>
-                          <span style={{ color: tier.color }}>{tier.name}</span>
-                          <span className="text-gray-400 text-sm">({tierAchievements.length})</span>
-                        </h3>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {tierAchievements.map(achievement => (
-                            <button
-                              key={achievement.id}
-                              onClick={() => toggleBadgeSelection(achievement.id)}
-                              className={`p-3 transition-all duration-200 text-left ${
-                                selectedBadges.includes(achievement.id)
-                                  ? 'bg-gray-700 border-opacity-100'
-                                  : 'hover:bg-gray-800'
-                              }`}
-                              style={{
-                                backgroundColor: selectedBadges.includes(achievement.id) ? themeColors.backgroundColor : 'transparent',
-                                border: `1px solid ${selectedBadges.includes(achievement.id) ? tier.color : '#4B5563'}`,
-                                borderRadius: themeColors.borderRadius
-                              }}
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className="text-2xl">{achievement.icon}</span>
-                                <div className="flex-1">
-                                  <div className="font-mono font-bold text-white text-sm">
-                                    {achievement.name}
-                                  </div>
-                                  <div className="font-mono text-xs text-gray-400">
-                                    {achievement.description}
-                                  </div>
-                                </div>
-                                {selectedBadges.includes(achievement.id) && (
-                                  <Star size={16} style={{ color: tier.color }} />
-                                )}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  
-                  {getUnlockedAchievements().length === 0 && (
-                    <div className="text-center py-8">
-                      <Trophy size={48} className="text-gray-500 mx-auto mb-3" />
-                      <div className="text-gray-400 font-mono text-lg font-bold mb-2">
-                        NO ACHIEVEMENTS UNLOCKED
-                      </div>
-                      <div className="text-gray-500 font-mono text-sm">
-                        Complete tasks and activities to unlock achievement badges!
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Profile Pic Editor Modal */}
       <AnimatePresence>
         {showProfilePicEditor && (
@@ -1280,7 +894,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               style={{
                 backgroundColor: themeColors.backgroundColor,
                 border: `2px solid ${themeColors.controlColor}`,
-                borderRadius: themeColors.borderRadius,
+                borderRadius: '12px', // Fixed - use consistent rounding for all themes
                 boxShadow: currentTheme === 'default' 
                   ? '0 0 30px rgba(255, 255, 255, 0.4), 8px 8px 0px 0px rgba(0,0,0,1)' 
                   : `0 0 20px ${themeColors.controlColor}30, 8px 8px 0px 0px rgba(0,0,0,1)`
@@ -1291,7 +905,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
               <div className="absolute inset-0 opacity-50 animate-pulse pointer-events-none" 
                    style={{ 
                      border: `2px solid ${themeColors.controlColor}`,
-                     borderRadius: themeColors.borderRadius
+                     borderRadius: '12px' // Fixed - use consistent rounding for all themes
                    }} />
               
               {/* Close button */}
@@ -1317,19 +931,14 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     <button
                       key={pic.id}
                       onClick={() => changeProfilePic(pic.id)}
-                      className={`p-4 transition-all duration-200 text-center ${
-                        selectedProfilePic === pic.id
-                          ? 'bg-gray-700 border-opacity-100'
-                          : 'hover:bg-gray-800'
-                      }`}
                       style={{
                         backgroundColor: selectedProfilePic === pic.id ? themeColors.backgroundColor : 'transparent',
                         border: `1px solid ${selectedProfilePic === pic.id ? themeColors.controlColor : '#4B5563'}`,
-                        borderRadius: themeColors.borderRadius
+                        borderRadius: '12px' // Fixed - use consistent rounding for all themes
                       }}
                     >
                       <div className="w-16 h-16 bg-gray-600 border border-gray-500 mx-auto mb-2 flex items-center justify-center"
-                           style={{ borderRadius: themeColors.borderRadius }}>
+                           style={{ borderRadius: '12px' }}> {/* Fixed - use consistent rounding for all themes */}
                         {/* Placeholder for now - in a real implementation, this would show the actual image */}
                         <span className="text-2xl">🎮</span>
                       </div>
@@ -1350,12 +959,11 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                      style={{
                        backgroundColor: themeColors.backgroundColor,
                        border: `1px solid ${themeColors.borderColor}`,
-                       borderRadius: themeColors.borderRadius
+                       borderRadius: '12px' // Fixed - use consistent rounding for all themes
                      }}>
-                  <div className="font-mono text-xs text-gray-400 mb-2">PREVIEW:</div>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gray-600 border border-gray-500 flex items-center justify-center"
-                         style={{ borderRadius: themeColors.borderRadius }}>
+                         style={{ borderRadius: '12px' }}> {/* Fixed - use consistent rounding for all themes */}
                       <span className="text-lg">🎮</span>
                     </div>
                     <div>

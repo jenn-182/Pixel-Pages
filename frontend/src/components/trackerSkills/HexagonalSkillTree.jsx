@@ -273,6 +273,29 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
     }
   };
 
+  // Calculate total focus time from sessions (same as TimeManagementMatrix)
+  const calculateTotalFocusTime = () => {
+    try {
+      const sessions = JSON.parse(localStorage.getItem('focusSessions') || '[]');
+      const totalMinutes = sessions.reduce((sum, session) => {
+        return sum + (session.timeSpent || 0);
+      }, 0);
+      return totalMinutes;
+    } catch (error) {
+      console.error('Error calculating total focus time:', error);
+      return 0;
+    }
+  };
+
+  const formatTime = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+  };
+
   // Sort categories for consistent order
   const sortedCategories = categories
     .filter(cat => (cat.xp || 0) >= 0)
@@ -285,7 +308,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
 
   const totalXP = sortedCategories.reduce((sum, cat) => sum + (cat.xp || 0), 0);
   const maxedBranches = sortedCategories.filter(cat => getCurrentLevel(cat.xp || 0) === 10).length;
-  const totalHours = Math.floor(totalXP / 60);
+  const totalFocusMinutes = calculateTotalFocusTime();
 
   return (
     <div 
@@ -336,7 +359,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                 className="text-2xl font-mono font-bold"
                 style={{ color: 'white' }}
               >
-                {totalHours}h
+                {formatTime(totalFocusMinutes)}
               </div>
               <div className="text-xs text-gray-400 font-mono">TOTAL FOCUS TIME</div>
             </div>

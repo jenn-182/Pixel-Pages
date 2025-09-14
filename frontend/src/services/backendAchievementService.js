@@ -58,12 +58,25 @@ getAchievementProgress(achievementId, userStats) {
 }
 
   getUnlockedAchievements() {
-    return this.playerAchievements
-      .filter(pa => pa.completed)  // These are already the full achievement objects
-      .map(playerAch => ({
-        ...playerAch,
-        unlockedAt: playerAch.unlockedAt
-      }));
+    const unlockedPlayerAchievements = this.playerAchievements.filter(pa => pa.completed);
+    
+    // Merge with full achievement data from allAchievements
+    return unlockedPlayerAchievements.map(playerAch => {
+      const fullAchievement = this.allAchievements.find(a => 
+        a.id === playerAch.achievementId || a.id === playerAch.id
+      );
+      
+      if (!fullAchievement) {
+        console.warn(`Full achievement data not found for: ${playerAch.achievementId || playerAch.id}`);
+        return playerAch; // Return as-is if not found
+      }
+      
+      return {
+        ...fullAchievement, // Full achievement data (id, name, description, tier, etc.)
+        ...playerAch,       // Player-specific data (progress, completed, unlockedAt)
+        id: fullAchievement.id // Ensure ID is from full achievement
+      };
+    }).filter(Boolean);
   }
 
   getLockedAchievements() {
