@@ -124,7 +124,7 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
           })}
         </div>
 
-        {/* ✅ Right side - App Logo - Higher and more centered */}
+        {/* ✅ Right side - App Logo - Updated to use ppcolor.png */}
         <motion.div 
           className="app-logo-container"
           initial={{ opacity: 0, x: 20 }}
@@ -132,17 +132,17 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
           transition={{ delay: 0.3 }}
           style={{
             position: 'absolute',
-            right: '50px',
+            right: '20px',
             top: '0px',
             zIndex: 20
           }}
         >
           <img 
-            src="/PixelPageSingleHeaderDraft.png"
+            src="/ppcolor.png"
             alt="Pixel Pages Logo" 
             className="app-logo"
             style={{
-              height: '65px',
+              height: '60px',
               width: 'auto',
               maxWidth: '250px',
               filter: 'brightness(1.1) contrast(1.1)',
