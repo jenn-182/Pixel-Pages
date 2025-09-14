@@ -1,6 +1,7 @@
 import React from 'react';
 import HeroCard from '../profile/HeroCard';
 import ProfileStats from '../profile/ProfileStats';
+import AboutPlayer from '../profile/AboutPlayer';
 import FavoriteBadges from '../profile/FavoriteBadges';
 import SkillTreeWidget from '../profile/SkillTreeWidget';
 import { usePlayer } from '../../hooks/usePlayer';
@@ -21,6 +22,9 @@ const ProfileTab = ({ username = 'user', tabColor = '#A78BFA' }) => {
         tasks={tasks} 
         taskLists={taskLists} 
       />
+      
+      {/* About Player - New section */}
+      <AboutPlayer />
       
       {/* Skill Tree Widget */}
       <SkillTreeWidget />

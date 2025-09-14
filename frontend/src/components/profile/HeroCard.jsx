@@ -736,7 +736,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                      style={{
                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
                        border: `2px solid ${themeColors.borderColor}`,
-                       borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                       borderRadius: '12px',
                        boxShadow: currentTheme === 'default' 
                          ? '0 0 8px rgba(255, 255, 255, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)' 
                          : `0 0 4px ${themeColors.primary}50, 2px 2px 0px 0px rgba(0,0,0,1)`
@@ -748,16 +748,16 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     className="h-full relative"
                     style={{
                       background: currentTheme === 'pink' 
-                        ? 'linear-gradient(90deg, #a855f7, #d946ef, #a855f7)'
-                        : 'linear-gradient(90deg, #06b6d4, #22c55e, #06b6d4)', // Cyan to green gradient
-                      borderRadius: '12px' // Fixed - use consistent rounding for all themes
+                        ? 'linear-gradient(90deg, #a855f7,rgb(255, 151, 236), #a855f7)'
+                        : 'linear-gradient(90deg, #06b6d4, #22c55e, #06b6d4)',
+                      borderRadius: '12px'
                     }}
                   >
                     {/* Animated shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white to-transparent opacity-20"
                          style={{ 
                            animation: 'pulse 2s ease-in-out infinite',
-                           borderRadius: '12px' // Fixed - use consistent rounding for all themes
+                           borderRadius: '12px'
                          }} />
                     
                     {/* XP Particles */}
@@ -770,6 +770,19 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                            style={{ animationDelay: '0.5s' }} />
                     </div>
                   </motion.div>
+                  
+                  {/* Percentage Display - Centered on progress bar */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-mono font-bold text-white text-sm relative z-20"
+                          style={{ 
+                            textShadow: currentTheme === 'pink' 
+                              ? '0 0 8px rgba(217, 70, 239, 0.8), 2px 2px 4px rgba(0,0,0,0.8)' 
+                              : '0 0 8px rgba(6, 182, 212, 0.8), 2px 2px 4px rgba(0,0,0,0.8)',
+                            filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.7))'
+                          }}>
+                      {progressPercentage}%
+                    </span>
+                  </div>
                 </div>
               </div>
               
@@ -782,7 +795,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                       style={{
                         backgroundColor: themeColors.backgroundColor,
                         border: `1px solid ${themeColors.borderColor}`,
-                        borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                        borderRadius: '12px',
                         boxShadow: currentTheme === 'default' 
                           ? '0 0 4px rgba(255, 255, 255, 0.2), 1px 1px 0px 0px rgba(0,0,0,1)' 
                           : `0 0 2px ${themeColors.primary}50, 1px 1px 0px 0px rgba(0,0,0,1)`
@@ -886,35 +899,36 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black bg-opacity-80 flex items-start justify-center z-50 pt-8 overflow-y-auto"
             onClick={() => setShowProfilePicEditor(false)}
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="p-6 max-w-xl mx-4 relative"
+              className="p-6 max-w-xl mx-4 relative mb-8"
               style={{
                 backgroundColor: themeColors.backgroundColor,
                 border: `2px solid ${themeColors.controlColor}`,
-                borderRadius: '12px', // Fixed - use consistent rounding for all themes
+                borderRadius: '12px',
                 boxShadow: currentTheme === 'default' 
                   ? '0 0 30px rgba(255, 255, 255, 0.4), 8px 8px 0px 0px rgba(0,0,0,1)' 
                   : `0 0 20px ${themeColors.controlColor}30, 8px 8px 0px 0px rgba(0,0,0,1)`
               }}
               onClick={(e) => e.stopPropagation()}
             >
+
               {/* Animated border */}
               <div className="absolute inset-0 opacity-50 animate-pulse pointer-events-none" 
                    style={{ 
                      border: `2px solid ${themeColors.controlColor}`,
-                     borderRadius: '12px' // Fixed - use consistent rounding for all themes
+                     borderRadius: '12px'
                    }} />
               
               {/* Close button */}
               <button
                 onClick={() => setShowProfilePicEditor(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
               >
                 <X size={20} />
               </button>

@@ -14,7 +14,8 @@ const defaultProfilePics = [
   { id: 'avatar12', imagePath: '/Avatars/avatar12.png' },
   { id: 'avatar13', imagePath: '/Avatars/avatar13.png' },
   { id: 'avatar14', imagePath: '/Avatars/avatar14.png' },
-  { id: 'avatar15', imagePath: '/Avatars/avatar15.png' }
+  { id: 'avatar15', imagePath: '/Avatars/avatar15.png' },
+  { id: 'avatar16', imagePath: '/Avatars/avatar16.png' }
 ];
 
 // Get saved profile pic or default
