@@ -377,12 +377,15 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
 
                 {/* Custom Pixel Profile Image */}
                 <img 
-                  src={PixelPageJenn}
+                  src={getProfilePicById(selectedProfilePic).imagePath}
                   alt="Pixel Profile Avatar"
                   className="w-full h-full object-cover relative z-10"
                   style={{ 
                     imageRendering: 'pixelated',
-                    borderRadius: '12px' // Fixed - use consistent rounding for all themes
+                    borderRadius: '12px'
+                  }}
+                  onError={(e) => {
+                    e.target.src = PixelPageJenn;
                   }}
                 />
 
@@ -746,7 +749,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                     style={{
                       background: currentTheme === 'pink' 
                         ? 'linear-gradient(90deg, #a855f7, #d946ef, #a855f7)'
-                        : 'linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4)',
+                        : 'linear-gradient(90deg, #06b6d4, #22c55e, #06b6d4)', // Cyan to green gradient
                       borderRadius: '12px' // Fixed - use consistent rounding for all themes
                     }}
                   >
@@ -923,33 +926,41 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 </h2>
                 
                 <p className="font-mono text-sm mb-6" style={{ color: themeColors.controlColor }}>
-                  Select a pixel art avatar to represent your character
+                  Select the avatar that looks most like you
                 </p>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
                   {defaultProfilePics.map(pic => (
                     <button
                       key={pic.id}
                       onClick={() => changeProfilePic(pic.id)}
+                      className="p-2 transition-all duration-200 hover:scale-105"
                       style={{
                         backgroundColor: selectedProfilePic === pic.id ? themeColors.backgroundColor : 'transparent',
-                        border: `1px solid ${selectedProfilePic === pic.id ? themeColors.controlColor : '#4B5563'}`,
-                        borderRadius: '12px' // Fixed - use consistent rounding for all themes
+                        border: `2px solid ${selectedProfilePic === pic.id ? themeColors.controlColor : '#4B5563'}`,
+                        borderRadius: '12px'
                       }}
                     >
-                      <div className="w-16 h-16 bg-gray-600 border border-gray-500 mx-auto mb-2 flex items-center justify-center"
-                           style={{ borderRadius: '12px' }}> {/* Fixed - use consistent rounding for all themes */}
-                        {/* Placeholder for now - in a real implementation, this would show the actual image */}
-                        <span className="text-2xl">🎮</span>
-                      </div>
-                      <div className="font-mono text-xs font-bold text-white">
-                        {pic.name}
-                      </div>
-                      <div className="font-mono text-xs text-gray-400">
-                        {pic.description}
+                      <div className="w-16 h-16 bg-gray-600 border border-gray-500 mx-auto overflow-hidden"
+                           style={{ borderRadius: '8px' }}>
+                        <img 
+                          src={pic.imagePath}
+                          alt={`Avatar ${pic.id}`}
+                          className="w-full h-full object-cover"
+                          style={{ imageRendering: 'pixelated' }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="w-full h-full hidden items-center justify-center text-2xl">
+                          🎮
+                        </div>
                       </div>
                       {selectedProfilePic === pic.id && (
-                        <Star size={16} className="mx-auto mt-1" style={{ color: themeColors.controlColor }} />
+                        <div className="mt-1 flex justify-center">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: themeColors.controlColor }} />
+                        </div>
                       )}
                     </button>
                   ))}
@@ -959,19 +970,31 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                      style={{
                        backgroundColor: themeColors.backgroundColor,
                        border: `1px solid ${themeColors.borderColor}`,
-                       borderRadius: '12px' // Fixed - use consistent rounding for all themes
+                       borderRadius: '12px'
                      }}>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-600 border border-gray-500 flex items-center justify-center"
-                         style={{ borderRadius: '12px' }}> {/* Fixed - use consistent rounding for all themes */}
-                      <span className="text-lg">🎮</span>
+                    <div className="w-12 h-12 bg-gray-600 border border-gray-500 flex items-center justify-center overflow-hidden"
+                         style={{ borderRadius: '8px' }}>
+                      <img 
+                        src={getCurrentProfilePicData().imagePath}
+                        alt="Selected Avatar"
+                        className="w-full h-full object-cover"
+                        style={{ imageRendering: 'pixelated' }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="w-full h-full hidden items-center justify-center text-lg">
+                        🎮
+                      </div>
                     </div>
                     <div>
                       <div className="font-mono text-sm font-bold text-white">
-                        {getCurrentProfilePicData().name}
+                        Currently Selected
                       </div>
                       <div className="font-mono text-xs text-gray-400">
-                        {getCurrentProfilePicData().description}
+                        {getCurrentProfilePicData().id}
                       </div>
                     </div>
                   </div>

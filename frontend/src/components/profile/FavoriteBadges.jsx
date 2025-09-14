@@ -94,29 +94,33 @@ const FavoriteBadges = () => {
               )}
               FAVORITE BADGES
             </h3>
+            {/* Debug info - remove this after fixing */}
+            <div className="text-xs text-gray-400 font-mono">
+              Unlocked: {unlockedAchievements.length} achievements
+            </div>
           </div>
           
-          {/* Add Badge Button */}
-          {unlockedAchievements.length > 0 && (
-            <button
-              onClick={() => setShowSelector(true)}
-              className="px-3 py-1.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden flex items-center gap-2"
-              style={{
-                backgroundColor: themeColors.backgroundColor,
-                border: `2px solid ${themeColors.controlColor}`,
-                borderRadius: '12px', // Fixed - use consistent rounding for all themes
-                color: themeColors.controlColor,
-                boxShadow: currentTheme === 'default' 
-                  ? '0 0 10px rgba(255, 255, 255, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)' 
-                  : `0 0 6px ${themeColors.controlColor}50, 2px 2px 0px 0px rgba(0,0,0,1)`
-              }}
-            >
-              <div className="relative z-10 flex items-center gap-2">
-                <Plus size={14} style={{ color: themeColors.controlColor }} />
-                <span className="text-xs">ADD BADGES</span>
-              </div>
-            </button>
-          )}
+          {/* Add Badge Button - Always show for debugging */}
+          <button
+            onClick={() => setShowSelector(true)}
+            className="px-3 py-1.5 relative group cursor-pointer transition-all duration-300 font-mono font-bold overflow-hidden flex items-center gap-2"
+            style={{
+              backgroundColor: themeColors.backgroundColor,
+              border: `2px solid ${themeColors.controlColor}`,
+              borderRadius: '12px',
+              color: themeColors.controlColor,
+              boxShadow: currentTheme === 'default' 
+                ? '0 0 10px rgba(255, 255, 255, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)' 
+                : `0 0 6px ${themeColors.controlColor}50, 2px 2px 0px 0px rgba(0,0,0,1)`
+            }}
+          >
+            <div className="relative z-10 flex items-center gap-2">
+              <Plus size={14} style={{ color: themeColors.controlColor }} />
+              <span className="text-xs">
+                {unlockedAchievements.length > 0 ? 'ADD BADGES' : 'NO BADGES YET'}
+              </span>
+            </div>
+          </button>
         </div>
 
         {/* Favorite Badges Display */}
