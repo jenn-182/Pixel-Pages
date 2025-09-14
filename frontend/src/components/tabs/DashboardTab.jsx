@@ -1,9 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Folder, BookOpen, FileText, Plus, ExternalLink, TrendingUp, Clock, Target, User, Trophy } from 'lucide-react';
+import { LayoutDashboard, Folder, BookOpen, FileText, Plus, ExternalLink, TrendingUp, Clock, Target, User, Search, Timer, Zap, Award } from 'lucide-react';
 import TaskInsights from '../tasks/TaskInsights';
-import ActiveMissions from '../shared/ActiveMissions';
-import FocusTimerWidget from '../focus/FocusTimerWidget';
 import NoteModal from '../notes/NoteModal';
 import useFolders from '../../hooks/useFolders';
 import useNotebooks from '../../hooks/useNotebooks';
@@ -32,6 +30,14 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
   // Handle clicking on a folder - navigate to library with specific folder view
   const handleFolderClick = (folder) => {
     navigateToFolder(folder, onTabChange);
+  };
+
+  // Handle clicking on new log - open note modal instead of tab
+  const handleNewLog = () => {
+    openModal('noteEdit', { 
+      note: null,
+      mode: 'create'
+    });
   };
 
   // Handle clicking on a note - open note in modal for editing
@@ -81,22 +87,22 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
     
     if (hour >= 5 && hour < 12) {
       return {
-        greeting: `Good morning, ${playerName}!`,
+        greeting: `Good morning, Jroc_182!`,
         subtitle: "Ready to start your productivity missions?"
       };
     } else if (hour >= 12 && hour < 17) {
       return {
-        greeting: `Good afternoon, ${playerName}!`,
+        greeting: `Good afternoon, Jroc_182!`,
         subtitle: "How's your mission progress today?",
       };
     } else if (hour >= 17 && hour < 22) {
       return {
-        greeting: `Good evening, ${playerName}!`,
+        greeting: `Good evening, Jroc_182!`,
         subtitle: "Time to review today's achievements!"
       };
     } else {
       return {
-        greeting: `Burning the midnight oil, ${playerName}?`,
+        greeting: `Burning the midnight oil, Jroc_182?`,
         subtitle: "Night owls are most productive at night!"
       };
     }
@@ -137,113 +143,124 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-3">
-            <div 
-              className="w-6 h-6 border border-gray-600" 
-              style={{ backgroundColor: tabColor }}
-            />
+          <div className="flex items-center justify-between">
             <h1 className="font-mono text-3xl font-bold text-white">
               PLAYER COMMAND CENTER
             </h1>
-            <span className="text-2xl">{currentGreeting.icon}</span>
-          </div>
-          
-          <div className="space-y-2">
             <h2 className="text-xl font-mono font-bold text-white">
               {currentGreeting.greeting}
             </h2>
-            <p className="text-gray-400 font-mono text-sm">
-              {currentGreeting.subtitle}
-            </p>
           </div>
         </motion.div>
 
         {/* Main Dashboard Grid */}
         <div className="space-y-6">
-          {/* 1. Quick Actions Panel - Updated button backgrounds */}
+          {/* 1. Quick Actions Panel - Cyan Accent */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gray-800 border-2 border-cyan-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 relative overflow-hidden"
-            style={{
-              boxShadow: '0 0 15px rgba(103, 232, 249, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
-            }}
+            className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/15 to-cyan-600/20 pointer-events-none" />
-            <div className="absolute inset-0 border-2 border-cyan-300 opacity-30 animate-pulse pointer-events-none" />
+            <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
             
             <div className="relative z-10">
               <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                <div className="w-4 h-4 bg-cyan-300 mr-2" />
+                <Search size={20} className="text-white mr-2" />
                 QUICK COMMANDS
               </h2>
               
-              {/* Quick Action Buttons - Updated to darker background */}
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+              {/* Quick Action Buttons */}
+              <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
                 <button
-                  onClick={() => onTabChange && onTabChange('notes')}
-                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                  onClick={handleNewLog}
+                  className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 20px rgba(6, 182, 212, 0.8), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
-                    <Plus size={20} className="text-cyan-300" />
-                    <span className="text-xs text-cyan-300">NEW LOG</span>
+                    <Plus size={20} className="text-white" />
+                    <span className="text-xs text-white">NEW LOG</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-cyan-400" />
                 </button>
 
                 <button
                   onClick={() => onTabChange && onTabChange('tasks')}
-                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 20px rgba(34, 197, 94, 0.8), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
-                    <Target size={20} className="text-cyan-300" />
-                    <span className="text-xs text-cyan-300">NEW MISSION</span>
+                    <Target size={20} className="text-white" />
+                    <span className="text-xs text-white">NEW MISSION</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-green-400" />
                 </button>
 
                 <button
-                  onClick={() => onTabChange && onTabChange('library')}
-                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                  onClick={() => onTabChange && onTabChange('focus')}
+                  className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 20px rgba(251, 146, 60, 0.8), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
-                    <Folder size={20} className="text-cyan-300" />
-                    <span className="text-xs text-cyan-300">BROWSE VAULT</span>
+                    <Timer size={20} className="text-white" />
+                    <span className="text-xs text-white">TIMER</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-orange-400" />
+                </button>
+
+                <button
+                  onClick={() => onTabChange && onTabChange('tracker')}
+                  className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 20px rgba(147, 51, 234, 0.8), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                  <div className="relative z-10 flex flex-col items-center gap-2">
+                    <Zap size={20} className="text-white" />
+                    <span className="text-xs text-white">SKILLS</span>
+                  </div>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-purple-400" />
                 </button>
 
                 <button
                   onClick={() => onTabChange && onTabChange('achievements')}
-                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 20px rgba(236, 72, 153, 0.8), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
-                    <Trophy size={20} className="text-cyan-300" />
-                    <span className="text-xs text-cyan-300">ACHIEVEMENTS</span>
+                    <Award size={20} className="text-white" />
+                    <span className="text-xs text-white">BADGES</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-pink-400" />
                 </button>
 
                 <button
                   onClick={() => onTabChange && onTabChange('profile')}
-                  className="bg-gray-900 border border-cyan-400 p-3 relative group cursor-pointer transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_8px_rgba(103,232,249,0.4)] font-mono font-bold text-cyan-300 overflow-hidden"
-                  style={{ boxShadow: '0 0 3px rgba(103, 232, 249, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                  className="bg-black border-2 border-white px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+                  style={{
+                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.8), 2px 2px 0px 0px rgba(0,0,0,1)'
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/8 to-cyan-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-2">
-                    <User size={20} className="text-cyan-300" />
-                    <span className="text-xs text-cyan-300">PLAYER LVL</span>
+                    <User size={20} className="text-white" />
+                    <span className="text-xs text-white">PLAYER LVL</span>
                   </div>
-                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-blue-400" />
                 </button>
               </div>
             </div>
@@ -251,69 +268,68 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
 
           {/* 2. Storage Vault & Recent Activity Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Storage Vault Section */}
+            {/* Storage Vault Section - Pink Accent */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gray-800 border-2 border-sky-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 relative overflow-hidden"
-              style={{
-                boxShadow: '0 0 15px rgba(34, 211, 238, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
-              }}
+              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-sky-400/15 to-sky-600/20 pointer-events-none" />
-              <div className="absolute inset-0 border-2 border-sky-400 opacity-30 animate-pulse pointer-events-none" />
+              <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
               
               <div className="relative z-10">
                 <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <div className="w-4 h-4 bg-sky-400 mr-2" />
+                  <Folder size={20} className="text-pink-400 mr-2" />
                   STORAGE VAULT OVERVIEW
                 </h2>
                 
                 {/* Archives Stats */}
                 <div className="space-y-4 mb-4">
                   <div className="grid grid-cols-3 gap-3 text-xs font-mono">
-                    <div className="bg-gray-900 border border-gray-600 p-2 text-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-sky-600/15 pointer-events-none" />
+                    <div className="bg-gray-900 border border-white/60 p-2 text-center relative overflow-hidden rounded">
+                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-pink-600/15 pointer-events-none" />
                       <div className="relative z-10">
-                        <Folder size={16} className="text-sky-400 mx-auto mb-1" />
-                        <div className="text-sky-400 font-bold">{folders.length}</div>
+                        <Folder size={16} className="text-pink-400 mx-auto mb-1" />
+                        <div className="text-pink-400 font-bold">{folders.length}</div>
                         <div className="text-gray-400">ARCHIVES</div>
                       </div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-600 p-2 text-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 to-sky-500/15 pointer-events-none" />
+                    <div className="bg-gray-900 border border-white/60 p-2 text-center relative overflow-hidden rounded">
+                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-pink-600/15 pointer-events-none" />
                       <div className="relative z-10">
-                        <BookOpen size={16} className="text-sky-300 mx-auto mb-1" />
-                        <div className="text-sky-300 font-bold">{notebooks.length}</div>
+                        <BookOpen size={16} className="text-pink-300 mx-auto mb-1" />
+                        <div className="text-pink-300 font-bold">{notebooks.length}</div>
                         <div className="text-gray-400">COLLECTIONS</div>
                       </div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-600 p-2 text-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-sky-700/15 pointer-events-none" />
+                    <div className="bg-gray-900 border border-white/60 p-2 text-center relative overflow-hidden rounded">
+                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-pink-600/15 pointer-events-none" />
                       <div className="relative z-10">
-                        <FileText size={16} className="text-sky-500 mx-auto mb-1" />
-                        <div className="text-sky-500 font-bold">{notes.length}</div>
+                        <FileText size={16} className="text-pink-500 mx-auto mb-1" />
+                        <div className="text-pink-500 font-bold">{notes.length}</div>
                         <div className="text-gray-400">LOGS</div>
                       </div>
                     </div>
                   </div>
                   
-                  {/* Most Active Archive - Updated to match Recent Archive folder styling */}
+                  {/* Most Active Archive */}
                   {mostActiveArchive && (
                     <button
                       onClick={() => handleFolderClick(mostActiveArchive)}
-                      className="w-full bg-gray-900 border border-sky-400 p-3 relative overflow-hidden group cursor-pointer transition-all duration-300 hover:border-sky-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)]"
-                      style={{ boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                      className="w-full bg-black border-2 border-white/60 p-3 relative overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105 rounded"
+                      style={{ 
+                        boxShadow: '0 0 15px rgba(236, 72, 153, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)' 
+                      }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-sky-500/8 to-sky-600/12 pointer-events-none" />
-                      <div className="absolute inset-0 bg-sky-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-pink-400" />
                       <div className="relative z-10 text-left">
                         <div className="flex items-center gap-2 mb-1">
-                          <TrendingUp size={14} className="text-sky-400 group-hover:text-sky-300 transition-colors" />
-                          <span className="text-xs font-mono text-sky-400 font-bold group-hover:text-sky-300 transition-colors">MOST ACTIVE ARCHIVE</span>
+                          <TrendingUp size={14} className="text-pink-400 group-hover:text-pink-300 transition-colors" />
+                          <span className="text-xs font-mono text-pink-400 font-bold group-hover:text-pink-300 transition-colors">MOST ACTIVE ARCHIVE</span>
                         </div>
-                        <div className="text-sm font-mono text-white font-bold group-hover:text-sky-50 transition-colors">{mostActiveArchive.name}</div>
+                        <div className="text-sm font-mono text-white font-bold group-hover:text-pink-50 transition-colors">{mostActiveArchive.name}</div>
                         <div className="text-xs font-mono text-gray-400">
                           {mostActiveArchive.totalNotes} total • {mostActiveArchive.recentNotes} this week
                         </div>
@@ -321,7 +337,7 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
                     </button>
                   )}
                   
-                  {/* Recent Archives - Now Clickable to open specific folders */}
+                  {/* Recent Archives */}
                   {folders.length > 0 && (
                     <div className="space-y-2">
                       <div className="text-xs font-mono text-gray-400 font-bold">RECENT ARCHIVES:</div>
@@ -332,14 +348,16 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
                             <button
                               key={folder.id}
                               onClick={() => handleFolderClick(folder)}
-                              className="bg-gray-900 border border-sky-400 p-2 text-center relative overflow-hidden group cursor-pointer transition-all duration-300 hover:border-sky-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)]"
-                              style={{ boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                              className="bg-black border-2 border-white/60 p-2 text-center relative overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105 rounded"
+                              style={{ 
+                                boxShadow: '0 0 10px rgba(236, 72, 153, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)' 
+                              }}
                             >
-                              <div className="absolute inset-0 bg-gradient-to-br from-sky-500/8 to-sky-600/12 pointer-events-none" />
-                              <div className="absolute inset-0 bg-sky-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-pink-400" />
                               <div className="relative z-10">
-                                <Folder size={24} className="text-sky-400 mx-auto mb-2 group-hover:text-sky-300 transition-colors" />
-                                <div className="text-xs font-mono text-sky-400 font-bold truncate mb-1 group-hover:text-sky-300 transition-colors">
+                                <Folder size={20} className="text-pink-400 mx-auto mb-2 group-hover:text-pink-300 transition-colors" />
+                                <div className="text-xs font-mono text-pink-400 font-bold truncate mb-1 group-hover:text-pink-300 transition-colors">
                                   {folder.name}
                                 </div>
                                 <div className="text-xs font-mono text-gray-400">
@@ -362,97 +380,104 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
                   )}
                 </div>
                 
-                {/* Access Storage Vault Button - Updated background */}
+                {/* Access Storage Vault Button */}
                 <button 
                   onClick={handleGoToStorageVault}
-                  className="w-full bg-gray-900 border border-sky-400 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-sky-300 hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] font-mono font-bold text-sky-400 overflow-hidden"
+                  className="w-full bg-black border-2 border-white/60 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
                   style={{
-                    boxShadow: '0 0 3px rgba(34, 211, 238, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                    boxShadow: '0 0 15px rgba(236, 72, 153, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)'
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky-500/8 to-sky-600/12 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                   <div className="relative z-10 flex items-center justify-center gap-2">
-                    <ExternalLink size={16} className="text-sky-400" />
-                    <span className="text-sky-400">ACCESS STORAGE VAULT</span>
+                    <ExternalLink size={16} className="text-pink-400" />
+                    <span className="text-pink-400">ACCESS STORAGE VAULT</span>
                   </div>
-                  <div className="absolute inset-0 bg-sky-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-pink-400" />
                 </button>
               </div>
             </motion.div>
 
-            {/* Recent Activity Section */}
+            {/* Recent Activity Section - Cyan Accent */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.25 }}
-              className="bg-gray-800 border-2 border-blue-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 relative overflow-hidden"
-              style={{
-                boxShadow: '0 0 15px rgba(14, 165, 233, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
-              }}
+              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/15 to-blue-700/20 pointer-events-none" />
-              <div className="absolute inset-0 border-2 border-blue-500 opacity-30 animate-pulse pointer-events-none" />
+              <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
               
               <div className="relative z-10">
                 <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <div className="w-4 h-4 bg-blue-500 mr-2" />
+                  <FileText size={20} className="text-cyan-400 mr-2" />
                   RECENT PLAYER LOGS
                 </h2>
                 
                 <div className="space-y-2 mb-4">
                   {notes.slice(0, 5).map((note, index) => (
-                    <button
+                    <motion.button
                       key={note.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ 
+                        scale: 1.02, 
+                        y: -2,
+                        transition: { duration: 0.2 }
+                      }}
                       onClick={() => handleNoteClick(note)}
-                      className="w-full bg-gray-900 border border-blue-500 p-2 text-xs font-mono relative overflow-hidden group cursor-pointer transition-all duration-300 hover:border-blue-400 hover:shadow-[0_0_8px_rgba(14,165,233,0.4)]"
-                      style={{ boxShadow: '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}
+                      className="w-full bg-black border-2 border-white/60 p-2 text-xs font-mono relative overflow-hidden group cursor-pointer transition-all duration-300 rounded"
+                      style={{ 
+                        boxShadow: '0 0 10px rgba(6, 182, 212, 0.4), 2px 2px 0px 0px rgba(0,0,0,1)' 
+                      }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/8 to-blue-700/12 pointer-events-none" />
-                      <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-cyan-400" />
                       <div className="relative z-10 text-left">
                         <div className="flex items-center gap-2">
-                          <FileText size={12} className="text-blue-400 group-hover:text-blue-300 transition-colors" />
-                          <span className="text-blue-400 group-hover:text-blue-300 transition-colors">Created log:</span>
-                          <span className="text-white truncate flex-1 group-hover:text-blue-50 transition-colors">{note.title}</span>
+                          <FileText size={12} className="text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                          <span className="text-cyan-400 group-hover:text-cyan-300 transition-colors">Created log:</span>
+                          <span className="text-white truncate flex-1 group-hover:text-cyan-50 transition-colors">{note.title}</span>
                         </div>
                         <div className="text-gray-400 text-xs mt-1">
                           {new Date(note.createdAt || note.updatedAt).toLocaleDateString()}
                         </div>
                       </div>
-                    </button>
+                    </motion.button>
                   ))}
                   
                   {notes.length === 0 && (
                     <div className="text-center py-4">
-                      <Clock size={24} className="text-blue-400 mx-auto mb-2" />
-                      <div className="text-sm font-mono text-blue-400">No recent activity</div>
+                      <Clock size={24} className="text-cyan-400 mx-auto mb-2" />
+                      <div className="text-sm font-mono text-cyan-400">No recent activity</div>
                       <div className="text-xs font-mono text-gray-500 mt-1">Create your first log to get started!</div>
                     </div>
                   )}
                 </div>
 
-                {/* Access All Logs Button - Updated background */}
+                {/* Access All Logs Button */}
                 {notes.length > 0 && (
                   <button 
                     onClick={handleAccessAllLogs}
-                    className="w-full bg-gray-900 border border-blue-500 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:border-blue-400 hover:shadow-[0_0_8px_rgba(14,165,233,0.4)] font-mono font-bold text-blue-500 overflow-hidden"
+                    className="w-full bg-black border-2 border-white/60 px-4 py-3 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
                     style={{
-                      boxShadow: '0 0 3px rgba(14, 165, 233, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
+                      boxShadow: '0 0 15px rgba(6, 182, 212, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)'
                     }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/8 to-blue-700/12 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
                     <div className="relative z-10 flex items-center justify-center gap-2">
-                      <ExternalLink size={16} className="text-blue-500" />
-                      <span className="text-blue-500">ACCESS ALL LOGS</span>
+                      <ExternalLink size={16} className="text-cyan-400" />
+                      <span className="text-cyan-400">ACCESS ALL LOGS</span>
                     </div>
-                    <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 transition-opacity" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-cyan-400" />
                   </button>
                 )}
               </div>
             </motion.div>
           </div>
 
-          {/* 3. Mission Insight Dashboard - Indigo (with Access Button) */}
+          {/* 3. Mission Insight Dashboard - Blue Accent */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -460,59 +485,6 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
           >
             <TaskInsights tasks={tasks} taskLists={taskLists} onTabChange={onTabChange} />
           </motion.div>
-
-          {/* 4. Active Missions & Focus Timer Row - UPDATED */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Active Missions Section - Keep exactly as is */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.35 }}
-              className="bg-gray-800 border-2 border-violet-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 relative overflow-hidden"
-              style={{
-                boxShadow: '0 0 15px rgba(99, 102, 241, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/15 to-violet-700/20 pointer-events-none" />
-              <div className="absolute inset-0 border-2 border-violet-500 opacity-30 animate-pulse pointer-events-none" />
-              
-              <div className="relative z-10">
-                <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <div className="w-4 h-4 bg-violet-500 mr-2" />
-                  ACTIVE ACHIEVEMENTS
-                </h2>
-                
-                <ActiveMissions notes={notes} compact={true} onTabChange={onTabChange} />
-              </div>
-            </motion.div>
-
-            {/* Focus Timer Section - REPLACE Smart Suggestions with this */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-gray-800 border-2 border-purple-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 relative overflow-hidden"
-              style={{
-                boxShadow: '0 0 15px rgba(147, 51, 234, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/15 to-purple-700/20 pointer-events-none" />
-              <div className="absolute inset-0 border-2 border-purple-500 opacity-30 animate-pulse pointer-events-none" />
-              
-              <div className="relative z-10">
-                <h2 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-                  <div className="w-4 h-4 bg-purple-500 mr-2" />
-                  FOCUS COMMAND CENTER
-                </h2>
-                
-                {/* Focus Timer Widget */}
-                <FocusTimerWidget 
-                  username={username || 'user'} 
-                  className="focus-timer-dashboard" 
-                />
-              </div>
-            </motion.div>
-          </div>
         </div>
       </div>
 

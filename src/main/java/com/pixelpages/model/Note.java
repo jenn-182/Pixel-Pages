@@ -62,6 +62,16 @@ public class Note {
     // Constructors
     public Note() {}
 
+    // Simple constructor for basic note creation
+    public Note(String title, String content) {
+        this.id = System.currentTimeMillis();
+        this.title = title;
+        this.content = content;
+        this.username = "user"; // Default username
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
     // ✅ Constructor that sets ID manually
     public Note(String title, String content, String tagsString, String color, String username, Long folderId, Long notebookId) {
         this.id = System.currentTimeMillis(); // ✅ Manual ID generation

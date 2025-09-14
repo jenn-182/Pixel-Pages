@@ -11,7 +11,7 @@ export const taskAchievements = [
       type: 'task_count',
       target: 1
     },
-    xpReward: 75,
+    xpReward: 4,
     color: '#10B981'
   },
   {
@@ -25,7 +25,7 @@ export const taskAchievements = [
       type: 'task_count',
       target: 3
     },
-    xpReward: 100,
+    xpReward: 5,
     color: '#10B981'
   },
   {
@@ -39,7 +39,7 @@ export const taskAchievements = [
       type: 'daily_tasks',
       target: 2
     },
-    xpReward: 100,
+    xpReward: 5,
     color: '#10B981'
   },
   {
@@ -53,7 +53,7 @@ export const taskAchievements = [
       type: 'priority_usage',
       target: 1
     },
-    xpReward: 50,
+    xpReward: 3,
     color: '#10B981'
   },
   {
@@ -67,7 +67,7 @@ export const taskAchievements = [
       type: 'due_date_usage',
       target: 1
     },
-    xpReward: 50,
+    xpReward: 3,
     color: '#10B981'
   },
   {
@@ -81,7 +81,7 @@ export const taskAchievements = [
       type: 'task_categories',
       target: 2
     },
-    xpReward: 75,
+    xpReward: 4,
     color: '#10B981'
   },
   {
@@ -95,7 +95,7 @@ export const taskAchievements = [
       type: 'tasks_created',
       target: 5
     },
-    xpReward: 100,
+    xpReward: 5,
     color: '#10B981'
   },
 
@@ -111,7 +111,7 @@ export const taskAchievements = [
       type: 'task_count',
       target: 15
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -125,7 +125,7 @@ export const taskAchievements = [
       type: 'daily_tasks',
       target: 5
     },
-    xpReward: 400,
+    xpReward: 15,
     color: '#3B82F6'
   },
   {
@@ -139,7 +139,7 @@ export const taskAchievements = [
       type: 'high_priority_tasks',
       target: 10
     },
-    xpReward: 350,
+    xpReward: 14,
     color: '#3B82F6'
   },
   {
@@ -153,7 +153,7 @@ export const taskAchievements = [
       type: 'early_completions',
       target: 10
     },
-    xpReward: 400,
+    xpReward: 15,
     color: '#3B82F6'
   },
   {
@@ -167,7 +167,7 @@ export const taskAchievements = [
       type: 'weekly_tasks',
       target: 10
     },
-    xpReward: 350,
+    xpReward: 14,
     color: '#3B82F6'
   },
   {
@@ -181,7 +181,7 @@ export const taskAchievements = [
       type: 'completion_ratio',
       ratio: 1.2
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -195,7 +195,7 @@ export const taskAchievements = [
       type: 'task_categories',
       target: 5
     },
-    xpReward: 250,
+    xpReward: 10,
     color: '#3B82F6'
   },
   {
@@ -210,7 +210,7 @@ export const taskAchievements = [
       hour: 12,
       target: 10
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -225,7 +225,7 @@ export const taskAchievements = [
       hour: 18,
       target: 10
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
 
@@ -241,7 +241,7 @@ export const taskAchievements = [
       type: 'task_count',
       target: 50
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
   {
@@ -255,7 +255,7 @@ export const taskAchievements = [
       type: 'daily_tasks',
       target: 10
     },
-    xpReward: 1200,
+    xpReward: 30,
     color: '#8B5CF6'
   },
   {
@@ -269,7 +269,7 @@ export const taskAchievements = [
       type: 'active_lists',
       target: 5
     },
-    xpReward: 800,
+    xpReward: 25,
     color: '#8B5CF6'
   },
   {
@@ -283,7 +283,7 @@ export const taskAchievements = [
       type: 'completion_streak',
       target: 7
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
   {
@@ -297,7 +297,7 @@ export const taskAchievements = [
       type: 'urgent_tasks',
       target: 20
     },
-    xpReward: 800,
+    xpReward: 25,
     color: '#8B5CF6'
   },
   {
@@ -311,7 +311,7 @@ export const taskAchievements = [
       type: 'monthly_tasks',
       target: 50
     },
-    xpReward: 1200,
+    xpReward: 30,
     color: '#8B5CF6'
   },
   {

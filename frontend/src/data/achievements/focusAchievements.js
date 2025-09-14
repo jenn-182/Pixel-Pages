@@ -11,7 +11,7 @@ export const focusAchievements = [
       type: 'session_count',
       target: 1
     },
-    xpReward: 100,
+    xpReward: 5,
     color: '#10B981'
   },
   {
@@ -27,7 +27,7 @@ export const focusAchievements = [
       maxDuration: 15,
       target: 3
     },
-    xpReward: 150,
+    xpReward: 7,
     color: '#10B981'
   },
   {
@@ -41,7 +41,7 @@ export const focusAchievements = [
       type: 'total_time',
       target: 60 // minutes
     },
-    xpReward: 200,
+    xpReward: 8,
     color: '#10B981'
   },
   {
@@ -55,7 +55,7 @@ export const focusAchievements = [
       type: 'single_session_duration',
       target: 5
     },
-    xpReward: 75,
+    xpReward: 4,
     color: '#10B981'
   },
   {
@@ -69,7 +69,7 @@ export const focusAchievements = [
       type: 'single_session_duration',
       target: 25
     },
-    xpReward: 150,
+    xpReward: 7,
     color: '#10B981'
   },
   {
@@ -83,7 +83,7 @@ export const focusAchievements = [
       type: 'break_session',
       target: 5
     },
-    xpReward: 50,
+    xpReward: 3,
     color: '#10B981'
   },
   {
@@ -97,7 +97,7 @@ export const focusAchievements = [
       type: 'time_before',
       hour: 10
     },
-    xpReward: 100,
+    xpReward: 5,
     color: '#10B981'
   },
   {
@@ -111,7 +111,7 @@ export const focusAchievements = [
       type: 'unique_categories',
       target: 2
     },
-    xpReward: 100,
+    xpReward: 5,
     color: '#10B981'
   },
 
@@ -127,7 +127,7 @@ export const focusAchievements = [
       type: 'pomodoro_count',
       target: 10
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -141,7 +141,7 @@ export const focusAchievements = [
       type: 'daily_streak',
       target: 3
     },
-    xpReward: 400,
+    xpReward: 15,
     color: '#3B82F6'
   },
   {
@@ -155,7 +155,7 @@ export const focusAchievements = [
       type: 'single_session_duration',
       target: 60
     },
-    xpReward: 350,
+    xpReward: 14,
     color: '#3B82F6'
   },
   {
@@ -169,7 +169,7 @@ export const focusAchievements = [
       type: 'total_time',
       target: 300
     },
-    xpReward: 500,
+    xpReward: 18,
     color: '#3B82F6'
   },
   {
@@ -184,7 +184,7 @@ export const focusAchievements = [
       hour: 18,
       target: 5
     },
-    xpReward: 250,
+    xpReward: 10,
     color: '#3B82F6'
   },
   {
@@ -199,7 +199,7 @@ export const focusAchievements = [
       category: 'study',
       target: 10
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -214,7 +214,7 @@ export const focusAchievements = [
       category: 'code',
       target: 10
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -229,7 +229,7 @@ export const focusAchievements = [
       category: 'work',
       target: 10
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -244,7 +244,7 @@ export const focusAchievements = [
       category: 'create',
       target: 10
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -258,7 +258,7 @@ export const focusAchievements = [
       type: 'duration_variety',
       target: 5
     },
-    xpReward: 250,
+    xpReward: 10,
     color: '#3B82F6'
   },
 
@@ -274,7 +274,7 @@ export const focusAchievements = [
       type: 'session_count',
       target: 50
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
   {
@@ -288,7 +288,7 @@ export const focusAchievements = [
       type: 'daily_streak',
       target: 7
     },
-    xpReward: 800,
+    xpReward: 25,
     color: '#8B5CF6'
   },
   {
@@ -302,7 +302,7 @@ export const focusAchievements = [
       type: 'total_time',
       target: 1200
     },
-    xpReward: 1200,
+    xpReward: 30,
     color: '#8B5CF6'
   },
   {
@@ -316,7 +316,7 @@ export const focusAchievements = [
       type: 'category_time',
       target: 600
     },
-    xpReward: 800,
+    xpReward: 25,
     color: '#8B5CF6'
   },
   {
@@ -331,7 +331,7 @@ export const focusAchievements = [
       duration: 90,
       target: 5
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
   {
@@ -345,7 +345,7 @@ export const focusAchievements = [
       type: 'monthly_sessions',
       target: 30
     },
-    xpReward: 800,
+    xpReward: 25,
     color: '#8B5CF6'
   },
   {
@@ -359,7 +359,7 @@ export const focusAchievements = [
       type: 'daily_streak',
       target: 14
     },
-    xpReward: 1200,
+    xpReward: 30,
     color: '#8B5CF6'
   },
   {

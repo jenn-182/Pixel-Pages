@@ -11,7 +11,7 @@ export const noteAchievements = [
       type: 'note_count',
       target: 1
     },
-    xpReward: 50,
+    xpReward: 3,
     color: '#10B981'
   },
   {
@@ -25,7 +25,7 @@ export const noteAchievements = [
       type: 'note_count',
       target: 5
     },
-    xpReward: 100,
+    xpReward: 5,
     color: '#10B981'
   },
   {
@@ -39,7 +39,7 @@ export const noteAchievements = [
       type: 'word_count',
       target: 100
     },
-    xpReward: 75,
+    xpReward: 4,
     color: '#10B981'
   },
   {
@@ -53,7 +53,7 @@ export const noteAchievements = [
       type: 'tag_count',
       target: 1
     },
-    xpReward: 50,
+    xpReward: 3,
     color: '#10B981'
   },
 
@@ -68,7 +68,7 @@ export const noteAchievements = [
       type: 'note_edits',
       target: 1
     },
-    xpReward: 50,
+    xpReward: 3,
     color: '#10B981'
   },
 
@@ -84,7 +84,7 @@ export const noteAchievements = [
       type: 'note_count',
       target: 10
     },
-    xpReward: 200,
+    xpReward: 8,
     color: '#3B82F6'
   },
   {
@@ -98,7 +98,7 @@ export const noteAchievements = [
       type: 'word_count',
       target: 500
     },
-    xpReward: 250,
+    xpReward: 10,
     color: '#3B82F6'
   },
   {
@@ -112,7 +112,7 @@ export const noteAchievements = [
       type: 'unique_tags',
       target: 5
     },
-    xpReward: 200,
+    xpReward: 8,
     color: '#3B82F6'
   },
   {
@@ -127,7 +127,7 @@ export const noteAchievements = [
       startHour: 23,
       endHour: 5
     },
-    xpReward: 150,
+    xpReward: 7,
     color: '#3B82F6'
   },
   {
@@ -142,7 +142,7 @@ export const noteAchievements = [
       startHour: 5,
       endHour: 8
     },
-    xpReward: 150,
+    xpReward: 7,
     color: '#3B82F6'
   },
   {
@@ -156,7 +156,7 @@ export const noteAchievements = [
       type: 'weekend_notes',
       target: 5
     },
-    xpReward: 200,
+    xpReward: 8,
     color: '#3B82F6'
   },
   {
@@ -171,7 +171,7 @@ export const noteAchievements = [
       words: 100,
       timeLimit: 300 // seconds
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -185,7 +185,7 @@ export const noteAchievements = [
       type: 'single_note_edits',
       target: 5
     },
-    xpReward: 250,
+    xpReward: 10,
     color: '#3B82F6'
   },
 
@@ -201,7 +201,7 @@ export const noteAchievements = [
       type: 'note_count',
       target: 25
     },
-    xpReward: 500,
+    xpReward: 15,
     color: '#8B5CF6'
   },
   {
@@ -215,7 +215,7 @@ export const noteAchievements = [
       type: 'word_count',
       target: 2000
     },
-    xpReward: 750,
+    xpReward: 22,
     color: '#8B5CF6'
   },
   {
@@ -229,7 +229,7 @@ export const noteAchievements = [
       type: 'unique_tags',
       target: 15
     },
-    xpReward: 600,
+    xpReward: 18,
     color: '#8B5CF6'
   },
   {
@@ -243,7 +243,7 @@ export const noteAchievements = [
       type: 'streak',
       target: 7
     },
-    xpReward: 800,
+    xpReward: 25,
     color: '#8B5CF6'
   },
   {
@@ -257,7 +257,7 @@ export const noteAchievements = [
       type: 'single_note_words',
       target: 500
     },
-    xpReward: 700,
+    xpReward: 20,
     color: '#8B5CF6'
   },
   {
@@ -271,7 +271,7 @@ export const noteAchievements = [
       type: 'weekly_notes',
       target: 10
     },
-    xpReward: 600,
+    xpReward: 18,
     color: '#8B5CF6'
   },
   {
@@ -285,7 +285,7 @@ export const noteAchievements = [
       type: 'single_note_tags',
       target: 3
     },
-    xpReward: 500,
+    xpReward: 15,
     color: '#8B5CF6'
   },
 
@@ -301,7 +301,7 @@ export const noteAchievements = [
       type: 'note_count',
       target: 100
     },
-    xpReward: 2000,
+    xpReward: 30,
     color: '#F59E0B'
   },
   {
@@ -329,7 +329,7 @@ export const noteAchievements = [
       type: 'unique_tags',
       target: 25
     },
-    xpReward: 2000,
+    xpReward: 30,
     color: '#F59E0B'
   },
   {

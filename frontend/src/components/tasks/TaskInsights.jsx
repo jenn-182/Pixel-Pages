@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp, Clock, AlertTriangle, Target, Calendar, Shield, ExternalLink } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, AlertTriangle, Target, Search,Calendar, Shield, ExternalLink } from 'lucide-react';
 
 const TaskInsights = ({ tasks, taskLists, onTabChange }) => {
   const [insights, setInsights] = useState({
@@ -133,9 +133,9 @@ const TaskInsights = ({ tasks, taskLists, onTabChange }) => {
 
   const getTrendIcon = (trend) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="text-green-400" size={16} />;
-      case 'down': return <TrendingUp className="text-red-400 rotate-180" size={16} />;
-      default: return <TrendingUp className="text-gray-400" size={16} />;
+      case 'up': return <TrendingUp className="text-white" size={16} />;
+      case 'down': return <TrendingUp className="text-white rotate-180" size={16} />;
+      default: return <TrendingUp className="text-white" size={16} />;
     }
   };
 
@@ -143,166 +143,173 @@ const TaskInsights = ({ tasks, taskLists, onTabChange }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gray-800 border-2 border-indigo-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 relative space-y-6"
-      style={{
-        boxShadow: '0 0 15px rgba(99, 102, 241, 0.3), 4px 4px 0px 0px rgba(0,0,0,1)'
-      }}
+      className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md"
     >
-      {/* Subtle gradient overlay - matching other sections */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/15 to-indigo-700/20 pointer-events-none" />
+      <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
       
-      {/* Header with Access Button */}
-      <div className="flex items-center justify-between relative z-10">
-        <h3 className="text-lg font-mono font-bold text-white flex items-center">
-          <div className="w-4 h-4 bg-indigo-500 mr-2" />
-          MISSION CONTROL CENTER
-        </h3>
-        
-        {/* Access Missions Button - Updated to match darker background styling */}
-        <button
-          onClick={() => onTabChange && onTabChange('tasks')}
-          className="bg-gray-900 border border-indigo-400 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:border-indigo-300 hover:shadow-[0_0_8px_rgba(99,102,241,0.4)] font-mono font-bold text-indigo-400 overflow-hidden"
-          style={{
-            boxShadow: '0 0 3px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)'
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/8 to-indigo-600/12 pointer-events-none" />
-          <div className="relative z-10 flex items-center gap-2">
-            <ExternalLink size={14} className="text-indigo-400" />
-            <span className="text-indigo-400 text-sm">ACCESS MISSIONS</span>
-          </div>
-          <div className="absolute inset-0 bg-indigo-400 opacity-0 group-hover:opacity-5 transition-opacity" />
-        </button>
-      </div>
-
-      {/* Key Metrics Grid - Toned down to match storage vault style */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-        {/* Total Missions */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-indigo-600/15 pointer-events-none" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-mono text-indigo-300 font-bold">TOTAL MISSIONS</div>
-                <div className="text-2xl font-mono font-bold text-white">{insights.totalTasks}</div>
-              </div>
-              <Target className="text-indigo-400" size={20} />
+      <div className="relative z-10 space-y-6">
+        {/* Header with Access Button */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-mono font-bold text-white flex items-center">
+            <Search size={24} className="text-purple-400 mr-2" />
+            MISSION CONTROL CENTER
+          </h3>
+          
+          {/* Access Missions Button */}
+          <button
+            onClick={() => onTabChange && onTabChange('tasks')}
+            className="bg-black border-2 border-white/60 px-4 py-2 relative group cursor-pointer transition-all duration-300 hover:scale-105 font-mono font-bold text-white overflow-hidden rounded"
+            style={{
+              boxShadow: '0 0 15px rgba(147, 51, 234, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)'
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+            <div className="relative z-10 flex items-center gap-2">
+              <ExternalLink size={14} className="text-white" />
+              <span className="text-white text-sm">ACCESS MISSIONS</span>
             </div>
-          </div>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-purple-400" />
+          </button>
         </div>
 
-        {/* Mission Success Rate */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-400/10 to-indigo-500/15 pointer-events-none" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-mono text-indigo-300 font-bold">SUCCESS RATE</div>
-                <div className="text-2xl font-mono font-bold text-white">{insights.completionRate}%</div>
-              </div>
-              {getTrendIcon(insights.productivityTrend)}
-            </div>
-          </div>
-        </div>
-
-        {/* Overdue */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 to-indigo-700/15 pointer-events-none" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-mono text-indigo-300 font-bold">OVERDUE</div>
-                <div className="text-2xl font-mono font-bold text-white">{insights.overdueTasks}</div>
-              </div>
-              <AlertTriangle className="text-red-300" size={20} />
-            </div>
-          </div>
-        </div>
-
-        {/* Urgent */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-indigo-800/15 pointer-events-none" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-mono text-indigo-300 font-bold">URGENT</div>
-                <div className="text-2xl font-mono font-bold text-white">{insights.dueSoonTasks}</div>
-              </div>
-              <Clock className="text-yellow-300" size={20} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Critical Priority Missions - Updated to match Operation Progress styling */}
-      {insights.topPriorities.length > 0 && (
-        <div className="space-y-2 relative z-10">
-          <div className="text-xs font-mono text-indigo-400 font-bold">CRITICAL PRIORITY MISSIONS:</div>
-          <div className="space-y-2">
-            {insights.topPriorities.map((task, index) => (
-              <div key={task.id} className="bg-gray-900 border border-indigo-400 p-3 relative overflow-hidden group transition-all duration-300 hover:border-indigo-300 hover:shadow-[0_0_8px_rgba(99,102,241,0.4)]"
-                   style={{ boxShadow: '0 0 3px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}>
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/8 to-indigo-600/12 pointer-events-none" />
-                <div className="absolute inset-0 bg-indigo-400 opacity-0 group-hover:opacity-5 transition-opacity" />
-                <div className="relative z-10 text-left">
-                  <div className="flex items-center gap-2 mb-1">
-                    <AlertTriangle size={14} className="text-red-400" />
-                    <span className="text-xs font-mono text-indigo-300 font-bold">HIGH PRIORITY</span>
-                  </div>
-                  <div className="text-sm font-mono text-white font-bold">{task.title}</div>
-                  {task.dueDate && (
-                    <div className="text-xs font-mono text-gray-400">
-                      Due: {new Date(task.dueDate).toLocaleDateString()}
-                    </div>
-                  )}
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Total Missions */}
+          <div className="bg-black border-2 border-white/60 p-4 relative overflow-hidden rounded" style={{ boxShadow: '0 0 15px rgba(147, 51, 234, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-mono text-gray-400">TOTAL MISSIONS</div>
+                  <div className="text-2xl font-mono font-bold text-white">{insights.totalTasks}</div>
                 </div>
+                <Target className="text-white" size={20} />
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* Mission Success Rate */}
+          <div className="bg-black border-2 border-white/60 p-4 relative overflow-hidden rounded" style={{ boxShadow: '0 0 15px rgba(147, 51, 234, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-mono text-gray-400">SUCCESS RATE</div>
+                  <div className="text-2xl font-mono font-bold text-white">{insights.completionRate}%</div>
+                </div>
+                <div className="text-white">{getTrendIcon(insights.productivityTrend)}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Overdue */}
+          <div className="bg-black border-2 border-white/60 p-4 relative overflow-hidden rounded" style={{ boxShadow: '0 0 15px rgba(147, 51, 234, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-mono text-gray-400">OVERDUE</div>
+                  <div className="text-2xl font-mono font-bold text-white">{insights.overdueTasks}</div>
+                </div>
+                <AlertTriangle className="text-white" size={20} />
+              </div>
+            </div>
+          </div>
+
+          {/* Urgent */}
+          <div className="bg-black border-2 border-white/60 p-4 relative overflow-hidden rounded" style={{ boxShadow: '0 0 15px rgba(147, 51, 234, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-mono text-gray-400">URGENT</div>
+                  <div className="text-2xl font-mono font-bold text-white">{insights.dueSoonTasks}</div>
+                </div>
+                <Clock className="text-white" size={20} />
+              </div>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Operation Progress - Toned down to match folder grid style */}
-      {insights.projectProgress.length > 0 && (
-        <div className="space-y-2 relative z-10">
-          <div className="text-xs font-mono text-indigo-400 font-bold">OPERATION PROGRESS:</div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {insights.projectProgress.slice(0, 4).map((project, index) => (
-              <div key={index} className="bg-gray-900 border border-indigo-400 p-3 relative overflow-hidden group transition-all duration-300 hover:border-indigo-300 hover:shadow-[0_0_8px_rgba(99,102,241,0.4)]"
-                   style={{ boxShadow: '0 0 3px rgba(99, 102, 241, 0.3), 1px 1px 0px 0px rgba(0,0,0,1)' }}>
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/8 to-indigo-600/12 pointer-events-none" />
-                <div className="absolute inset-0 bg-indigo-400 opacity-0 group-hover:opacity-5 transition-opacity" />
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <div className="flex items-center gap-2">
+        {/* Critical Priority Missions */}
+        {insights.topPriorities.length > 0 && (
+          <div className="space-y-2 mt-8">
+            <div className="text-xs font-mono text-gray-400 font-bold">CRITICAL PRIORITY MISSIONS:</div>
+            <div className="space-y-2">
+              {insights.topPriorities.map((task, index) => (
+                <button
+                  key={task.id}
+                  onClick={() => onTabChange && onTabChange('tasks')}
+                  className="w-full bg-black border-2 border-white/60 p-3 relative overflow-hidden group transition-all duration-300 hover:scale-105 rounded cursor-pointer"
+                  style={{ boxShadow: '0 0 10px rgba(239, 68, 68, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-red-400" />
+                  <div className="relative z-10 text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertTriangle size={14} className="text-white" />
+                      <span className="text-xs font-mono text-white font-bold">HIGH PRIORITY</span>
+                    </div>
+                    <div className="text-sm font-mono text-white font-bold">{task.title}</div>
+                    {task.dueDate && (
+                      <div className="text-xs font-mono text-gray-400">
+                        Due: {new Date(task.dueDate).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Operation Progress */}
+        {insights.projectProgress.length > 0 && (
+          <div className="space-y-2 mt-8">
+            <div className="text-xs font-mono text-gray-400 font-bold">OPERATION PROGRESS:</div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              {insights.projectProgress.slice(0, 4).map((project, index) => (
+                <button
+                  key={index}
+                  onClick={() => onTabChange && onTabChange('tasks')}
+                  className="w-full bg-black border-2 border-white/60 p-3 relative overflow-hidden group transition-all duration-300 hover:scale-105 rounded cursor-pointer"
+                  style={{ boxShadow: '0 0 10px rgba(147, 51, 234, 0.6), 2px 2px 0px 0px rgba(0,0,0,1)' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/8 to-white/12 pointer-events-none" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-purple-400" />
+                  <div className="relative z-10 text-left">
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 border border-gray-600 rounded"
+                          style={{ backgroundColor: project.color }}
+                        />
+                        <span className="font-mono text-white truncate">{project.name}</span>
+                      </div>
+                      <span className="font-mono text-white text-xs">
+                        {project.progress}%
+                      </span>
+                    </div>
+                    <div className="text-xs font-mono text-gray-400 mb-2">
+                      {project.completed}/{project.total} complete
+                    </div>
+                    <div className="w-full bg-gray-700 h-2 border border-gray-600 rounded">
                       <div 
-                        className="w-3 h-3 border border-gray-600"
-                        style={{ backgroundColor: project.color }}
+                        className="h-full transition-all duration-700 ease-out rounded"
+                        style={{ 
+                          width: `${project.progress}%`, 
+                          backgroundColor: project.color
+                        }}
                       />
-                      <span className="font-mono text-white truncate">{project.name}</span>
                     </div>
-                    <span className="font-mono text-indigo-300 text-xs">
-                      {project.progress}%
-                    </span>
                   </div>
-                  <div className="text-xs font-mono text-gray-400 mb-2">
-                    {project.completed}/{project.total} complete
-                  </div>
-                  <div className="w-full bg-gray-700 h-2 border border-gray-600">
-                    <div 
-                      className="h-full transition-all duration-700 ease-out"
-                      style={{ 
-                        width: `${project.progress}%`, 
-                        backgroundColor: project.color
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </motion.div>
   );
 };

@@ -55,7 +55,7 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
           { id: 'profession', name: 'Profession', iconName: 'Briefcase', color: '#00FFFF', xp: 180 }, // Level 3 with some progress
           { id: 'artisan', name: 'Artisan', iconName: 'Palette', color: '#8A2BE2', xp: 45 },        // Level 1 with progress
           { id: 'scribe', name: 'Scribe', iconName: 'PenTool', color: '#FF6347', xp: 0 },           // No progress yet
-          { id: 'programming', name: 'Programming', iconName: 'Code', color: '#00FF7F', xp: 125 },  // Level 2 with progress
+          { id: 'programming', name: 'Programming', iconName: 'Code', color: '#00FF7F', xp: 200 },  // Level 2 with progress
           { id: 'literacy', name: 'Literacy', iconName: 'Target', color: '#FFD700', xp: 30 },       // Level 1 partial
           { id: 'strategist', name: 'Strategist', iconName: 'Calendar', color: '#FF4500', xp: 0 },  // No progress
           { id: 'mindfulness', name: 'Mindfulness', iconName: 'Heart', color: '#40E0D0', xp: 85 },  // Level 2 partial
@@ -168,6 +168,7 @@ const TrackerTab = ({ username = 'user', tabColor = '#10B981' }) => {
             }}
           >
             {/* Remove the animated border overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none" />
             {/* Remove the gradient overlay */}
             
             <div className="relative z-10">

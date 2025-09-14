@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { CheckSquare, Target, Clock, TrendingUp } from 'lucide-react';
+import { CheckSquare, Target, TrendingUp } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const TaskStats = ({ tasks, taskLists }) => {
   const [stats, setStats] = useState({
@@ -11,9 +11,11 @@ const TaskStats = ({ tasks, taskLists }) => {
     averageCompletionTime: 0
   });
 
+  const { currentTheme, getThemeColors } = useTheme();
+  const themeColors = getThemeColors();
   useEffect(() => {
     calculateStats();
-  }, [tasks, taskLists]);
+  }, [tasks, taskLists]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const calculateStats = () => {
     if (!tasks || tasks.length === 0) {
@@ -86,24 +88,38 @@ const TaskStats = ({ tasks, taskLists }) => {
     return { rank: 'METHODICAL', color: '#6B7280' };
   };
 
-  const streakRank = getStreakRank(stats.streakDays);
-  const completionRank = getCompletionRank(stats.completionRate);
-  const speedRank = getSpeedRank(stats.averageCompletionTime);
+  // Unused rank calculations (for potential future features)
+  // const streakRank = getStreakRank(stats.streakDays);
+  // const completionRank = getCompletionRank(stats.completionRate);
+  // const speedRank = getSpeedRank(stats.averageCompletionTime);
 
   return (
     <>
-<h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
-  <span className="text-pink-400 mr-2 text-xl">♥</span>
-  MISSION STATS
-</h3>
+      <h3 className="text-lg font-mono font-bold text-white flex items-center mb-4">
+        <span className="mr-2 text-xl" style={{ color: themeColors.secondary }}>
+          {currentTheme === 'pink' ? '♥' : '⚡'}
+        </span>
+        MISSION STATS
+      </h3>
       
       {/* Rest of TaskStats content without wrapper border */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Tasks */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+        <div className="p-4 relative overflow-hidden"
+             style={{
+               backgroundColor: themeColors.backgroundColor,
+               border: `1px solid ${themeColors.borderColor}`,
+               borderRadius: themeColors.borderRadius
+             }}>
+          <div className="absolute inset-0 pointer-events-none"
+               style={{
+                 background: currentTheme === 'default' 
+                   ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                   : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                 borderRadius: themeColors.borderRadius
+               }} />
           <div className="relative z-10">
-            <div className="text-xs font-mono text-gray-400">TOTAL MISSIONS</div>
+            <div className="text-xs font-mono text-gray-400">MISSIONS</div>
             <div className="text-2xl font-mono font-bold text-white">
               {stats.totalTasks}
             </div>
@@ -111,10 +127,21 @@ const TaskStats = ({ tasks, taskLists }) => {
         </div>
 
         {/* Completion Rate */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+        <div className="p-4 relative overflow-hidden"
+             style={{
+               backgroundColor: themeColors.backgroundColor,
+               border: `1px solid ${themeColors.borderColor}`,
+               borderRadius: themeColors.borderRadius
+             }}>
+          <div className="absolute inset-0 pointer-events-none"
+               style={{
+                 background: currentTheme === 'default' 
+                   ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                   : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                 borderRadius: themeColors.borderRadius
+               }} />
           <div className="relative z-10">
-            <div className="text-xs font-mono text-gray-400">COMPLETION RATE</div>
+            <div className="text-xs font-mono text-gray-400">COMPLETION</div>
             <div className="text-2xl font-mono font-bold text-white">
               {stats.completionRate}%
             </div>
@@ -122,10 +149,21 @@ const TaskStats = ({ tasks, taskLists }) => {
         </div>
 
         {/* Streak */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+        <div className="p-4 relative overflow-hidden"
+             style={{
+               backgroundColor: themeColors.backgroundColor,
+               border: `1px solid ${themeColors.borderColor}`,
+               borderRadius: themeColors.borderRadius
+             }}>
+          <div className="absolute inset-0 pointer-events-none"
+               style={{
+                 background: currentTheme === 'default' 
+                   ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                   : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                 borderRadius: themeColors.borderRadius
+               }} />
           <div className="relative z-10">
-            <div className="text-xs font-mono text-gray-400">MISSION STREAK</div>
+            <div className="text-xs font-mono text-gray-400">STREAK</div>
             <div className="text-2xl font-mono font-bold text-white">
               {stats.streakDays} days
             </div>
@@ -133,10 +171,21 @@ const TaskStats = ({ tasks, taskLists }) => {
         </div>
 
         {/* Average Time */}
-        <div className="bg-gray-900 border border-gray-600 p-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/15 pointer-events-none" />
+        <div className="p-4 relative overflow-hidden"
+             style={{
+               backgroundColor: themeColors.backgroundColor,
+               border: `1px solid ${themeColors.borderColor}`,
+               borderRadius: themeColors.borderRadius
+             }}>
+          <div className="absolute inset-0 pointer-events-none"
+               style={{
+                 background: currentTheme === 'default' 
+                   ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                   : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                 borderRadius: themeColors.borderRadius
+               }} />
           <div className="relative z-10">
-            <div className="text-xs font-mono text-gray-400">COMPLETION SPEED</div>
+            <div className="text-xs font-mono text-gray-400">AVG SPEED</div>
             <div className="text-2xl font-mono font-bold text-white">
               {stats.averageCompletionTime > 0 ? `${stats.averageCompletionTime} days` : 'N/A'}
             </div>
@@ -147,30 +196,86 @@ const TaskStats = ({ tasks, taskLists }) => {
       {/* Achievement Indicators */}
       <div className="mt-6 flex flex-wrap gap-2">
         {stats.streakDays >= 7 && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-cyan-400 bg-opacity-20 border border-cyan-400">
-            <TrendingUp size={12} className="text-cyan-400" />
-            <span className="text-xs font-mono text-cyan-400">WEEK WARRIOR</span>
+          <div className="flex items-center gap-1 px-2 py-1 relative overflow-hidden"
+               style={{
+                 backgroundColor: themeColors.backgroundColor,
+                 border: `1px solid ${themeColors.borderColor}`,
+                 borderRadius: themeColors.borderRadius
+               }}>
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{
+                   background: currentTheme === 'default' 
+                     ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                     : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                   borderRadius: themeColors.borderRadius
+                 }} />
+            <div className="relative z-10 flex items-center gap-1">
+              <TrendingUp size={12} className="text-white" />
+              <span className="text-xs font-mono text-white">WEEK WARRIOR</span>
+            </div>
           </div>
         )}
         
         {stats.completionRate >= 90 && stats.totalTasks >= 5 && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-cyan-400 bg-opacity-20 border border-cyan-400">
-            <Target size={12} className="text-cyan-400" />
-            <span className="text-xs font-mono text-cyan-400">PERFECTIONIST</span>
+          <div className="flex items-center gap-1 px-2 py-1 relative overflow-hidden"
+               style={{
+                 backgroundColor: themeColors.backgroundColor,
+                 border: `1px solid ${themeColors.borderColor}`,
+                 borderRadius: themeColors.borderRadius
+               }}>
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{
+                   background: currentTheme === 'default' 
+                     ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                     : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                   borderRadius: themeColors.borderRadius
+                 }} />
+            <div className="relative z-10 flex items-center gap-1">
+              <Target size={12} className="text-white" />
+              <span className="text-xs font-mono text-white">PERFECTIONIST</span>
+            </div>
           </div>
         )}
         
         {stats.totalTasks >= 25 && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-cyan-400 bg-opacity-20 border border-cyan-400">
-            <CheckSquare size={12} className="text-cyan-400" />
-            <span className="text-xs font-mono text-cyan-400">QUEST MASTER</span>
+          <div className="flex items-center gap-1 px-2 py-1 relative overflow-hidden"
+               style={{
+                 backgroundColor: themeColors.backgroundColor,
+                 border: `1px solid ${themeColors.borderColor}`,
+                 borderRadius: themeColors.borderRadius
+               }}>
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{
+                   background: currentTheme === 'default' 
+                     ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                     : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                   borderRadius: themeColors.borderRadius
+                 }} />
+            <div className="relative z-10 flex items-center gap-1">
+              <CheckSquare size={12} className="text-white" />
+              <span className="text-xs font-mono text-white">QUEST MASTER</span>
+            </div>
           </div>
         )}
 
         {stats.completedTasks >= 50 && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-cyan-400 bg-opacity-20 border border-cyan-400">
-            <CheckSquare size={12} className="text-cyan-400" />
-            <span className="text-xs font-mono text-cyan-400">TASK TERMINATOR</span>
+          <div className="flex items-center gap-1 px-2 py-1 relative overflow-hidden"
+               style={{
+                 backgroundColor: themeColors.backgroundColor,
+                 border: `1px solid ${themeColors.borderColor}`,
+                 borderRadius: themeColors.borderRadius
+               }}>
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{
+                   background: currentTheme === 'default' 
+                     ? 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(6,182,212,0.05))'
+                     : `linear-gradient(to bottom right, ${themeColors.secondary}10, ${themeColors.secondary}15)`,
+                   borderRadius: themeColors.borderRadius
+                 }} />
+            <div className="relative z-10 flex items-center gap-1">
+              <CheckSquare size={12} className="text-white" />
+              <span className="text-xs font-mono text-white">TASK TERMINATOR</span>
+            </div>
           </div>
         )}
       </div>

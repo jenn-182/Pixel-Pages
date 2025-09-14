@@ -163,13 +163,10 @@ const SaveSessionModal = ({
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-gray-800 border-2 border-purple-500 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-lg relative"
-        style={{
-          boxShadow: '0 0 20px rgba(139, 92, 246, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-        }}
+        className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-full max-w-lg relative rounded-lg bg-black/40 backdrop-blur-md"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-700/20 pointer-events-none" />
-        <div className="absolute inset-0 border-2 border-purple-500 opacity-30 animate-pulse pointer-events-none" />
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
         
         <div className="relative z-10">
           {/* Header */}
@@ -178,7 +175,7 @@ const SaveSessionModal = ({
             <h3 className="font-mono text-xl font-bold text-white mb-2">
               {sessionType === 'partial' ? 'PARTIAL SESSION COMPLETE!' : 'SESSION COMPLETE!'}
             </h3>
-            <p className="font-mono text-purple-400 text-lg">
+            <p className="font-mono text-white text-lg">
               +{timeSpent} minutes earned
             </p>
             <p className="font-mono text-gray-400 text-sm mt-1">
@@ -188,7 +185,7 @@ const SaveSessionModal = ({
 
           {/* Category Selection */}
           <div className="mb-6">
-            <div className="text-sm font-mono text-gray-300 mb-3">SELECT CATEGORY:</div>
+            <div className="text-sm font-mono text-white mb-3">SELECT CATEGORY:</div>
             <div className="grid grid-cols-3 gap-2 mb-3">
               {savedCategories.map(category => {
                 const IconComponent = getIconComponent(category.iconName || category.icon);
@@ -196,16 +193,28 @@ const SaveSessionModal = ({
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id)}
-                    className={`p-3 border-2 transition-all duration-200 font-mono text-xs ${
-                      selectedCategory === category.id
-                        ? 'border-purple-400 bg-purple-500 bg-opacity-20'
-                        : 'border-gray-600 hover:border-gray-500'
-                    }`}
+                    className="p-3 border-2 border-white rounded-lg transition-all duration-200 font-mono text-xs bg-black/20 hover:bg-black/40 relative overflow-hidden"
+                    style={{
+                      boxShadow: selectedCategory === category.id ? `0 0 20px ${category.color}, 0 0 40px ${category.color}` : 'none'
+                    }}
                   >
-                    <div className="flex flex-col items-center gap-1">
+                    <div 
+                      className={`absolute inset-0 transition-all duration-300 ${
+                        selectedCategory === category.id 
+                          ? 'opacity-30' 
+                          : 'opacity-10 hover:opacity-20'
+                      }`}
+                      style={{ 
+                        background: `linear-gradient(135deg, ${category.color}40, ${category.color}20)`
+                      }}
+                    />
+                    <div className="flex flex-col items-center gap-1 relative z-10">
                       <IconComponent size={16} style={{ color: category.color }} />
                       <span className="text-white font-bold truncate w-full">{category.name}</span>
-                      <div className="text-xs text-gray-400">
+                      <div 
+                        className="text-xs font-bold"
+                        style={{ color: category.color }}
+                      >
                         {category.xp || 0}m XP
                       </div>
                     </div>
@@ -217,15 +226,19 @@ const SaveSessionModal = ({
             {/* Custom Category Button */}
             <button
               onClick={handleCustomCategory}
-              className={`w-full p-3 border-2 transition-all duration-200 font-mono text-sm ${
-                selectedCategory === 'custom'
-                  ? 'border-purple-400 bg-purple-500 bg-opacity-20'
-                  : 'border-gray-600 hover:border-gray-500'
-              }`}
+              className="w-full p-3 border-2 border-white rounded-lg transition-all duration-200 font-mono text-sm bg-black/20 hover:bg-black/40 relative overflow-hidden"
+              style={{
+                boxShadow: selectedCategory === 'custom' ? '0 0 20px #8B5CF6, 0 0 40px #8B5CF6' : 'none'
+              }}
             >
-              <div className="flex items-center justify-center gap-2">
+              <div 
+                className={`absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 transition-all duration-300 ${
+                  selectedCategory === 'custom' ? 'opacity-30' : 'opacity-10 hover:opacity-20'
+                }`}
+              />
+              <div className="flex items-center justify-center gap-2 relative z-10">
                 <Plus size={16} className="text-gray-400" />
-                <span className="text-gray-300">Create New Category</span>
+                <span className="text-white">Create New Category</span>
               </div>
             </button>
 
@@ -241,7 +254,7 @@ const SaveSessionModal = ({
                   placeholder="Enter category name..."
                   value={customCategoryName}
                   onChange={(e) => setCustomCategoryName(e.target.value)}
-                  className="w-full p-3 bg-gray-900 border border-gray-600 text-white font-mono text-sm focus:border-purple-400 focus:outline-none"
+                  className="w-full p-3 bg-black/60 border-2 border-white/30 rounded-lg text-white font-mono text-sm focus:border-white focus:outline-none backdrop-blur-sm"
                   autoFocus
                 />
               </motion.div>
@@ -253,14 +266,17 @@ const SaveSessionModal = ({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gray-900 border border-purple-500 p-3 mb-6"
+              className="border-2 border-white/30 rounded-lg p-3 mb-6 bg-black/20 backdrop-blur-sm"
             >
               <div className="text-center font-mono">
                 <div className="text-sm text-gray-400">XP GAIN PREVIEW:</div>
-                <div className="text-lg text-purple-400 font-bold">
+                <div 
+                  className="text-lg font-bold"
+                  style={{ color: selectedCategoryData.color }}
+                >
                   {selectedCategoryData.name}: {(selectedCategoryData.xp || 0)}m → {(selectedCategoryData.xp || 0) + timeSpent}m
                 </div>
-                <div className="text-xs text-green-400">+{timeSpent} XP gained!</div>
+                <div className="text-xs text-white font-bold">+{timeSpent} XP gained!</div>
               </div>
             </motion.div>
           )}
@@ -270,9 +286,15 @@ const SaveSessionModal = ({
             <button
               onClick={handleSave}
               disabled={!selectedCategory || (selectedCategory === 'custom' && !customCategoryName.trim())}
-              className="flex-1 bg-gray-900 border-2 border-green-500 px-4 py-3 font-mono font-bold text-green-500 hover:bg-green-500 hover:bg-opacity-10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 border-2 border-white px-4 py-3 font-mono font-bold text-white transition-all duration-300 bg-black/20 hover:bg-black/40 rounded-lg relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                boxShadow: (!selectedCategory || (selectedCategory === 'custom' && !customCategoryName.trim())) ? 'none' : '0 0 20px #00FF7F, 0 0 40px #00FF7F'
+              }}
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className={`absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20 transition-all duration-300 ${
+                (!selectedCategory || (selectedCategory === 'custom' && !customCategoryName.trim())) ? 'opacity-0' : 'opacity-20 hover:opacity-40'
+              }`} />
+              <div className="flex items-center justify-center gap-2 relative z-10">
                 <Save size={16} />
                 <span>SAVE +{timeSpent} XP</span>
               </div>
@@ -280,9 +302,13 @@ const SaveSessionModal = ({
 
             <button
               onClick={onDiscard}
-              className="flex-1 bg-gray-900 border-2 border-red-500 px-4 py-3 font-mono font-bold text-red-500 hover:bg-red-500 hover:bg-opacity-10 transition-colors"
+              className="flex-1 border-2 border-white px-4 py-3 font-mono font-bold text-white transition-all duration-300 bg-black/20 hover:bg-black/40 rounded-lg relative overflow-hidden"
+              style={{
+                boxShadow: '0 0 20px #FF1493, 0 0 40px #FF1493'
+              }}
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-pink-600/20 opacity-20 hover:opacity-40 transition-all duration-300" />
+              <div className="flex items-center justify-center gap-2 relative z-10">
                 <Trash2 size={16} />
                 <span>DISCARD</span>
               </div>

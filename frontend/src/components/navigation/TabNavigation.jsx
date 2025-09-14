@@ -4,14 +4,14 @@ import { FileText, Archive, Trophy, User, CheckSquare, Clock, LayoutGrid, Timer,
 
 const TabNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'dashboard', label: 'DASHBOARD', icon: LayoutGrid, color: '#67E8F9' },
-    { id: 'notes', label: 'LOGS', icon: FileText, color: '#22D3EE' },
-    { id: 'tasks', label: 'MISSIONS', icon: CheckSquare, color: '#0EA5E9' },
-    { id: 'library', label: 'VAULT', icon: Archive, color: '#3B82F6' },
-    { id: 'focus', label: 'GRIND', icon: Timer, color: '#8B5CF6' },        // ADD THIS
-    { id: 'tracker', label: 'SKILLS', icon: BarChart3, color: '#F59E0B' }, // ADD THIS
-    { id: 'achievements', label: 'ACHIEVEMENTS', icon: Trophy, color: '#8B5CF6' },
-    { id: 'profile', label: 'PROFILE', icon: User, color: '#A78BFA' }
+    { id: 'dashboard', label: 'DASHBOARD', icon: LayoutGrid },
+    { id: 'notes', label: 'LOGS', icon: FileText },
+    { id: 'tasks', label: 'MISSIONS', icon: CheckSquare },
+    { id: 'library', label: 'VAULT', icon: Archive },
+    { id: 'focus', label: 'FOCUS', icon: Timer },
+    { id: 'tracker', label: 'SKILLS', icon: BarChart3 },
+    { id: 'achievements', label: 'ACHIEVEMENTS', icon: Trophy },
+    { id: 'profile', label: 'PROFILE', icon: User }
   ];
 
   return (
@@ -41,39 +41,84 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 style={{
-                  '--tab-color': tab.color,
-                  '--tab-shadow': isActive 
-                    ? `0 0 25px ${tab.color}80, 0 0 50px ${tab.color}40, 0 8px 16px rgba(0, 0, 50, 0.4)` 
-                    : `0 0 5px ${tab.color}30`
+                  position: 'relative',
+                  overflow: 'hidden',
+                  background: isActive 
+                    ? 'linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05), rgba(255,255,255,0.1))'
+                    : 'transparent',
+                  borderColor: isActive ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                  boxShadow: isActive 
+                    ? '0 0 20px rgba(255,255,255,0.6), 0 0 40px rgba(255,255,255,0.3), inset 0 0 20px rgba(255,255,255,0.1)'
+                    : '0 0 5px rgba(255,255,255,0.2)',
+                  color: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)'
                 }}
               >
-                <div className="tab-content">
-                  <IconComponent size={16} className="tab-icon" />
-                  <span className="tab-label">{tab.label}</span>
-                </div>
+                {/* Holographic shimmer effect */}
+                {isActive && (
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+                      transform: 'translateX(-100%)'
+                    }}
+                    animate={{
+                      transform: ['translateX(-100%)', 'translateX(200%)']
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                      ease: "easeInOut"
+                    }}
+                  />
+                )}
                 
+                {/* Sparkle effects */}
                 {isActive && (
                   <>
                     <motion.div
-                      className="tab-indicator"
-                      layoutId="activeTab"
-                      initial={false}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      className="absolute top-2 left-4 w-1 h-1 bg-white rounded-full"
+                      animate={{
+                        opacity: [0, 1, 0],
+                        scale: [0, 1, 0]
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        delay: 0
+                      }}
                     />
                     <motion.div
-                      className="tab-constellation"
-                      animate={{ 
-                        opacity: [0.3, 0.8, 0.3],
-                        scale: [1, 1.1, 1]
+                      className="absolute bottom-3 right-6 w-1 h-1 bg-white rounded-full"
+                      animate={{
+                        opacity: [0, 1, 0],
+                        scale: [0, 1, 0]
                       }}
-                      transition={{ 
-                        duration: 3, 
+                      transition={{
+                        duration: 1.8,
                         repeat: Infinity,
-                        ease: "easeInOut"
+                        delay: 0.5
+                      }}
+                    />
+                    <motion.div
+                      className="absolute top-1/2 right-3 w-0.5 h-0.5 bg-white rounded-full"
+                      animate={{
+                        opacity: [0, 1, 0],
+                        scale: [0, 1, 0]
+                      }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                        delay: 1
                       }}
                     />
                   </>
                 )}
+
+                <div className="tab-content relative z-10">
+                  <IconComponent size={16} className="tab-icon" />
+                  <span className="tab-label">{tab.label}</span>
+                </div>
               </motion.button>
             );
           })}

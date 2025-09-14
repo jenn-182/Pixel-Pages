@@ -44,12 +44,31 @@ public class PlayerAchievement {
         this.updatedAt = LocalDateTime.now();
     }
     
+    // Constructor for creating achievements
+    public PlayerAchievement(String username, String achievementId) {
+        this.username = username;
+        this.achievementId = achievementId;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        generateId();
+    }
+    
     // ✅ ADD METHOD TO GENERATE MANUAL ID
     public void generateId() {
         if (this.id == null) {
             // Simple timestamp-based ID generation
             this.id = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
         }
+    }
+    
+    // Add missing methods referenced in AchievementService
+    public Integer getTargetValue() {
+        return this.maxProgress;
+    }
+    
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.unlockedAt = completedAt;
+        this.updatedAt = LocalDateTime.now();
     }
     
     // All your existing getters and setters...

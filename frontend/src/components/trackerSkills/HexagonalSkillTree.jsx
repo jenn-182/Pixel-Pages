@@ -98,6 +98,24 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
     return colorMap[categoryKey] || '#6B7280';
   };
 
+  // Get branch activity label
+  const getBranchActivity = (categoryName) => {
+    const activityMap = {
+      'scholar': 'STUDY',
+      'profession': 'WORK',
+      'artisan': 'CREATE',
+      'scribe': 'WRITE',
+      'programming': 'CODE',
+      'literacy': 'READ',
+      'strategist': 'PLAN',
+      'mindfulness': 'REST',
+      'knowledge': 'RESEARCH'
+    };
+    
+    const categoryKey = categoryName.toLowerCase();
+    return activityMap[categoryKey] || '';
+  };
+
   // Get node description for hover
   const getNodeDescription = (category, nodeLevel) => {
     const descriptions = {
@@ -204,8 +222,8 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
       
       <polygon
         points="50,5 85,25 85,75 50,95 15,75 15,25"
-        fill="#1F2937"
-        stroke={isUnlocked ? color : '#4B5563'}
+        fill="#000000"
+        stroke={isUnlocked ? color : '#1a1a1a'}
         strokeWidth="2"
       />
       
@@ -224,7 +242,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
       <polygon
         points="50,5 85,25 85,75 50,95 15,75 15,25"
         fill="transparent"
-        stroke={isUnlocked ? color : '#4B5563'}
+        stroke={isUnlocked ? color : '#1a1a1a'}
         strokeWidth="2"
         style={{
           filter: isUnlocked ? `drop-shadow(0 0 8px ${color}40)` : undefined
@@ -320,17 +338,17 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
               >
                 {totalHours}h
               </div>
-              <div className="text-xs text-gray-400 font-mono">TOTAL GRIND TIME</div>
+              <div className="text-xs text-gray-400 font-mono">TOTAL FOCUS TIME</div>
             </div>
           </div>
 
           {/* Center - Header */}
           <div className="text-center">
             <div className="font-mono font-bold text-white text-3xl mb-2">
-              SKILL TREE MATRIX
+              PLAYER SKILL TREE
             </div>
             <div className="text-gray-400 font-mono text-sm">
-              Track your grind sessions and level up your skills.
+              Track your focus sessions and level up your skills.
             </div>
             <div 
               className="font-mono text-sm font-bold tracking-wider mt-1"
@@ -446,6 +464,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
             const progress = getLevelProgress(category.xp || 0);
             const levelTitle = getLevelTitle(category, currentLevel);
             const branchColor = getBranchColor(category.name, category.customColor);
+            const branchActivity = getBranchActivity(category.name);
             const isMaxLevel = currentLevel === 10;
             
             return (
@@ -473,7 +492,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-mono font-bold text-white text-xl">
-                          {category.name.toUpperCase()} BRANCH
+                          {category.name.toUpperCase()} BRANCH {branchActivity && `(${branchActivity})`}
                         </div>
                         <div 
                           className="font-mono text-sm font-bold tracking-wider"
@@ -518,7 +537,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                 {/* Combined Progress Line and Skill Nodes */}
                 <div className="relative">
                   {/* Background Progress Line */}
-                  <div className="absolute top-6 left-6 right-6 h-1 bg-gray-700 rounded-full" />
+                  <div className="absolute top-6 left-6 right-6 h-1 bg-black rounded-full" />
                   
                   {/* Active Progress Line */}
                   <div 
@@ -591,7 +610,7 @@ const HexagonalSkillTree = ({ categories, tabColor, tabColorRgb }) => {
                             ) : isCompleted ? (
                               <Zap size={12} style={{ color: '#000000' }} />
                             ) : (
-                              <div className="font-mono font-bold text-xs text-black-400">
+                              <div className="font-mono font-bold text-xs text-gray-400">
                                 {nodeLevel}
                               </div>
                             )}

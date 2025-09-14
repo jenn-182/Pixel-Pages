@@ -25,6 +25,7 @@ import DashboardTab from './tabs/DashboardTab';
 import TrackerTab from './tabs/TrackerTab';
 import apiService from '../services/api';
 import AchievementNotification from './ui/AchievementNotification'; // Fixed path
+import { ThemeProvider } from '../contexts/ThemeContext';
 
 const PixelPages = () => {
   const username = 'user'; // Add this line near the top
@@ -230,19 +231,20 @@ const PixelPages = () => {
   }
 
   return (
-    <div className="pixel-pages-container">
-      {/* Add subtle noise texture overlay */}
-      <div className="fixed inset-0 opacity-5 pointer-events-none" 
-           style={{
-             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-           }} 
-      />
-      
-      <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
-      
-      <main className="tab-content-area">
-        {renderTabContent()}
-      </main>
+    <ThemeProvider>
+      <div className="pixel-pages-container">
+        {/* Add subtle noise texture overlay */}
+        <div className="fixed inset-0 opacity-5 pointer-events-none" 
+             style={{
+               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+             }} 
+        />
+        
+        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
+        
+        <main className="tab-content-area">
+          {renderTabContent()}
+        </main>
       
       {/* Keep only the necessary modals */}
       <AnimatePresence mode="wait">
@@ -554,7 +556,8 @@ const PixelPages = () => {
 
       {/* Achievement notifications - add this anywhere in your app */}
       <AchievementNotification />
-    </div>
+      </div>
+    </ThemeProvider>
   );
 };
 

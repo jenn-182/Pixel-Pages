@@ -11,7 +11,7 @@ export const specialAchievements = [
       type: 'daily_combo',
       activities: ['note', 'task', 'focus']
     },
-    xpReward: 500,
+    xpReward: 18,
     color: '#3B82F6'
   },
   {
@@ -25,7 +25,7 @@ export const specialAchievements = [
       type: 'weekly_combo',
       activities: ['note', 'task', 'focus']
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -69,7 +69,7 @@ export const specialAchievements = [
       type: 'late_night_activity',
       hour: 0
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
   {
@@ -83,7 +83,7 @@ export const specialAchievements = [
       type: 'early_morning_activity',
       hour: 6
     },
-    xpReward: 300,
+    xpReward: 12,
     color: '#3B82F6'
   },
 
@@ -100,7 +100,7 @@ export const specialAchievements = [
       activities: ['note', 'task', 'focus'],
       target: 7
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
   {
@@ -170,7 +170,7 @@ export const specialAchievements = [
       type: 'daily_activity_count',
       target: 10
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
   {
@@ -198,7 +198,7 @@ export const specialAchievements = [
       type: 'player_level',
       target: 10
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
   {
@@ -212,7 +212,7 @@ export const specialAchievements = [
       type: 'total_xp',
       target: 5000
     },
-    xpReward: 500,
+    xpReward: 18,
     color: '#8B5CF6'
   },
   {
@@ -226,7 +226,7 @@ export const specialAchievements = [
       type: 'achievement_count',
       target: 25
     },
-    xpReward: 1000,
+    xpReward: 28,
     color: '#8B5CF6'
   },
 

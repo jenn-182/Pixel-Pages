@@ -14,7 +14,7 @@
   width: 100%;
   background: 
     /* Match the new starfield pattern with multicolor stars */
-    radial-gradient(2px 2px at 15% 25%, rgba(0, 255, 255, 0.6), transparent), /* Bright cyan */
+    radial-gradient(2px 2px at 15% 25%, rgba(255, 255, 255, 0.6), transparent), /* Bright white */
     radial-gradient(2px 2px at 85% 75%, rgba(255, 0, 255, 0.5), transparent), /* Bright magenta */
     radial-gradient(1px 1px at 45% 15%, rgba(255, 20, 147, 0.4), transparent), /* Deep pink */
     radial-gradient(1px 1px at 25% 85%, rgba(138, 43, 226, 0.5), transparent), /* Blue violet */
@@ -22,10 +22,10 @@
     radial-gradient(1px 1px at 35% 65%, rgba(255, 105, 180, 0.3), transparent), /* Hot pink */
     /* Pure black background to match main theme */
     linear-gradient(135deg, #000000 0%, #111111 25%, #000000 50%, #111111 75%, #000000 100%);
-  border-bottom: 2px solid rgba(0, 255, 255, 0.4);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(0, 255, 255, 0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 10;
   backdrop-filter: blur(2px);
@@ -55,7 +55,7 @@
   top: 20%;
   left: 10%;
   animation-delay: 0s;
-  background: rgba(0, 255, 255, 0.9); /* Bright cyan */
+  background: rgba(255, 255, 255, 0.9); /* White */
 }
 
 .star-2 {
@@ -141,7 +141,7 @@
 .pixel-tab.starfield-theme {
   position: relative;
   background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(0, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 16px 24px;
   cursor: pointer;
   transition: all 0.4s ease;
@@ -154,7 +154,7 @@
   font-weight: bold;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 0 5px rgba(0, 255, 255, 0.4);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
   letter-spacing: 1px;
 }
 
@@ -278,8 +278,6 @@
 }
 
 /*  starfield background effects */
-.pixel-pages-container::before {
-}
 
 .tab-indicator {
   background: var(--tab-color) !important;

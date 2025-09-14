@@ -21,43 +21,43 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
     return () => clearInterval(shimmerInterval);
   }, [unlocked]);
 
-  // Updated color scheme: cyan, pink, purple, gold
+  // Updated color scheme: bronze, silver, emerald, gold
   const getRarityStyle = (tier) => {
     switch (tier?.toLowerCase()) {
       case 'common':
         return {
-          color: '#06B6D4', // Cyan
-          bgColor: 'rgba(6, 182, 212, 0.15)',
-          shadowColor: 'rgba(6, 182, 212, 0.6)',
-          lockedColor: '#0A4A56', // Dark cyan for locked
-          lockedBgColor: 'rgba(6, 182, 212, 0.05)',
+          color: '#CD7F32', // Bronze
+          bgColor: 'rgba(205, 127, 50, 0.15)',
+          shadowColor: 'rgba(205, 127, 50, 0.6)',
+          lockedColor: '#6B3E19', // Dark bronze for locked
+          lockedBgColor: 'rgba(205, 127, 50, 0.05)',
           name: 'COMMON'
         };
       case 'uncommon':
         return {
-          color: '#EC4899', // Pink
-          bgColor: 'rgba(236, 72, 153, 0.15)',
-          shadowColor: 'rgba(236, 72, 153, 0.6)',
-          lockedColor: '#5A1E3D', // Dark pink for locked
-          lockedBgColor: 'rgba(236, 72, 153, 0.05)',
+          color: '#B8D4E3', // Silver with blue hint
+          bgColor: 'rgba(184, 212, 227, 0.15)',
+          shadowColor: 'rgba(184, 212, 227, 0.6)',
+          lockedColor: '#5A6B72', // Dark silver-blue for locked
+          lockedBgColor: 'rgba(184, 212, 227, 0.05)',
           name: 'UNCOMMON'
         };
       case 'rare':
         return {
-          color: '#8B5CF6', // Purple
-          bgColor: 'rgba(139, 92, 246, 0.15)',
-          shadowColor: 'rgba(139, 92, 246, 0.6)',
-          lockedColor: '#3D2461', // Dark purple for locked
-          lockedBgColor: 'rgba(139, 92, 246, 0.05)',
+          color: '#50C878', // Emerald
+          bgColor: 'rgba(80, 200, 120, 0.15)',
+          shadowColor: 'rgba(80, 200, 120, 0.6)',
+          lockedColor: '#2A5C3C', // Dark emerald for locked
+          lockedBgColor: 'rgba(80, 200, 120, 0.05)',
           name: 'RARE'
         };
       case 'legendary':
         return {
-          color: '#FFCB2E', // Gold
-          bgColor: 'rgba(245, 158, 11, 0.15)',
-          shadowColor: 'rgba(245, 206, 11, 0.68)',
-          lockedColor: '#5A3E0B', // Dark gold for locked 
-          lockedBgColor: 'rgba(245, 158, 11, 0.05)',
+          color: '#FFD700', // Gold
+          bgColor: 'rgba(255, 215, 0, 0.15)',
+          shadowColor: 'rgba(255, 215, 0, 0.68)',
+          lockedColor: '#665500', // Dark gold for locked 
+          lockedBgColor: 'rgba(255, 215, 0, 0.05)',
           name: 'LEGENDARY'
         };
       default:
@@ -86,9 +86,197 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
   const style = getRarityStyle(achievement.tier);
   const IconComponent = getRarityIcon(achievement.tier);
 
+  // Enhanced rarity-specific background effects
+  const getRarityBackgroundEffects = (tier, isUnlocked) => {
+    if (!isUnlocked) return null;
+
+    switch (tier?.toLowerCase()) {
+      case 'common': // Bronze - subtle metallic texture with contrast
+        return (
+          <>
+            {/* Subtle metallic bronze base with better contrast */}
+            <div className="absolute inset-0 opacity-25 pointer-events-none"
+                 style={{
+                   background: `
+                     radial-gradient(circle at 30% 20%, rgba(205, 127, 50, 0.4) 0%, transparent 50%),
+                     radial-gradient(circle at 70% 80%, rgba(160, 82, 25, 0.5) 0%, transparent 45%),
+                     linear-gradient(135deg, 
+                       rgba(205, 127, 50, 0.2) 0%, 
+                       rgba(139, 69, 19, 0.3) 30%, 
+                       rgba(205, 127, 50, 0.2) 60%, 
+                       rgba(101, 67, 33, 0.4) 100%)
+                   `
+                 }} />
+            
+            {/* Subtle metallic shine points with contrast */}
+            <div className="absolute inset-0 opacity-30 pointer-events-none"
+                 style={{
+                   background: `
+                     radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.6) 0%, rgba(205, 127, 50, 0.3) 15%, transparent 25%),
+                     radial-gradient(circle at 75% 75%, rgba(255, 140, 0, 0.5) 0%, rgba(160, 82, 25, 0.3) 18%, transparent 30%),
+                     radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.4) 0%, rgba(205, 127, 50, 0.2) 10%, transparent 20%)
+                   `
+                 }} />
+            
+            {/* Darker oxidation for contrast */}
+            <div className="absolute inset-0 opacity-35 pointer-events-none"
+                 style={{
+                   background: `
+                     radial-gradient(circle at 15% 85%, rgba(101, 67, 33, 0.8) 0%, rgba(139, 69, 19, 0.5) 25%, transparent 40%),
+                     radial-gradient(circle at 85% 15%, rgba(139, 69, 19, 0.7) 0%, rgba(101, 67, 33, 0.4) 20%, transparent 35%),
+                     radial-gradient(circle at 60% 40%, rgba(87, 51, 15, 0.6) 0%, transparent 25%)
+                   `
+                 }} />
+          </>
+        );
+
+      case 'uncommon': // Silver - improved chrome with better text readability
+        return (
+          <>
+            {/* Chrome base with realistic metallic reflections - reduced opacity */}
+            <div className="absolute inset-0 opacity-25 pointer-events-none"
+                 style={{
+                   background: `
+                     linear-gradient(135deg, 
+                       #ffffff 0%, 
+                       #e5e5e5 20%, 
+                       #a0a0a0 40%, 
+                       #ffffff 50%, 
+                       #d0d0d0 60%, 
+                       #808080 80%, 
+                       #ffffff 100%)
+                   `
+                 }} />
+            
+            {/* Sharp chrome reflection lines - reduced opacity */}
+            <div className="absolute inset-0 opacity-30 pointer-events-none"
+                 style={{
+                   background: `
+                     linear-gradient(45deg, 
+                       transparent 0%, 
+                       transparent 30%, 
+                       rgba(255, 255, 255, 0.6) 35%, 
+                       rgba(255, 255, 255, 0.6) 37%, 
+                       transparent 42%, 
+                       transparent 58%, 
+                       rgba(255, 255, 255, 0.4) 63%, 
+                       rgba(255, 255, 255, 0.4) 65%, 
+                       transparent 70%, 
+                       transparent 100%)
+                   `
+                 }} />
+            
+            {/* Subtle blue energy accent with tint */}
+            <div className="absolute inset-0 opacity-15 pointer-events-none"
+                 style={{
+                   background: `
+                     radial-gradient(circle at 70% 30%, rgba(100, 149, 237, 0.8) 0%, transparent 50%),
+                     linear-gradient(90deg, transparent 0%, rgba(135, 206, 250, 0.3) 50%, transparent 100%)
+                   `
+                 }} />
+          </>
+        );
+
+      case 'rare': // Emerald - subtle crystalline with good contrast
+        return (
+          <>
+            {/* Toned down crystalline facets with better contrast */}
+            <div className="absolute inset-0 opacity-30 pointer-events-none"
+                 style={{
+                   background: `
+                     conic-gradient(from 45deg at 50% 50%, 
+                       rgba(80, 200, 120, 0.4) 0deg, 
+                       rgba(34, 139, 34, 0.6) 30deg,
+                       rgba(144, 238, 144, 0.3) 60deg, 
+                       rgba(80, 200, 120, 0.5) 90deg,
+                       rgba(34, 139, 34, 0.7) 120deg, 
+                       rgba(50, 205, 50, 0.4) 150deg,
+                       rgba(80, 200, 120, 0.3) 180deg, 
+                       rgba(34, 139, 34, 0.5) 210deg,
+                       rgba(144, 238, 144, 0.4) 240deg, 
+                       rgba(80, 200, 120, 0.6) 270deg,
+                       rgba(34, 139, 34, 0.4) 300deg, 
+                       rgba(50, 205, 50, 0.3) 330deg,
+                       rgba(80, 200, 120, 0.4) 360deg)
+                   `
+                 }} />
+            
+            {/* Subtle crystal sparkle points */}
+            <div className="absolute inset-0 opacity-40 pointer-events-none"
+                 style={{
+                   background: `
+                     radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.7) 0%, rgba(144, 238, 144, 0.4) 12%, transparent 20%),
+                     radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.6) 0%, rgba(50, 205, 50, 0.3) 15%, transparent 25%),
+                     radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.5) 0%, rgba(80, 200, 120, 0.2) 10%, transparent 18%),
+                     radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.4) 0%, rgba(144, 238, 144, 0.2) 8%, transparent 15%)
+                   `
+                 }} />
+            
+            {/* Darker areas for contrast */}
+            <div className="absolute inset-0 opacity-25 pointer-events-none"
+                 style={{
+                   background: `
+                     radial-gradient(circle at 40% 60%, rgba(34, 139, 34, 0.8) 0%, rgba(25, 100, 25, 0.6) 20%, transparent 35%),
+                     radial-gradient(circle at 70% 30%, rgba(25, 100, 25, 0.7) 0%, transparent 30%),
+                     linear-gradient(120deg, transparent 0%, rgba(34, 139, 34, 0.5) 2%, transparent 4%)
+                   `
+                 }} />
+          </>
+        );
+
+      case 'legendary': // Gold - plasma-like energy flowing around edges
+        return (
+          <>
+            {/* Plasma energy base */}
+            <div className="absolute inset-0 opacity-40 pointer-events-none"
+                 style={{
+                   background: `
+                     radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.4) 0%, rgba(255, 140, 0, 0.3) 50%, transparent 70%)
+                   `
+                 }} />
+            {/* Flowing plasma edges */}
+            <motion.div 
+              className="absolute inset-0 pointer-events-none"
+              animate={{
+                background: [
+                  `conic-gradient(from 0deg at 50% 50%, 
+                    rgba(255, 215, 0, 0.6) 0deg, 
+                    rgba(255, 140, 0, 0.4) 90deg, 
+                    rgba(255, 215, 0, 0.6) 180deg, 
+                    rgba(255, 69, 0, 0.5) 270deg, 
+                    rgba(255, 215, 0, 0.6) 360deg)`,
+                  `conic-gradient(from 120deg at 50% 50%, 
+                    rgba(255, 215, 0, 0.6) 0deg, 
+                    rgba(255, 140, 0, 0.4) 90deg, 
+                    rgba(255, 215, 0, 0.6) 180deg, 
+                    rgba(255, 69, 0, 0.5) 270deg, 
+                    rgba(255, 215, 0, 0.6) 360deg)`,
+                  `conic-gradient(from 240deg at 50% 50%, 
+                    rgba(255, 215, 0, 0.6) 0deg, 
+                    rgba(255, 140, 0, 0.4) 90deg, 
+                    rgba(255, 215, 0, 0.6) 180deg, 
+                    rgba(255, 69, 0, 0.5) 270deg, 
+                    rgba(255, 215, 0, 0.6) 360deg)`
+                ]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              style={{ opacity: 0.3 }}
+            />
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <motion.div
-      className={`bg-black border-2 ${compact ? 'p-3' : 'p-4'} relative transition-all duration-300 cursor-pointer group overflow-hidden`}
+      className={`bg-black/95 border-2 ${compact ? 'p-3' : 'p-4'} relative transition-all duration-300 cursor-pointer group overflow-hidden backdrop-blur-sm`}
       style={{
         borderColor: unlocked ? style.color : (inProgress ? style.lockedColor : '#4B5563'),
         boxShadow: unlocked 
@@ -110,19 +298,26 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
             : '0 0 8px rgba(75, 85, 99, 0.4), 4px 4px 0px 0px rgba(0,0,0,1)'
       }}
       whileTap={{ scale: 0.98 }}
-      // REMOVED: No automatic pulse for in-progress badges
     >
-      {/* Background overlay */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-30"
-        style={{ 
-          background: unlocked 
-            ? `linear-gradient(135deg, ${style.color}40, ${style.color}20, ${style.color}60)` 
-            : inProgress 
-              ? `linear-gradient(135deg, ${style.lockedColor}40, ${style.lockedColor}20, ${style.lockedColor}60)`
-              : 'linear-gradient(135deg, rgba(75, 85, 99, 0.2), rgba(75, 85, 99, 0.1))'
-        }} 
-      />
+      {/* Enhanced rarity-specific background effects */}
+      {getRarityBackgroundEffects(achievement.tier, unlocked)}
+
+      {/* Dark translucent overlay for better text contrast */}
+      <div className="absolute inset-0 bg-black/20 pointer-events-none z-10" />
+
+      {/* Fallback background overlay for non-enhanced tiers */}
+      {!getRarityBackgroundEffects(achievement.tier, unlocked) && (
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{ 
+            background: unlocked 
+              ? `linear-gradient(135deg, ${style.color}40, ${style.color}20, ${style.color}60)` 
+              : inProgress 
+                ? `linear-gradient(135deg, ${style.lockedColor}40, ${style.lockedColor}20, ${style.lockedColor}60)`
+                : 'linear-gradient(135deg, rgba(75, 85, 99, 0.2), rgba(75, 85, 99, 0.1))'
+          }} 
+        />
+      )}
 
       {/* SMOOTHER DIAGONAL Shimmer effects - ONLY for unlocked badges */}
       {unlocked && (
@@ -190,7 +385,7 @@ const AchievementBadge = ({ achievement, size = 'medium', isUnlocked = false, on
         </>
       )}
       
-      <div className="relative z-10 text-center">
+      <div className="relative z-20 text-center">
         {/* Badge Icon Circle - Pulse on hover for in-progress */}
         <div className={compact ? "mb-2 flex justify-center" : "mb-3 flex justify-center"}>
           <motion.div 

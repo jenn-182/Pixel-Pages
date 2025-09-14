@@ -15,6 +15,7 @@ public class WebConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:3000"); // React frontend
+        config.addAllowedOrigin("http://localhost:3001"); // React frontend (alternate port)
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         

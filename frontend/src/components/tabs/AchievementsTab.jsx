@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Star, Zap, Crown, Lock, Shield, CheckCircle, Target, BarChart3, Award, Grid, List, ChevronDown, TrendingUp, Settings, X, Calendar } from 'lucide-react';
+import { Trophy, Star, Zap, Crown, Lock, Shield, CheckCircle, Target, BarChart, TrendingUp, Award, Grid, List, ChevronDown, Settings, X, Calendar } from 'lucide-react';
 import { allAchievements, achievementsByTier, tierInfo } from '../../data/achievements';
 import achievementService from '../../services/achievementService';
 import AchievementBadge from '../ui/AchievementBadge';
@@ -95,7 +95,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
     return [...achievements].sort((a, b) => {
       switch (sortBy) {
         case 'rarity':
-          return getRarityOrder(a.tier) - getRarityOrder(b.tier); // Common first, legendary last
+          return getRarityOrder(b.tier) - getRarityOrder(a.tier); // Legendary first, common last
         case 'progress':
           // Use backend progress data instead of local service
           const playerAchA = backendAchievementService.playerAchievements.find(pa => pa.achievementId === a.id);
@@ -151,27 +151,27 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
     // Move all hooks BEFORE any conditional returns
     const rarityStyles = useMemo(() => ({
       common: {
-        color: '#06B6D4',
-        bgColor: 'rgba(6, 182, 212, 0.15)',
-        shadowColor: 'rgba(6, 182, 212, 0.6)',
+        color: '#CD7F32', // Bronze
+        bgColor: 'rgba(205, 127, 50, 0.15)',
+        shadowColor: 'rgba(205, 127, 50, 0.6)',
         name: 'COMMON'
       },
       uncommon: {
-        color: '#EC4899',
-        bgColor: 'rgba(236, 72, 153, 0.15)',
-        shadowColor: 'rgba(236, 72, 153, 0.6)',
+        color: '#B8D4E3', // Silver with blue hint
+        bgColor: 'rgba(184, 212, 227, 0.15)',
+        shadowColor: 'rgba(184, 212, 227, 0.6)',
         name: 'UNCOMMON'
       },
       rare: {
-        color: '#8B5CF6',
-        bgColor: 'rgba(139, 92, 246, 0.15)',
-        shadowColor: 'rgba(139, 92, 246, 0.6)',
+        color: '#50C878', // Emerald
+        bgColor: 'rgba(80, 200, 120, 0.15)',
+        shadowColor: 'rgba(80, 200, 120, 0.6)',
         name: 'RARE'
       },
       legendary: {
-        color: '#FFCB2E',
-        bgColor: 'rgba(245, 158, 11, 0.15)',
-        shadowColor: 'rgba(245, 158, 11, 0.6)',
+        color: '#FFD700', // Gold
+        bgColor: 'rgba(255, 215, 0, 0.15)',
+        shadowColor: 'rgba(255, 215, 0, 0.6)',
         name: 'LEGENDARY'
       }
     }), []);
@@ -207,7 +207,8 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-start justify-center p-4"
+        style={{ paddingTop: '15vh' }}
         onClick={onClose}
       >
         <motion.div
@@ -218,11 +219,12 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
             type: "tween",
             duration: 0.2
           }}
-          className="bg-black border-2 p-8 relative max-w-2xl w-full overflow-hidden"
+          className="bg-black border-2 p-8 relative overflow-hidden"
           style={{
-            width: '600px',
+            width: 'min(90vw, 600px)',
             height: 'auto',
             minHeight: '300px',
+            maxHeight: '80vh',
             borderColor: style.color,
             boxShadow: `0 0 40px ${style.shadowColor}, 0 0 80px ${style.color}30, 2px 2px 0px 0px rgba(0,0,0,1)`
           }}
@@ -383,7 +385,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
               ACHIEVEMENT SHOWCASE
             </h1>
             <p className="text-gray-400 font-mono text-sm">
-              View your badges and unlock achievements by completing logs and missions.
+              Unlock achievements by completing logs, missions and using the focus timer.
             </p>
           </div>
           
@@ -408,93 +410,6 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
         </div>
       </div>
 
-      {/* Progress Summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg bg-black/40 backdrop-blur-md"
-      >
-        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
-        
-        <div className="relative z-10">
-          <div className="border-b px-4 py-3 rounded-t-lg"
-               style={{ 
-                 borderColor: 'white',
-                 backgroundColor: 'rgba(0, 0, 0, 0.6)'
-               }}>
-            <h3 className="text-lg font-mono font-bold text-white flex items-center">
-              <Trophy className="mr-2" size={20} color="white" />
-              BADGE METRICS
-            </h3>
-          </div>
-          
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Badges Earned */}
-              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
-                   style={{
-                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                     boxShadow: '0 0 25px rgba(34, 197, 94, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
-                   }}>
-                <div className="relative z-10">
-                  <CheckCircle size={20} className="text-green-400 mx-auto mb-2" />
-                  <div className="text-xs font-mono text-gray-400 mb-1">BADGES EARNED</div>
-                  <div className="text-2xl font-mono font-bold text-green-400">
-                    {unlockedAchievements.length}
-                  </div>
-                </div>
-              </div>
-
-              {/* Badges In Progress */}
-              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
-                   style={{
-                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                     boxShadow: '0 0 25px rgba(59, 130, 246, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
-                   }}>
-                <div className="relative z-10">
-                  <Target size={20} className="text-blue-400 mx-auto mb-2" />
-                  <div className="text-xs font-mono text-gray-400 mb-1">BADGES IN PROGRESS</div>
-                  <div className="text-2xl font-mono font-bold text-blue-400">
-                    {progressMetrics.inProgressCount}
-                  </div>
-                </div>
-              </div>
-
-              {/* Badges Locked */}
-              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
-                   style={{
-                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                     boxShadow: '0 0 25px rgba(107, 114, 128, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
-                   }}>
-                <div className="relative z-10">
-                  <Lock size={20} className="text-gray-400 mx-auto mb-2" />
-                  <div className="text-xs font-mono text-gray-400 mb-1">BADGES LOCKED</div>
-                  <div className="text-2xl font-mono font-bold text-gray-400">
-                    {progressMetrics.lockedCount}
-                  </div>
-                </div>
-              </div>
-
-              {/* Completion Percentage */}
-              <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg"
-                   style={{
-                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                     boxShadow: '0 0 25px rgba(251, 191, 36, 0.8), 4px 4px 0px 0px rgba(0,0,0,1)'
-                   }}>
-                <div className="relative z-10">
-                  <Trophy size={20} className="text-yellow-400 mx-auto mb-2" />
-                  <div className="text-xs font-mono text-gray-400 mb-1">COMPLETION RATE</div>
-                  <div className="text-2xl font-mono font-bold text-yellow-400">
-                    {Math.round((unlockedAchievements.length / allAchievements.length) * 100)}%
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Achievement Sections */}
       <AnimatePresence mode="wait">
         {!showLockedAchievements ? (
@@ -508,7 +423,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
               className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative mb-6 rounded-lg bg-black/40 backdrop-blur-md"
             >
               <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+              <div className="absolute inset-0 bg-gradient-to-br from-black/1 to-black/1 pointer-events-none rounded-lg" />
               
               <div className="relative z-10">
                 <div className="border-b px-4 py-3 rounded-t-lg"
@@ -531,11 +446,21 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                           const isActive = selectedTier === tier;
                           const getRarityColor = (t) => {
                             switch(t) {
-                              case 'common': return '#06B6D4';
-                              case 'uncommon': return '#EC4899';
-                              case 'rare': return '#8B5CF6';
-                              case 'legendary': return '#F59E0B';
-                              default: return tabColor;
+                              case 'common': return '#CD7F32'; // Bronze
+                              case 'uncommon': return '#B8D4E3'; // Silver with blue hint
+                              case 'rare': return '#50C878'; // Emerald
+                              case 'legendary': return '#FFD700'; // Gold
+                              default: return '#FFFFFF'; // White for ALL button
+                            }
+                          };
+                          
+                          const getRarityLabel = (t) => {
+                            switch(t) {
+                              case 'common': return 'BRONZE';
+                              case 'uncommon': return 'SILVER';
+                              case 'rare': return 'EMERALD';
+                              case 'legendary': return 'GOLD';
+                              default: return 'ALL';
                             }
                           };
                           
@@ -547,13 +472,13 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                               style={{
                                 borderColor: isActive ? getRarityColor(tier) : '#4B5563',
                                 backgroundColor: isActive ? getRarityColor(tier) : 'transparent',
-                                color: isActive ? '#000' : getRarityColor(tier),
+                                color: isActive ? (tier === 'all' ? '#000000' : '#000000') : getRarityColor(tier),
                                 boxShadow: isActive ? `0 0 10px ${getRarityColor(tier)}40` : 'none'
                               }}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              {tier.toUpperCase()}
+                              {getRarityLabel(tier)}
                             </motion.button>
                           );
                         })}
@@ -584,16 +509,99 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                     <div className="text-center py-8">
                       <Trophy size={48} className="text-gray-500 mx-auto mb-3" />
                       <h3 className="font-mono text-lg font-bold text-white mb-2">
-                        {selectedTier === 'all' ? 'NO ACHIEVEMENTS DETECTED' : `NO ${selectedTier.toUpperCase()} ACHIEVEMENTS UNLOCKED`}
+                        {selectedTier === 'all' ? 'NO ACHIEVEMENTS DETECTED' : `NO ${
+                          selectedTier === 'common' ? 'BRONZE' :
+                          selectedTier === 'uncommon' ? 'SILVER' :
+                          selectedTier === 'rare' ? 'EMERALD' :
+                          selectedTier === 'legendary' ? 'GOLD' : selectedTier.toUpperCase()
+                        } ACHIEVEMENTS UNLOCKED`}
                       </h3>
                       <p className="text-gray-400 mb-4 font-mono">
                         {selectedTier === 'all' 
                           ? 'Create mission logs to unlock achievements!' 
-                          : `Complete more activities to unlock ${selectedTier} achievements!`
+                          : `Complete more activities to unlock ${
+                            selectedTier === 'common' ? 'bronze' :
+                            selectedTier === 'uncommon' ? 'silver' :
+                            selectedTier === 'rare' ? 'emerald' :
+                            selectedTier === 'legendary' ? 'gold' : selectedTier
+                          } achievements!`
                         }
                       </p>
                     </div>
                   )}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Progress Summary - Moved below user badges */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ delay: 0.1 }}
+              className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative mb-6 rounded-lg bg-black/40 backdrop-blur-md"
+            >
+              <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+              
+              <div className="relative z-10">
+                <div className="border-b px-4 py-3 rounded-t-lg"
+                     style={{ 
+                       borderColor: 'white',
+                       backgroundColor: 'rgba(0, 0, 0, 0.6)'
+                     }}>
+                  <h3 className="text-lg font-mono font-bold text-white flex items-center">
+                    <Trophy className="mr-2" size={20} color="white" />
+                    BADGE METRICS
+                  </h3>
+                </div>
+                
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Badges Earned - No colors */}
+                    <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg bg-black/60">
+                      <div className="relative z-10">
+                        <CheckCircle size={20} className="text-white mx-auto mb-2" />
+                        <div className="text-xs font-mono text-gray-400 mb-1">BADGES EARNED</div>
+                        <div className="text-2xl font-mono font-bold text-white">
+                          {unlockedAchievements.length}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Badges In Progress - No colors */}
+                    <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg bg-black/60">
+                      <div className="relative z-10">
+                        <Target size={20} className="text-white mx-auto mb-2" />
+                        <div className="text-xs font-mono text-gray-400 mb-1">BADGES IN PROGRESS</div>
+                        <div className="text-2xl font-mono font-bold text-white">
+                          {progressMetrics.inProgressCount}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Badges Locked - No colors */}
+                    <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg bg-black/60">
+                      <div className="relative z-10">
+                        <Lock size={20} className="text-white mx-auto mb-2" />
+                        <div className="text-xs font-mono text-gray-400 mb-1">BADGES LOCKED</div>
+                        <div className="text-2xl font-mono font-bold text-white">
+                          {progressMetrics.lockedCount}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Completion Percentage - No colors */}
+                    <div className="border-2 border-white text-center p-4 relative transition-all duration-200 rounded-lg bg-black/60">
+                      <div className="relative z-10">
+                        <Trophy size={20} className="text-white mx-auto mb-2" />
+                        <div className="text-xs font-mono text-gray-400 mb-1">COMPLETION RATE</div>
+                        <div className="text-2xl font-mono font-bold text-white">
+                          {Math.round((unlockedAchievements.length / allAchievements.length) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -603,7 +611,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ delay: 0.1 }}
+              transition={{ delay: 0.15 }}
               className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg bg-black/40 backdrop-blur-md"
             >
               <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />

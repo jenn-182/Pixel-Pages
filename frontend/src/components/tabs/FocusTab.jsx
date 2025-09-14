@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, Square, Timer, Clock, Coffee, Brain, Zap, Target, BookOpen, Code } from 'lucide-react';
+import { Play, Pause, Square, Timer, Clock, Coffee, Brain, Zap, Target, BookOpen, Code, Star } from 'lucide-react';
 import { useFocusTimer } from '../../hooks/useFocusTimer';
 import CircularProgress from '../focus/CircularProgress';
 import SaveSessionModal from '../modals/SaveSessionModal';
@@ -31,7 +31,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
 
   const hexToRgb = (hex) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? 
+    return result ?
       `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
       '139, 92, 246';
   };
@@ -116,7 +116,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
   // Start timer with selected duration
   const handleStartTimer = () => {
     let finalDuration = selectedDuration;
-    
+
     if (selectedDuration === 'custom') {
       const customMinutes = parseInt(customDuration);
       if (customMinutes && customMinutes > 0) {
@@ -126,7 +126,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
         return;
       }
     }
-    
+
     if (finalDuration) {
       startTimer(finalDuration);
       setSelectedDuration(null);
@@ -139,7 +139,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
   const getTimerStatus = () => {
     if (!isActive) return { text: 'READY TO START', color: '#6B7280', icon: Timer };
     if (isPaused) return { text: 'PAUSED', color: '#F59E0B', icon: Pause };
-    if (isRunning) return { text: 'GRINDING SKILLS', color: tabColor, icon: Play };
+    if (isRunning) return { text: 'LEVELING UP SKILLS...', color: tabColor, icon: Play };
     return { text: 'READY', color: '#6B7280', icon: Timer };
   };
 
@@ -147,278 +147,328 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
   const StatusIcon = timerStatus.icon;
 
   return (
-    <div className="focus-tab-container p-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-mono text-3xl font-bold text-white mb-2 flex items-center gap-3">
-          <div 
-            className="w-6 h-6 border border-gray-600" 
-            style={{ backgroundColor: tabColor }}
-          />
-          GRIND TERMINAL
-        </h1>
-        <p className="text-gray-400 font-mono text-sm">
-          Focus timer to level up your skills and keep you on track.
-        </p>
+      <div className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 relative rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+
+        <div className="relative z-10 flex justify-between items-start">
+          <div>
+            <h1 className="font-mono text-3xl font-bold text-white mb-2">
+              FOCUS ARENA
+            </h1>
+            <p className="text-gray-400 font-mono text-sm">
+              Battle distractions and level up your productivity skills!
+            </p>
+          </div>
+
+          {/* XP Display */}
+          <div className="text-right">
+            <div className="text-2xl font-mono font-bold text-yellow-400 mb-1 flex items-center gap-2">
+              <Star className="text-yellow-400" size={20} />
+              {Math.floor(totalTimeSpent / 60)} XP
+            </div>
+            <div className="text-sm text-gray-400 font-mono">GRIND POINTS EARNED</div>
+          </div>
+        </div>
       </div>
 
-      {/* Main Timer Interface */}
+      {/* Main Battle Interface */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 relative mb-6"
-        style={{
-          borderColor: tabColor,
-          boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-        }}
+        className="border-2 border-white/30 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-lg bg-black/40 backdrop-blur-md"
       >
-        <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-             style={{ borderColor: tabColor }} />
-        
-        <div className="relative z-10 text-center">
-          {/* Timer Display */}
-          <div className="mb-8">
-            <CircularProgress
-              progress={progress}
-              size={220}
-              strokeWidth={16}
-              color={tabColor}
-              backgroundColor="#374151"
-            >
-              <div className="text-center">
-                <div className="text-4xl font-mono font-bold text-white mb-2">
-                  {isActive ? formatTime() : '00:00'}
-                </div>
-                {duration && (
-                  <div className="text-sm font-mono text-gray-400">
-                    / {duration} min
+        <div className="absolute inset-0 border-2 border-white opacity-5 pointer-events-none rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none rounded-lg" />
+
+        {/* Animated border effects for active timer */}
+        {isActive && (
+          <motion.div
+            className="absolute inset-0 border-2 rounded-lg pointer-events-none"
+            style={{
+              borderColor: isRunning ? '#FFFFFF' : '#F59E0B'
+            }}
+            animate={{
+              opacity: [0.3, 0.8, 0.3],
+              boxShadow: isRunning
+                ? ['0 0 10px #FFFFFF', '0 0 30px #FFFFFF', '0 0 10px #FFFFFF']
+                : ['0 0 10px #F59E0B', '0 0 30px #F59E0B', '0 0 10px #F59E0B']
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        )}
+
+        <div className="relative z-10 p-6 text-center">
+          {/* Epic Timer Display */}
+          <div className="mb-6">
+            <div className="relative inline-block">
+              <CircularProgress
+                progress={progress}
+                size={400}
+                strokeWidth={24}
+                color={isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'}
+                backgroundColor="#1F2937"
+              >
+                <div className="text-center">
+                  {/* Main Timer */}
+                  <div className="text-8xl font-mono font-bold text-white mb-4 tracking-wider">
+                    {isActive ? formatTime() : '00:00'}
                   </div>
-                )}
-              </div>
-            </CircularProgress>
+
+                  {/* Duration info */}
+                  {duration && (
+                    <div className="text-xl font-mono text-gray-400 mb-3">
+                      / {duration} min mission
+                    </div>
+                  )}
+
+                  {/* Status with icon */}
+                  <div className="flex items-center justify-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-full animate-pulse"
+                      style={{
+                        backgroundColor: isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'
+                      }}
+                    />
+                    <span
+                      className="text-sm font-mono font-bold tracking-wider"
+                      style={{
+                        color: isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'
+                      }}
+                    >
+                      {timerStatus.text}
+                    </span>
+                    <div
+                      className="w-3 h-3 rounded-full animate-pulse"
+                      style={{
+                        backgroundColor: isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'
+                      }}
+                    />
+                  </div>
+                </div>
+              </CircularProgress>
+
+              {/* Floating particles around timer when active */}
+              {isRunning && (
+                <>
+                  {[...Array(6)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-2 h-2 bg-white rounded-full"
+                      style={{
+                        top: '50%',
+                        left: '50%',
+                        originX: 0.5,
+                        originY: 0.5,
+                      }}
+                      animate={{
+                        x: [0, Math.cos((i * 60) * Math.PI / 180) * 220],
+                        y: [0, Math.sin((i * 60) * Math.PI / 180) * 220],
+                        opacity: [0, 1, 0],
+                        scale: [0, 1, 0]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: i * 0.5,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Timer Status */}
-          <div className="flex items-center justify-center gap-2 text-sm font-mono mb-6">
-            <StatusIcon size={16} style={{ color: timerStatus.color }} />
-            <span style={{ color: timerStatus.color }}>{timerStatus.text}</span>
-          </div>
-
-          {/* Duration Selection (when no active timer) */}
+          {/* Mission Selection (when no active timer) */}
           {!isActive && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6"
             >
-              <div className="text-sm font-mono text-gray-300 mb-4">SELECT DURATION:</div>
-              
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {[25, 90].map(minutes => (
-                  <button
-                    key={minutes}
-                    onClick={() => handleDurationSelect(minutes)}
-                    className={`p-4 border-2 transition-all duration-200 font-mono ${
-                      selectedDuration === minutes
-                        ? 'border-purple-400 bg-purple-500 bg-opacity-20'
-                        : 'border-gray-600 hover:border-gray-500'
-                    }`}
-                  >
-                    <div className="text-white font-bold">{minutes} MIN</div>
-                    <div className="text-xs text-gray-400">
-                      {minutes === 25 ? 'Quick Focus' : 'Deep Work'}
-                    </div>
-                  </button>
-                ))}
-                
-                <button
-                  onClick={() => handleDurationSelect('custom')}
-                  className={`p-4 border-2 transition-all duration-200 font-mono ${
-                    selectedDuration === 'custom'
-                      ? 'border-purple-400 bg-purple-500 bg-opacity-20'
-                      : 'border-gray-600 hover:border-gray-500'
-                  }`}
-                >
-                  <div className="text-white font-bold">CUSTOM</div>
-                  <div className="text-xs text-gray-400">Set Time</div>
-                </button>
+              <div className="text-lg font-mono font-bold text-white mb-4 text-center">
+                SELECT FOCUS TIMER
               </div>
 
-              {/* Custom Duration Input */}
-              {showCustomInput && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  className="mb-4"
+              {/* Quick Mission Buttons */}
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                {[
+                  { minutes: 25, name: 'POMODORO', color: '#FF1493', icon: Target },
+                  { minutes: 90, name: 'DEEP DIVE', color: '#8A2BE2', icon: Brain },
+                  { minutes: 15, name: 'QUICK', color: '#FFD700', icon: Zap },
+                  { minutes: 60, name: 'MARATHON', color: '#00FFFF', icon: Clock }
+                ].map(mission => {
+                  const IconComponent = mission.icon;
+                  return (
+                    <motion.button
+                      key={mission.minutes}
+                      onClick={() => handleDurationSelect(mission.minutes)}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="p-3 border-2 border-white rounded-lg transition-all duration-200 font-mono relative overflow-hidden bg-black/20 hover:bg-black/40"
+                      style={{
+                        boxShadow: selectedDuration === mission.minutes ? `0 0 20px ${mission.color}, 0 0 40px ${mission.color}` : 'none'
+                      }}
+                    >
+                      <div
+                        className={`absolute inset-0 transition-all duration-300 ${selectedDuration === mission.minutes
+                            ? 'opacity-30'
+                            : 'opacity-10 group-hover:opacity-20'
+                          }`}
+                        style={{
+                          background: `linear-gradient(135deg, ${mission.color}40, ${mission.color}20)`
+                        }}
+                      />
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-center mb-1">
+                          <IconComponent
+                            size={16}
+                            style={{ color: mission.color }}
+                          />
+                        </div>
+                        <div
+                          className="text-xs font-bold mb-1"
+                          style={{ color: mission.color }}
+                        >
+                          {mission.name}
+                        </div>
+                        <div className="text-sm font-bold text-white">{mission.minutes}m</div>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+
+              {/* Custom Mission Input */}
+              <div className="mb-4">
+                <button
+                  onClick={() => handleDurationSelect('custom')}
+                  className="w-full p-3 border-2 border-white rounded-lg transition-all duration-200 font-mono bg-black/20 hover:bg-black/40 relative overflow-hidden"
+                  style={{
+                    boxShadow: selectedDuration === 'custom' ? '0 0 20px #8B5CF6, 0 0 40px #8B5CF6' : 'none'
+                  }}
                 >
-                  <input
-                    type="number"
-                    placeholder="Enter minutes..."
-                    value={customDuration}
-                    onChange={(e) => setCustomDuration(e.target.value)}
-                    className="w-full p-3 bg-gray-900 border border-gray-600 text-white font-mono text-center focus:border-purple-400 focus:outline-none"
-                    min="1"
-                    max="240"
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 transition-all duration-300 ${selectedDuration === 'custom' ? 'opacity-30' : 'opacity-10 hover:opacity-20'
+                      }`}
                   />
-                </motion.div>
-              )}
+                  <div className="relative z-10">
+                    <div className="text-white font-bold text-sm">CUSTOM MISSION</div>
+                    <div className="text-xs text-gray-400">Set your own duration</div>
+                  </div>
+                </button>
+
+                {showCustomInput && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    className="mt-3"
+                  >
+                    <div className="flex gap-2 justify-center">
+                      <div className="flex flex-col items-center">
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={Math.floor(parseInt(customDuration) / 60) || ''}
+                          onChange={(e) => {
+                            const hours = parseInt(e.target.value) || 0;
+                            const minutes = parseInt(customDuration) % 60 || 0;
+                            setCustomDuration((hours * 60 + minutes).toString());
+                          }}
+                          className="w-16 p-2 bg-black/60 border-2 border-white/30 rounded-lg text-white font-mono text-center focus:border-white focus:outline-none backdrop-blur-sm"
+                          min="0"
+                          max="4"
+                        />
+                        <label className="text-xs text-gray-400 mt-1">HR</label>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <input
+                          type="number"
+                          placeholder="25"
+                          value={parseInt(customDuration) % 60 || ''}
+                          onChange={(e) => {
+                            const hours = Math.floor(parseInt(customDuration) / 60) || 0;
+                            const minutes = parseInt(e.target.value) || 0;
+                            setCustomDuration((hours * 60 + minutes).toString());
+                          }}
+                          className="w-16 p-2 bg-black/60 border-2 border-white/30 rounded-lg text-white font-mono text-center focus:border-white focus:outline-none backdrop-blur-sm"
+                          min="0"
+                          max="59"
+                        />
+                        <label className="text-xs text-gray-400 mt-1">MIN</label>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
           )}
 
-          {/* Timer Controls */}
-          <div className="flex items-center justify-center gap-4">
+          {/* Epic Battle Controls */}
+          <div className="flex items-center justify-center gap-6">
             {!isActive ? (
-              <button
+              <motion.button
                 onClick={handleStartTimer}
                 disabled={!selectedDuration}
-                className="bg-gray-900 border-2 px-8 py-4 relative group cursor-pointer transition-all duration-300 font-mono font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="border-2 border-white px-8 py-4 rounded-lg relative group cursor-pointer transition-all duration-300 font-mono font-bold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden bg-black/20 hover:bg-black/40"
                 style={{
-                  borderColor: tabColor,
-                  color: tabColor,
-                  boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+                  boxShadow: !selectedDuration ? 'none' : '0 0 20px #8B5CF6, 0 0 40px #8B5CF6'
                 }}
               >
-                <div className="flex items-center gap-2">
-                  <Play size={20} />
-                  <span>START GRINDING</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 group-hover:from-purple-600/40 group-hover:to-pink-600/40 transition-all duration-300" />
+                <div className="flex items-center gap-3 relative z-10 text-white">
+                  <Play size={24} />
+                  <span className="text-lg">BEGIN TIMER</span>
+                  <Zap size={24} />
                 </div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
-                     style={{ backgroundColor: tabColor }} />
-              </button>
+              </motion.button>
             ) : (
-              <div className="flex gap-3">
-                <button
+              <div className="flex gap-4">
+                <motion.button
                   onClick={isPaused ? resumeTimer : pauseTimer}
-                  className="bg-gray-900 border-2 px-6 py-3 relative group cursor-pointer transition-all duration-300 font-mono font-bold"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="border-2 border-white px-6 py-3 rounded-lg relative group cursor-pointer transition-all duration-300 font-mono font-bold bg-black/20 hover:bg-black/40"
                   style={{
-                    borderColor: tabColor,
-                    color: tabColor,
-                    boxShadow: `0 0 5px rgba(${tabColorRgb}, 0.2), 2px 2px 0px 0px rgba(0,0,0,1)`
+                    boxShadow: '0 0 20px #00FFFF, 0 0 40px #00FFFF'
                   }}
                 >
-                  <div className="flex items-center gap-2">
-                    {isPaused ? <Play size={16} /> : <Pause size={16} />}
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 group-hover:from-cyan-600/40 group-hover:to-blue-600/40 transition-all duration-300" />
+                  <div className="flex items-center gap-2 text-white relative z-10">
+                    {isPaused ? <Play size={20} /> : <Pause size={20} />}
                     <span>{isPaused ? 'RESUME' : 'PAUSE'}</span>
                   </div>
-                </button>
+                </motion.button>
 
-                <button
+                <motion.button
                   onClick={stopTimer}
-                  className="bg-gray-900 border-2 border-red-500 px-6 py-3 relative group cursor-pointer transition-all duration-300 font-mono font-bold text-red-500 hover:bg-red-500 hover:bg-opacity-10"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="border-2 border-white px-6 py-3 rounded-lg relative group cursor-pointer transition-all duration-300 font-mono font-bold bg-black/20 hover:bg-black/40"
+                  style={{
+                    boxShadow: '0 0 20px #FF1493, 0 0 40px #FF1493'
+                  }}
                 >
-                  <div className="flex items-center gap-2">
-                    <Square size={16} />
-                    <span>STOP</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-pink-600/20 group-hover:from-red-600/40 group-hover:to-pink-600/40 transition-all duration-300" />
+                  <div className="flex items-center gap-2 text-white relative z-10">
+                    <Square size={20} />
+                    <span>ABORT</span>
                   </div>
-                </button>
+                </motion.button>
               </div>
             )}
           </div>
         </div>
       </motion.div>
-
-      {/* Quick Start Templates */}
-      {!isActive && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 relative"
-          style={{
-            borderColor: tabColor,
-            boxShadow: `0 0 20px rgba(${tabColorRgb}, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)`
-          }}
-        >
-          <div className="absolute inset-0 border-2 opacity-30 animate-pulse pointer-events-none" 
-               style={{ borderColor: tabColor }} />
-          
-          <div className="relative z-10">
-            <h3 className="text-lg font-mono font-bold text-white mb-6 flex items-center gap-2">
-              <Zap size={20} style={{ color: tabColor }} />
-              QUICK GRIND TEMPLATES
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {quickStartTemplates.map(template => {
-                const IconComponent = template.icon;
-                return (
-                  <motion.button
-                    key={template.id}
-                    onClick={() => handleTemplateSelect(template)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`bg-gray-900 border-2 p-4 relative overflow-hidden transition-all duration-300 hover:shadow-lg group ${
-                      selectedDuration === template.duration
-                        ? 'border-purple-400 bg-purple-500 bg-opacity-20'
-                        : 'border-gray-600 hover:border-gray-500'
-                    }`}
-                    style={{
-                      boxShadow: selectedDuration === template.duration 
-                        ? `0 0 15px rgba(139, 92, 246, 0.3), 2px 2px 0px 0px rgba(0,0,0,1)`
-                        : '2px 2px 0px 0px rgba(0,0,0,1)'
-                    }}
-                  >
-                    {/* Gradient Background */}
-                    <div 
-                      className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-br ${template.gradient}`}
-                    />
-                    
-                    <div className="relative z-10 text-left">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div 
-                          className="w-10 h-10 border-2 border-gray-600 flex items-center justify-center group-hover:border-opacity-80 transition-colors"
-                          style={{ 
-                            backgroundColor: `${template.color}20`,
-                            borderColor: selectedDuration === template.duration ? template.color : '#4B5563'
-                          }}
-                        >
-                          <IconComponent 
-                            size={20} 
-                            style={{ color: template.color }}
-                          />
-                        </div>
-                        <div>
-                          <div className="font-mono font-bold text-white text-sm">
-                            {template.name}
-                          </div>
-                          <div className="text-xs text-gray-400 font-mono">
-                            {template.description}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        <div 
-                          className="inline-block px-2 py-1 text-xs font-mono font-bold border"
-                          style={{
-                            color: template.color,
-                            borderColor: selectedDuration === template.duration ? template.color : '#4B5563',
-                            backgroundColor: selectedDuration === template.duration ? `${template.color}20` : 'transparent'
-                          }}
-                        >
-                          {template.duration} MIN
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Hover effect */}
-                    <div 
-                      className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300"
-                      style={{ backgroundColor: template.color }}
-                    />
-                  </motion.button>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 text-center">
-              <div className="text-sm font-mono text-gray-400">
-                Click a template to select it, then hit START GRINDING
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
 
       {/* Save Session Modal */}
       <SaveSessionModal

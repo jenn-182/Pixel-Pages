@@ -302,13 +302,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
       <div className="flex h-full">
         {/* Left Sidebar - Operations (Toggleable) */}
         {showOperations && (
-          <motion.div
-            initial={{ x: -320 }}
-            animate={{ x: 0 }}
-            exit={{ x: -320 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-80 p-4"
-          >
+          <div className="w-80 p-4">
             <TaskListManager
               taskLists={taskLists}
               onCreateTaskList={handleCreateTaskList}
@@ -317,7 +311,7 @@ const TasksTab = ({ tabColor = '#0EA5E9' }) => {
               selectedTaskListId={selectedTaskListId}
               tabColor={tabColor}
             />
-          </motion.div>
+          </div>
         )}
 
         {/* Main Content */}
