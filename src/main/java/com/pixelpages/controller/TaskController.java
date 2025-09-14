@@ -22,13 +22,13 @@ public class TaskController {
     }
     
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<List<Task>> getAllTasks(@RequestParam(defaultValue = "Jroc_182") String username) {
         List<Task> tasks = taskService.getAllTasks(username);
         return ResponseEntity.ok(tasks);
     }
     
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody CreateTaskRequest request, @RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<Task> createTask(@RequestBody CreateTaskRequest request, @RequestParam(defaultValue = "Jroc_182") String username) {
         try {
             Task task = new Task();
             task.setTitle(request.getTitle());
@@ -59,7 +59,7 @@ public class TaskController {
     }
     
     @PutMapping("/{taskId}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody CreateTaskRequest request, @RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody CreateTaskRequest request, @RequestParam(defaultValue = "Jroc_182") String username) {
         try {
             Task task = new Task();
             task.setId(taskId);
@@ -92,7 +92,7 @@ public class TaskController {
     }
     
     @DeleteMapping("/{taskId}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId, @RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId, @RequestParam(defaultValue = "Jroc_182") String username) {
         taskService.deleteTask(taskId, username);
         return ResponseEntity.ok().build();
     }
@@ -106,14 +106,14 @@ public class TaskController {
     
     // Get overdue tasks
     @GetMapping("/overdue")
-    public ResponseEntity<List<Task>> getOverdueTasks(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<List<Task>> getOverdueTasks(@RequestParam(defaultValue = "Jroc_182") String username) {
         List<Task> tasks = taskService.getOverdueTasks(username);
         return ResponseEntity.ok(tasks);
     }
 
     // Get tasks due soon
     @GetMapping("/due-soon")
-    public ResponseEntity<List<Task>> getDueSoonTasks(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<List<Task>> getDueSoonTasks(@RequestParam(defaultValue = "Jroc_182") String username) {
         List<Task> tasks = taskService.getDueSoonTasks(username);
         return ResponseEntity.ok(tasks);
     }
@@ -121,7 +121,7 @@ public class TaskController {
     // Get tasks by list
     @GetMapping("/by-list")
     public ResponseEntity<List<Task>> getTasksByList(
-            @RequestParam(defaultValue = "user") String username,
+            @RequestParam(defaultValue = "Jroc_182") String username,
             @RequestParam(required = false) Long taskListId) {
         List<Task> tasks = taskService.getTasksByList(username, taskListId);
         return ResponseEntity.ok(tasks);

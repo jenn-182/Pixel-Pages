@@ -14,7 +14,7 @@ const useTasks = () => {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}?username=user`);
+      const response = await fetch(`${API_BASE}?username=Jroc_182`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch tasks');
@@ -34,7 +34,7 @@ const useTasks = () => {
   // Fetch task lists
   const fetchTaskLists = async () => {
     try {
-      const response = await fetch(`${TASK_LISTS_API}?username=user`);
+      const response = await fetch(`${TASK_LISTS_API}?username=Jroc_182`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch task lists');
@@ -50,7 +50,7 @@ const useTasks = () => {
   // Create new task
   const createTask = async (taskData) => {
     try {
-      const response = await fetch(`${API_BASE}?username=user`, {
+      const response = await fetch(`${API_BASE}?username=Jroc_182`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,8 +94,8 @@ const useTasks = () => {
         completed: updatedData.completed
       };
       
-      // ✅ FIX: Use API_BASE constant and 'user' instead of currentUser
-      const response = await fetch(`${API_BASE}/${taskId}?username=user`, {
+      // ✅ FIX: Use API_BASE constant and 'Jroc_182' instead of currentUser
+      const response = await fetch(`${API_BASE}/${taskId}?username=Jroc_182`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ const useTasks = () => {
   // Delete task
   const deleteTask = async (taskId) => {
     try {
-      const response = await fetch(`${API_BASE}/${taskId}?username=user`, {
+      const response = await fetch(`${API_BASE}/${taskId}?username=Jroc_182`, {
         method: 'DELETE',
       });
 
@@ -160,7 +160,7 @@ const useTasks = () => {
   // Get overdue tasks
   const getOverdueTasks = async () => {
     try {
-      const response = await fetch(`${API_BASE}/overdue?username=user`);
+      const response = await fetch(`${API_BASE}/overdue?username=Jroc_182`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch overdue tasks');
@@ -176,7 +176,7 @@ const useTasks = () => {
   // Get tasks due soon
   const getDueSoonTasks = async () => {
     try {
-      const response = await fetch(`${API_BASE}/due-soon?username=user`);
+      const response = await fetch(`${API_BASE}/due-soon?username=Jroc_182`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch tasks due soon');
@@ -197,7 +197,7 @@ const useTasks = () => {
   // Create task list
   const createTaskList = async (taskListData) => {
     try {
-      const response = await fetch(`${TASK_LISTS_API}?username=user`, {
+      const response = await fetch(`${TASK_LISTS_API}?username=Jroc_182`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ const useTasks = () => {
   // Delete task list
   const deleteTaskList = async (taskListId) => {
     try {
-      const response = await fetch(`${TASK_LISTS_API}/${taskListId}?username=user`, {
+      const response = await fetch(`${TASK_LISTS_API}/${taskListId}?username=Jroc_182`, {
         method: 'DELETE',
       });
 

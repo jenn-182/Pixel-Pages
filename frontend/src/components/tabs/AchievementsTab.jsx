@@ -2,12 +2,11 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, Zap, Crown, Lock, Shield, CheckCircle, Target, BarChart, TrendingUp, Award, Grid, List, ChevronDown, Settings, X, Calendar } from 'lucide-react';
 import { allAchievements, achievementsByTier, tierInfo } from '../../data/achievements';
-import achievementService from '../../services/achievementService';
 import AchievementBadge from '../ui/AchievementBadge';
 import apiService from '../../services/api'; 
 import backendAchievementService from '../../services/backendAchievementService';
 
-const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' }) => {
+const AchievementsTab = React.memo(({ username = 'Jroc_182', tabColor = '#F59E0B' }) => {
   const [selectedTier, setSelectedTier] = useState('all');
   const [achievementStats, setAchievementStats] = useState({});
   const [userStats, setUserStats] = useState({});
@@ -16,50 +15,82 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
   const [showLockedAchievements, setShowLockedAchievements] = useState(false);
   const [showInProgressSection, setShowInProgressSection] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // Add direct state for achievement arrays
+  const [unlockedAchievements, setUnlockedAchievements] = useState([]);
+  const [inProgressAchievements, setInProgressAchievements] = useState([]);
+  const [lockedAchievements, setLockedAchievements] = useState([]);
 
-  useEffect(() => {
-    loadAchievementData();
-  }, [username]);
-
+  // Load achievement data from backend only (NO localStorage)
   const loadAchievementData = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('🔄 Loading achievement data for:', username);
+      console.log('� Loading achievement data from backend for:', username);
       
-      // Load from backend (skip the auto-trigger for now)
+      // Load from backend only
       await backendAchievementService.loadData(username);
+      
+      console.log('✅ Backend service loaded:', {
+        allAchievements: backendAchievementService.allAchievements?.length || 0,
+        playerAchievements: backendAchievementService.playerAchievements?.length || 0,
+        playerStats: backendAchievementService.playerStats
+      });
       
       // Get stats from backend service
       const stats = backendAchievementService.getStats();
       setAchievementStats(stats);
       
+      // Set achievement data directly in state
+      const unlocked = backendAchievementService.getUnlockedAchievements() || [];
+      const inProgress = backendAchievementService.getInProgressAchievements() || [];
+      const locked = backendAchievementService.getLockedAchievements() || [];
+      
+      console.log('🔍 DIRECT: Setting achievement data in state:', {
+        unlocked: unlocked.length,
+        inProgress: inProgress.length,
+        locked: locked.length
+      });
+      
+      setUnlockedAchievements(unlocked);
+      setInProgressAchievements(inProgress);
+      setLockedAchievements(locked);
+      
       // Set user stats for progress calculations
       setUserStats({
         totalNotes: backendAchievementService.playerStats.totalNotes || 0,
         totalWords: backendAchievementService.playerStats.totalWords || 0,
-        totalTasks: backendAchievementService.playerStats.completedAchievements || 0,
+        totalTasks: backendAchievementService.playerStats.completedTasks || 0,
         totalSessions: backendAchievementService.playerStats.totalSessions || 0,
         totalFocusTime: backendAchievementService.playerStats.totalFocusTime || 0,
         totalXP: backendAchievementService.playerStats.totalXp || 0
       });
 
-      console.log('🎯 Achievement data loaded (ACHIEVEMENTS TAB):', {
+      console.log('✅ Achievement data loaded from backend:', {
         stats,
         unlocked: backendAchievementService.getUnlockedAchievements().length,
-        inProgress: backendAchievementService.getInProgressAchievements().length,
-        unlockedAchievementIds: backendAchievementService.getUnlockedAchievements(),
-        backendServiceStats: backendAchievementService.getStats()
+        inProgress: backendAchievementService.getInProgressAchievements().length
       });
-
+      
     } catch (error) {
-      console.error('Failed to load achievements:', error);
-      // Fallback to local service
-      const localStats = achievementService.getStats();
-      setAchievementStats(localStats);
+      console.error('❌ Failed to load achievement data:', error);
+      // Set default stats on error
+      setAchievementStats({
+        completedAchievements: 0,
+        totalAchievements: 0,
+        totalXp: 0,
+        completionPercentage: 0
+      });
     } finally {
       setLoading(false);
+      // Force a re-render by updating a timestamp
+      setAchievementStats(prev => ({...prev, lastUpdated: Date.now()}));
     }
   }, [username]);
+
+  // Initialize data load (NO localStorage cleanup needed)
+  useEffect(() => {
+    loadAchievementData();
+  }, [loadAchievementData]);
 
   // Add this useEffect after your existing useEffect:
   useEffect(() => {
@@ -113,20 +144,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
     });
   }, [getRarityOrder]);
 
-  // Memoize achievement arrays
-  const unlockedAchievements = useMemo(() => 
-    backendAchievementService.getUnlockedAchievements() || []
-  , [achievementStats]);
-  
-  const lockedAchievements = useMemo(() => 
-    backendAchievementService.getLockedAchievements() || []
-  , [achievementStats]);
-
-  const inProgressAchievements = useMemo(() => {
-    const achievements = backendAchievementService.getInProgressAchievements() || [];
-    return sortAchievements(achievements, 'rarity'); // Default sort by rarity
-  }, [achievementStats, sortAchievements]);
-
+  // Use the state arrays directly instead of useMemo
   const filteredAchievements = useMemo(() => {
     const filtered = selectedTier === 'all' ? unlockedAchievements : unlockedAchievements.filter(a => a.tier === selectedTier);
     return sortAchievements(filtered, 'rarity'); // Default sort by rarity
@@ -137,6 +155,10 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
     return lockedAchievements.filter(a => a.tier === selectedTier);
   }, [lockedAchievements, selectedTier]);
 
+  const sortedInProgressAchievements = useMemo(() => {
+    return sortAchievements(inProgressAchievements, 'rarity'); // Default sort by rarity
+  }, [inProgressAchievements, sortAchievements]);
+
   // Memoize progress metrics
   const progressMetrics = useMemo(() => ({
     inProgressCount: inProgressAchievements.length,
@@ -145,7 +167,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
 
   // Memoize click handler
   const handleBadgeClick = useCallback((achievement, event) => {
-    setSelectedAchievement(achievement); // Remove clickPosition
+    setSelectedAchievement(achievement);
   }, []);
 
   // Performance-optimized Achievement Modal Component
@@ -392,23 +414,23 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
           </div>
           
           <motion.button
-          onClick={() => setShowLockedAchievements(!showLockedAchievements)}
-          className="bg-black border-2 border-white/60 px-4 py-2 font-mono font-bold transition-all duration-200 flex items-center gap-2 text-white hover:scale-105"
-          style={{
-            boxShadow: `2px 2px 0px 0px rgba(0,0,0,1)`
-          }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Lock size={16} />
-          {showLockedAchievements ? 'SHOW MY BADGES' : 'VIEW LOCKED BADGES'} 
-          <motion.div
-            animate={{ rotate: showLockedAchievements ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
+            onClick={() => setShowLockedAchievements(!showLockedAchievements)}
+            className="bg-black border-2 border-white/60 px-4 py-2 font-mono font-bold transition-all duration-200 flex items-center gap-2 text-white hover:scale-105"
+            style={{
+              boxShadow: `2px 2px 0px 0px rgba(0,0,0,1)`
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <ChevronDown size={16} />
-          </motion.div>
-        </motion.button>
+            <Lock size={16} />
+            {showLockedAchievements ? 'SHOW MY BADGES' : 'VIEW LOCKED BADGES'} 
+            <motion.div
+              animate={{ rotate: showLockedAchievements ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown size={16} />
+            </motion.div>
+          </motion.button>
         </div>
       </div>
 
@@ -436,7 +458,6 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-mono font-bold text-white flex items-center">
                       <Award className="mr-2" size={20} color="white" />
-                      {/*{username.toUpperCase()}'S BADGES*/}
                       JROC_182's BADGES
                     </h3>
                     
@@ -655,7 +676,7 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
                       <div className="p-4">
                         {inProgressAchievements.length > 0 ? (
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            {inProgressAchievements.map((achievement, index) => (
+                            {sortedInProgressAchievements.map((achievement, index) => (
                               <MemoizedAchievementBadge
                                 key={achievement.id}
                                 achievement={achievement}
@@ -754,29 +775,6 @@ const AchievementsTab = React.memo(({ username = 'user', tabColor = '#F59E0B' })
           />
         )}
       </AnimatePresence>
-{/* 
-      CLEAN debug section
-      <div className="mb-4 p-4 bg-gray-900 border border-gray-600">
-        <h3 className="text-gray-300 font-mono font-bold mb-2">🔍 DEBUG STATUS:</h3>
-        <div className="text-gray-400 font-mono text-sm space-y-1">
-          <div>Backend loaded: {backendAchievementService.loaded ? 'YES' : 'NO'}</div>
-          <div>Total achievements: {backendAchievementService.allAchievements.length}</div>
-          <div>Player achievements: {backendAchievementService.playerAchievements.length}</div>
-          <div>Unlocked: {backendAchievementService.getUnlockedAchievements().length}</div>
-          <div>In progress: {backendAchievementService.getInProgressAchievements().length}</div>
-          <div>Locked: {backendAchievementService.getLockedAchievements().length}</div>
-        </div>
-        
-        <button
-          onClick={() => {
-            console.log('🔍 Sample player achievement:', backendAchievementService.playerAchievements[0]);
-            console.log('🔍 First 3 achievements:', backendAchievementService.allAchievements.slice(0, 3));
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 font-mono text-sm mt-2"
-        >
-          LOG SAMPLE DATA
-        </button>
-      </div> */}
     </div>
   );
 });

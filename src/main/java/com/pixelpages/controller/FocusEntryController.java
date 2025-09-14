@@ -32,7 +32,7 @@ public class FocusEntryController {
     // GET /api/focus/entries?username=user&sessionId=123&date=2024-01-01
     @GetMapping
     public ResponseEntity<List<FocusEntry>> getFocusEntries(
-            @RequestParam String username,
+            @RequestParam(defaultValue = "Jroc_182") String username,
             @RequestParam(required = false) Long sessionId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -178,7 +178,7 @@ public class FocusEntryController {
     // GET /api/focus/entries/stats?username=user&date=2024-01-01
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getEntryStats(
-            @RequestParam String username,
+            @RequestParam(defaultValue = "Jroc_182") String username,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         
         try {

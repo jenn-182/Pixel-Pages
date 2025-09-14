@@ -208,12 +208,18 @@ public class AchievementService {
         try {
             // Fix: Use long instead of int to match repository return type
             long completedCount = taskRepository.countByUsernameAndCompleted(username, true);
+            long allTasksCount = taskRepository.countByUsername(username);
             
-            updateProgress(username, "task_rookie", (int)completedCount);
-            updateProgress(username, "mission_apprentice", (int)completedCount);
-            updateProgress(username, "quest_journeyman", (int)completedCount);
+            // Use correct achievement IDs from database
+            updateProgress(username, "task_rookie", (int)completedCount);           // 1 task
+            updateProgress(username, "daily_warrior", (int)completedCount);         // 3 tasks
+            updateProgress(username, "task_creator", (int)allTasksCount);           // 5 tasks created
+            updateProgress(username, "mission_commander", (int)completedCount);     // 15 tasks
+            updateProgress(username, "quest_conqueror", (int)completedCount);       // 50 tasks
+            updateProgress(username, "mission_emperor", (int)completedCount);       // 200 tasks
+            updateProgress(username, "legendary_executor", (int)completedCount);    // 500 tasks
             
-            System.out.println("✅ Task tracking: " + username + " has completed " + completedCount + " tasks");
+            System.out.println("✅ Task tracking: " + username + " has completed " + completedCount + " tasks, created " + allTasksCount + " total");
             
         } catch (Exception e) {
             System.err.println("Error tracking task completion: " + e.getMessage());
@@ -227,14 +233,18 @@ public class AchievementService {
         
         try {
             int sessionCount = getFocusSessionCountForUser(username);
+            int totalFocusMinutes = getTotalFocusMinutesForUser(username);
             
-            // Update focus time achievements
-            updateProgress(username, "focused_initiate", sessionCount);
-            updateProgress(username, "concentration_cadet", sessionCount);
-            updateProgress(username, "hour_apprentice", totalMinutes);
-            updateProgress(username, "steady_studier", totalMinutes);
+            // Use correct achievement IDs from database
+            updateProgress(username, "focused_initiate", sessionCount);              // 1 session
+            updateProgress(username, "hour_apprentice", totalFocusMinutes);          // 60 minutes total
+            updateProgress(username, "dedication_keeper", totalFocusMinutes);        // 300 minutes total
+            updateProgress(username, "concentration_king", sessionCount);            // 50 sessions
+            updateProgress(username, "marathon_mind", totalFocusMinutes);            // 1200 minutes total
+            updateProgress(username, "focus_legend", sessionCount);                  // 200 sessions
+            updateProgress(username, "time_lord", totalFocusMinutes);                // 6000 minutes total
             
-            System.out.println("🎯 Focus tracking: " + username + " - " + totalMinutes + " mins, " + sessionCount + " sessions");
+            System.out.println("🎯 Focus tracking: " + username + " - " + totalMinutes + " mins this session, " + totalFocusMinutes + " total mins, " + sessionCount + " sessions");
             
         } catch (Exception e) {
             System.err.println("Error tracking focus session: " + e.getMessage());
@@ -666,6 +676,174 @@ public class AchievementService {
             System.out.println("✅ Updated progress for all achievements for: " + username);
         } catch (Exception e) {
             System.err.println("Error updating all progress: " + e.getMessage());
+        }
+    }
+    
+    // ===============================
+    // BACKEND-ONLY METHODS (NEW)
+    // ===============================
+    
+    /**
+     * Get all unlocked achievement IDs for a user (DATABASE ONLY)
+     */
+    public List<String> getUnlockedAchievements(String username) {
+        try {
+            List<PlayerAchievement> unlockedAchievements = playerAchievementRepository
+                .findByUsernameAndUnlocked(username, true);
+            return unlockedAchievements.stream()
+                .map(PlayerAchievement::getAchievementId)
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error getting unlocked achievements: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
+     * Unlock a new achievement for a user (DATABASE ONLY)
+     */
+    @Transactional
+    public boolean unlockAchievement(String username, String achievementId, LocalDateTime unlockedAt) {
+        try {
+            // Check if already unlocked
+            Optional<PlayerAchievement> existing = playerAchievementRepository
+                .findByUsernameAndAchievementId(username, achievementId);
+            
+            if (existing.isPresent() && existing.get().getUnlocked()) {
+                return false; // Already unlocked
+            }
+            
+            // Create or update player achievement
+            PlayerAchievement playerAchievement = existing.orElse(new PlayerAchievement());
+            playerAchievement.setUsername(username);
+            playerAchievement.setAchievementId(achievementId);
+            playerAchievement.setUnlocked(true);
+            playerAchievement.setUnlockedAt(LocalDateTime.now());
+            
+            // Set progress to target (achievement completed)
+            Achievement achievement = achievementRepository.findById(achievementId).orElse(null);
+            if (achievement != null) {
+                playerAchievement.setProgress(achievement.getRequirementTarget());
+            }
+            
+            playerAchievementRepository.save(playerAchievement);
+            System.out.println("✅ Unlocked achievement: " + achievementId + " for user: " + username);
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("Error unlocking achievement: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Calculate and get user stats (DATABASE ONLY)
+     */
+    public Map<String, Object> calculateAndGetUserStats(String username) {
+        try {
+            Map<String, Object> stats = new HashMap<>();
+            
+            // Get total achievements
+            long totalAchievements = achievementRepository.count();
+            
+            // Get unlocked achievements
+            List<PlayerAchievement> unlockedAchievements = playerAchievementRepository
+                .findByUsernameAndUnlocked(username, true);
+            long completedAchievements = unlockedAchievements.size();
+            
+            // Calculate total XP from unlocked achievements
+            int totalXp = 0;
+            for (PlayerAchievement pa : unlockedAchievements) {
+                Achievement achievement = achievementRepository.findById(pa.getAchievementId()).orElse(null);
+                if (achievement != null) {
+                    totalXp += achievement.getXpReward();
+                }
+            }
+            
+            // Calculate completion percentage
+            double completionPercentage = totalAchievements > 0 ? 
+                (double) completedAchievements / totalAchievements * 100 : 0.0;
+            
+            stats.put("completedAchievements", completedAchievements);
+            stats.put("totalAchievements", totalAchievements);
+            stats.put("totalXp", totalXp);
+            stats.put("completionPercentage", completionPercentage);
+            
+            return stats;
+            
+        } catch (Exception e) {
+            System.err.println("Error calculating user stats: " + e.getMessage());
+            return Map.of(
+                "completedAchievements", 0,
+                "totalAchievements", 0,
+                "totalXp", 0,
+                "completionPercentage", 0.0
+            );
+        }
+    }
+    
+    /**
+     * Recalculate and check all achievements for a user (DATABASE ONLY)
+     */
+    @Transactional
+    public List<String> recalculateAllAchievements(String username) {
+        List<String> newlyUnlocked = new ArrayList<>();
+        
+        try {
+            System.out.println("🔄 Recalculating all achievements for: " + username);
+            
+            // Ensure player achievements are initialized
+            ensurePlayerAchievementsInitialized(username);
+            
+            // Get all achievements
+            List<Achievement> allAchievements = achievementRepository.findAll();
+            
+            for (Achievement achievement : allAchievements) {
+                try {
+                    // Check current progress
+                    int currentProgress = getCurrentProgressForAchievement(username, achievement);
+                    
+                    // Update progress
+                    updateProgress(username, achievement.getId(), currentProgress);
+                    
+                    // Check if should be unlocked
+                    if (currentProgress >= achievement.getRequirementTarget()) {
+                        boolean wasUnlocked = unlockAchievement(username, achievement.getId(), null);
+                        if (wasUnlocked) {
+                            newlyUnlocked.add(achievement.getId());
+                        }
+                    }
+                    
+                } catch (Exception e) {
+                    System.err.println("Error recalculating achievement " + achievement.getId() + ": " + e.getMessage());
+                }
+            }
+            
+            System.out.println("✅ Recalculated achievements. Newly unlocked: " + newlyUnlocked.size());
+            return newlyUnlocked;
+            
+        } catch (Exception e) {
+            System.err.println("Error recalculating achievements: " + e.getMessage());
+            return newlyUnlocked;
+        }
+    }
+    
+    /**
+     * Reset all achievements for a user (DATABASE ONLY - for testing)
+     */
+    @Transactional
+    public void resetUserAchievements(String username) {
+        try {
+            System.out.println("🔄 Resetting all achievements for: " + username);
+            
+            // Delete all player achievements for this user
+            List<PlayerAchievement> userAchievements = playerAchievementRepository.findByUsername(username);
+            playerAchievementRepository.deleteAll(userAchievements);
+            
+            System.out.println("✅ Reset " + userAchievements.size() + " achievements for: " + username);
+            
+        } catch (Exception e) {
+            System.err.println("Error resetting achievements: " + e.getMessage());
         }
     }
 }

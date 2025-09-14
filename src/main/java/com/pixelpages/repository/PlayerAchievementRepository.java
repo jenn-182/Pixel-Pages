@@ -33,6 +33,17 @@ public interface PlayerAchievementRepository extends JpaRepository<PlayerAchieve
     @Query("SELECT COALESCE(SUM(a.xpReward), 0) FROM PlayerAchievement pa JOIN Achievement a ON pa.achievementId = a.id WHERE pa.username = :username AND pa.completed = true")
     int getTotalXpByUsername(@Param("username") String username);
 
+    // Find unlocked achievements for a user
+    List<PlayerAchievement> findByUsernameAndUnlocked(String username, boolean unlocked);
+    
+    // Count unlocked achievements for a user
+    @Query("SELECT COUNT(pa) FROM PlayerAchievement pa WHERE pa.username = :username AND pa.unlocked = true")
+    long countUnlockedByUsername(@Param("username") String username);
+    
+    // Get total XP earned from unlocked achievements
+    @Query("SELECT COALESCE(SUM(a.xpReward), 0) FROM PlayerAchievement pa JOIN Achievement a ON pa.achievementId = a.id WHERE pa.username = :username AND pa.unlocked = true")
+    int getTotalXpByUnlockedUsername(@Param("username") String username);
+
     @Query("SELECT MAX(p.id) FROM PlayerAchievement p")
     Optional<Integer> findMaxId();
 }

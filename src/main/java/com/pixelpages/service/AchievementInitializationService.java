@@ -2,6 +2,7 @@ package com.pixelpages.service;
 
 import com.pixelpages.model.Achievement;
 import com.pixelpages.repository.AchievementRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -326,5 +327,39 @@ public class AchievementInitializationService {
             e.printStackTrace();
             throw e;
         }
+    }
+    
+    // Add achievement calculation for test users when achievements are initialized
+    @Autowired
+    private AchievementService achievementService;
+    
+    @PostConstruct
+    public void calculateTestUserAchievements() {
+        // Wait a bit for achievement initialization to complete
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000); // Wait 3 seconds for initialization
+                System.out.println("🏆 Calculating achievements for test users...");
+                
+                // Calculate achievements for common test usernames
+                String[] testUsers = {"user", "jenn", "test", "admin", "Jroc_182"};
+                
+                for (String username : testUsers) {
+                    try {
+                        List<String> newlyUnlocked = achievementService.recalculateAllAchievements(username);
+                        if (newlyUnlocked.size() > 0) {
+                            System.out.println("✅ User '" + username + "' unlocked " + newlyUnlocked.size() + " achievements");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Error calculating achievements for " + username + ": " + e.getMessage());
+                    }
+                }
+                
+                System.out.println("🎯 Achievement calculation complete!");
+                
+            } catch (InterruptedException e) {
+                System.err.println("Achievement calculation thread interrupted");
+            }
+        }).start();
     }
 }

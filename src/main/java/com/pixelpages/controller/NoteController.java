@@ -25,7 +25,7 @@ public class NoteController {
     // Get all notes for user
     @GetMapping
     @CrossOrigin(origins = "http://localhost:3000") // ✅ ADD THIS
-    public List<Note> getAllNotes(@RequestParam(defaultValue = "user") String username) {
+    public List<Note> getAllNotes(@RequestParam(defaultValue = "Jroc_182") String username) {
         return noteService.getAllNotes(username);
     }
 
@@ -81,7 +81,7 @@ public class NoteController {
     @PostMapping
     @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<Note> createNote(@RequestBody CreateNoteRequest request, 
-                                     @RequestParam(defaultValue = "user") String username) {
+                                     @RequestParam(defaultValue = "Jroc_182") String username) {
         try {
             System.out.println("📝 Creating note: " + request.getTitle() + " for user: " + username);
             
@@ -159,21 +159,21 @@ public class NoteController {
     @GetMapping("/search")
     public List<Note> searchNotes(
             @RequestParam String query,
-            @RequestParam(defaultValue = "user") String username) {
+            @RequestParam(defaultValue = "Jroc_182") String username) {
         return noteService.searchNotes(username, query);
     }
 
     // Get notes in folder
     @GetMapping("/folder/{folderId}")
     public List<Note> getNotesInFolder(@PathVariable Long folderId, 
-                                      @RequestParam(defaultValue = "user") String username) {
+                                      @RequestParam(defaultValue = "Jroc_182") String username) {
         return noteService.getNotesInFolder(folderId, username);
     }
 
     // Get notes in notebook
     @GetMapping("/notebook/{notebookId}")
     public List<Note> getNotesInNotebook(@PathVariable Long notebookId,
-                                        @RequestParam(defaultValue = "user") String username) {
+                                        @RequestParam(defaultValue = "Jroc_182") String username) {
         return noteService.getNotesInNotebook(notebookId, username);
     }
 
@@ -233,7 +233,7 @@ public class NoteController {
 
     // EXPORT ALL NOTES FOR USER
     @GetMapping("/export/all")
-    public ResponseEntity<String> exportAllNotes(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<String> exportAllNotes(@RequestParam(defaultValue = "Jroc_182") String username) {
         try {
             System.out.println("=== EXPORT ALL NOTES DEBUG ===");
             System.out.println("Exporting all notes for user: " + username);

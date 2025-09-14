@@ -8,7 +8,7 @@ import { usePlayer } from '../../hooks/usePlayer';
 import useNotes from '../../hooks/useNotes';
 import useTasks from '../../hooks/useTasks';
 
-const ProfileTab = ({ username = 'user', tabColor = '#A78BFA' }) => {
+const ProfileTab = ({ username = 'Jroc_182', tabColor = '#A78BFA' }) => { // Changed default
   const { player } = usePlayer();
   const { notes } = useNotes();
   const { tasks, taskLists } = useTasks();

@@ -327,7 +327,7 @@ const apiService = {
     return await response.json();
   },
 
-  // Add this method:
+  // Achievement-related methods
   async getAchievements(username) {
     try {
       const response = await fetch(`${API_BASE}/achievements?username=${username || 'user'}`);
@@ -348,12 +348,81 @@ const apiService = {
     }
   },
 
+  async getAllAchievements() {
+    try {
+      const response = await fetch(`${API_BASE}/achievements`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch all achievements:', error);
+      // Return empty array as fallback
+      return [];
+    }
+  },
+
+  async getPlayerAchievements(username = 'Jroc_182') {
+    try {
+      const url = `${API_BASE}/achievements/player/${username}`;
+      console.log('🌐 API: Calling getPlayerAchievements URL:', url);
+      
+      const response = await fetch(url);
+      console.log('🌐 API: getPlayerAchievements response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('🌐 API: getPlayerAchievements parsed data:', {
+        type: typeof data,
+        isArray: Array.isArray(data),
+        length: data?.length,
+        firstItem: data?.[0]
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('🌐 API: Failed to fetch player achievements:', error);
+      // Return empty array as fallback
+      return [];
+    }
+  },
+
+  async getAchievementPlayerStats(username = 'Jroc_182') {
+    try {
+      const url = `${API_BASE}/achievements/player/${username}/stats`;
+      console.log('🌐 API: Calling getAchievementPlayerStats URL:', url);
+      
+      const response = await fetch(url);
+      console.log('🌐 API: getAchievementPlayerStats response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('🌐 API: getAchievementPlayerStats parsed data:', {
+        type: typeof data,
+        keys: Object.keys(data || {}),
+        data: data
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('🌐 API: Failed to fetch achievement player stats:', error);
+      // Return empty object as fallback
+      return {};
+    }
+  },
+
   // UPDATE the getPlayerStats function:
-  async getPlayerStats(username = 'user') {
+  async getPlayerStats(username = 'Jroc_182') { // Changed default
     try {
       if (!username) {
         console.warn('No username provided for player stats, using default');
-        username = 'user';
+        username = 'Jroc_182'; // Changed default
       }
       
       const response = await fetch(`${API_BASE}/players/${username}`);
@@ -367,198 +436,12 @@ const apiService = {
     }
   },
 
-  // =================== FOCUS CATEGORIES API ===================
-  
-  // Save focus session with category
-  async saveFocusSessionWithCategory(sessionData) {
-    const response = await fetch(`${API_BASE}/focus/sessions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...sessionData,
-        // Ensure category is included in the session data
-        category: sessionData.category || 'OTHER'
-      }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
-  },
-
-  // Get categories with XP totals
-  async getFocusCategories(username) {
-    try {
-      // First try to get from backend
-      const response = await fetch(`${API_BASE}/focus/sessions/stats?username=${username}`);
-      if (!response.ok) {
-        throw new Error('Backend not available');
-      }
-      
-      const stats = await response.json();
-      
-      // Convert backend stats to category format
-      const categories = [];
-      if (stats.categoryBreakdown) {
-        Object.entries(stats.categoryBreakdown).forEach(([categoryName, minutes]) => {
-          categories.push({
-            id: categoryName.toLowerCase(),
-            name: categoryName,
-            xp: minutes,
-            iconName: this.getCategoryIcon(categoryName)
-          });
-        });
-      }
-      
-      return categories;
-    } catch (error) {
-      console.warn('Using localStorage categories as fallback');
-      // Fallback to localStorage
-      const saved = localStorage.getItem('focusCategories');
-      return saved ? JSON.parse(saved) : [];
-    }
-  },
-
-  // Helper method to get icon for category
-  getCategoryIcon(categoryName) {
-    const iconMap = {
-      // NEW 9 Default Branches
-      'SCHOLAR': 'BookOpen',      // Scholar (Study)
-      'PROFESSION': 'Briefcase',  // Profession (Work)
-      'ARTISAN': 'Palette',       // Artisan (Creating)
-      'SCRIBE': 'PenTool',        // Scribe (Writing)
-      'PROGRAMMING': 'Code',      // Programming (Coding)
-      'LITERACY': 'Target',       // Literacy (Reading)
-      'STRATEGIST': 'Calendar',   // Strategist (Planning)
-      'MINDFULNESS': 'Heart',     // Mindfulness (Rest)
-      'KNOWLEDGE': 'Search',      // Knowledge (Researching)
-      
-      // Legacy mappings (for backward compatibility)
-      'STUDY': 'BookOpen',
-      'WORK': 'Briefcase',
-      'LEARNING': 'BookOpen',
-      'CODE': 'Code',
-      'CREATE': 'Palette',
-      'CREATIVE': 'Palette',
-      'PERSONAL': 'User',
-      'HEALTH': 'User',
-      'OTHER': 'User'
-    };
-    return iconMap[categoryName.toUpperCase()] || 'User';
-  },
-
-  // =================== ACHIEVEMENTS API ===================
-  
-  // Get all achievements  
-  async getAllAchievements() {
-    try {
-      const response = await fetch(`${API_BASE}/achievements`);
-      if (!response.ok) throw new Error('Failed to fetch achievements');
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching achievements:', error);
-      return [];
-    }
-  },
-
-  // Get player achievements with progress
-  async getPlayerAchievements(username) {
-    if (!username || username === 'undefined') {
-      console.log("No username provided for player achievements");
-      return [];
-    }
-    
-    try {
-      const response = await fetch(`${API_BASE}/achievements/player/${username}`);
-      if (!response.ok) throw new Error('Failed to fetch player achievements');
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching player achievements:', error);
-      return [];
-    }
-  },
-
-  // Get achievement player stats
-  async getAchievementPlayerStats(username) {
-    if (!username || username === 'undefined') {
-      console.log("No username provided for achievement player stats");
-      return {
-        completedAchievements: 0,
-        totalAchievements: 0,
-        totalXp: 0,
-        completionPercentage: 0.0
-      };
-    }
-    
-    try {
-      const response = await fetch(`${API_BASE}/achievements/player/${username}/stats`);
-      if (!response.ok) throw new Error('Failed to fetch achievement player stats');
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching achievement player stats:', error);
-      return {
-        completedAchievements: 0,
-        totalAchievements: 0,
-        totalXp: 0,
-        completionPercentage: 0.0
-      };
-    }
-  },
-
-  // Update achievement progress
-  async updateAchievementProgress(username, achievementId, progress) {
-    try {
-      const response = await fetch(`${API_BASE}/achievements/player/${username}/progress`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          achievementId: achievementId,
-          progress: progress
-        })
-      });
-      if (!response.ok) throw new Error('Failed to update achievement progress');
-      return await response.text();
-    } catch (error) {
-      console.error('Error updating achievement progress:', error);
-      throw error;
-    }
-  },
-
-  // Populate test achievement data
-  async populateTestAchievements(username) {
-    try {
-      const response = await fetch(`${API_BASE}/achievements/test/populate/${username}`, {
-        method: 'POST'
-      });
-      if (!response.ok) throw new Error('Failed to populate test achievements');
-      return await response.text();
-    } catch (error) {
-      console.error('Error populating test achievements:', error);
-      throw error;
-    }
-  },
-
-  // Add this method to your api.js if it's missing:
-  async checkAllAchievements(username) {
-    const response = await fetch(`${API_BASE}/achievements/player/${username}/check`, {
-      method: 'POST'
-    });
-    if (!response.ok) throw new Error('Failed to check achievements');
-    return response.text();
-  },
-
-  // ADD this method to your apiService object:
-
-  async updateTask(taskId, taskData, username = 'user') {
+  async updateTask(taskId, taskData, username = 'Jroc_182') { // Changed default
     const requestData = {
       title: taskData.title,
       description: taskData.description,
       priority: taskData.priority,
-      dueDate: taskData.dueDate, // YYYY-MM-DD format
+      dueDate: taskData.dueDate,
       tags: taskData.tags,
       taskListId: taskData.taskListId,
       completed: taskData.completed

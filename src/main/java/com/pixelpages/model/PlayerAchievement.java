@@ -20,6 +20,9 @@ public class PlayerAchievement {
     @Column(name = "completed", nullable = false)
     private boolean completed = false;
     
+    @Column(name = "unlocked", nullable = false)
+    private boolean unlocked = false;
+    
     @Column(name = "progress")
     private int progress = 0;
     
@@ -113,4 +116,10 @@ public class PlayerAchievement {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public boolean getUnlocked() { return unlocked; }
+    public void setUnlocked(boolean unlocked) { 
+        this.unlocked = unlocked;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

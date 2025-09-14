@@ -3,7 +3,7 @@ import  apiService  from '../services/api';
 
 export const usePlayer = () => {
   const [playerStats, setPlayerStats] = useState({
-    username: 'PixelAdventurer',
+    username: 'Jroc_182', // Changed from 'PixelAdventurer'
     level: 1,
     experience: 0,
     experienceToNext: 100,
@@ -19,7 +19,7 @@ export const usePlayer = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiService.getPlayerStats();
+      const response = await apiService.getPlayerStats('Jroc_182'); // Pass username explicitly
       
       // Handle gaming response format
       const stats = response.data || response;

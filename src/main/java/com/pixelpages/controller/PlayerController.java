@@ -19,7 +19,7 @@ public class PlayerController {
     private AchievementService achievementService;
 
     @GetMapping("/stats")
-    public ResponseEntity<Map<String, Object>> getPlayerStats(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<Map<String, Object>> getPlayerStats(@RequestParam(defaultValue = "Jroc_182") String username) {
         try {
             Map<String, Object> stats = new HashMap<>();
             stats.put("username", username);
@@ -61,7 +61,7 @@ public class PlayerController {
     }
 
     @GetMapping("/achievements")
-    public ResponseEntity<List<Map<String, Object>>> getPlayerAchievements(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<List<Map<String, Object>>> getPlayerAchievements(@RequestParam(defaultValue = "Jroc_182") String username) {
         try {
             if (achievementService != null) {
                 List<Map<String, Object>> achievements = achievementService.getPlayerAchievements(username);
@@ -98,7 +98,7 @@ public class PlayerController {
     }
 
     @GetMapping("/level")
-    public ResponseEntity<Map<String, Object>> getPlayerLevel(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<Map<String, Object>> getPlayerLevel(@RequestParam(defaultValue = "Jroc_182") String username) {
         try {
             Map<String, Object> levelData = new HashMap<>();
             levelData.put("level", 1);

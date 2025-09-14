@@ -11,7 +11,7 @@ const useTaskLists = () => {
   const fetchTaskLists = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}?username=user`);
+      const response = await fetch(`${API_BASE}?username=Jroc_182`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch task lists');
@@ -33,7 +33,7 @@ const useTaskLists = () => {
   // Create new task list
   const createTaskList = async (taskListData) => {
     try {
-      const response = await fetch(`${API_BASE}?username=user`, {
+      const response = await fetch(`${API_BASE}?username=Jroc_182`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ const useTaskLists = () => {
   // Update task list
   const updateTaskList = async (taskListId, updates) => {
     try {
-      const response = await fetch(`${API_BASE}/${taskListId}?username=user`, {
+      const response = await fetch(`${API_BASE}/${taskListId}?username=Jroc_182`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const useTaskLists = () => {
   // Delete task list
   const deleteTaskList = async (taskListId) => {
     try {
-      const response = await fetch(`${API_BASE}/${taskListId}?username=user`, {
+      const response = await fetch(`${API_BASE}/${taskListId}?username=Jroc_182`, {
         method: 'DELETE',
       });
 

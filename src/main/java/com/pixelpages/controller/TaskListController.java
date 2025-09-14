@@ -19,21 +19,21 @@ public class TaskListController {
     
     // Get all task lists for user
     @GetMapping
-    public ResponseEntity<List<TaskList>> getAllTaskLists(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<List<TaskList>> getAllTaskLists(@RequestParam(defaultValue = "Jroc_182") String username) {
         List<TaskList> taskLists = taskService.getAllTaskLists(username);
         return ResponseEntity.ok(taskLists);
     }
     
     // Create new task list
     @PostMapping
-    public ResponseEntity<TaskList> createTaskList(@RequestBody TaskList taskList, @RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<TaskList> createTaskList(@RequestBody TaskList taskList, @RequestParam(defaultValue = "Jroc_182") String username) {
         TaskList createdTaskList = taskService.createTaskList(taskList, username);
         return ResponseEntity.ok(createdTaskList);
     }
     
     // Delete task list
     @DeleteMapping("/{taskListId}")
-    public ResponseEntity<Void> deleteTaskList(@PathVariable Long taskListId, @RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<Void> deleteTaskList(@PathVariable Long taskListId, @RequestParam(defaultValue = "Jroc_182") String username) {
         taskService.deleteTaskList(taskListId, username);
         return ResponseEntity.ok().build();
     }
@@ -42,14 +42,14 @@ public class TaskListController {
     @GetMapping("/{taskListId}/tasks")
     public ResponseEntity<List<com.pixelpages.model.Task>> getTasksByList(
             @PathVariable Long taskListId, 
-            @RequestParam(defaultValue = "user") String username) {
+            @RequestParam(defaultValue = "Jroc_182") String username) {
         List<com.pixelpages.model.Task> tasks = taskService.getTasksByList(username, taskListId);
         return ResponseEntity.ok(tasks);
     }
     
     // Get general tasks (not in any list)
     @GetMapping("/general/tasks")
-    public ResponseEntity<List<com.pixelpages.model.Task>> getGeneralTasks(@RequestParam(defaultValue = "user") String username) {
+    public ResponseEntity<List<com.pixelpages.model.Task>> getGeneralTasks(@RequestParam(defaultValue = "Jroc_182") String username) {
         List<com.pixelpages.model.Task> tasks = taskService.getTasksByList(username, null);
         return ResponseEntity.ok(tasks);
     }

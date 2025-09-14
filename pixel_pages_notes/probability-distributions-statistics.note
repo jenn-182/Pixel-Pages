@@ -1,8 +1,8 @@
 Probability Distributions - Statistics
-Created: 2025-09-12 23:35:42
-Updated: 2025-09-13 14:04:32
+Created: 2025-01-22 13:45:00
+Updated: 2025-09-14 18:33:51
 Tags: statistics, probability, distributions, normal, binomial, exam
-Color: #F472B6
+Color: #60A5FA
 
 # Probability Distributions - Chapter 6
 
@@ -11,8 +11,8 @@ Color: #F472B6
 A function that assigns numerical values to outcomes of a random experiment.
 
 ### Types
-- ==Discrete==: Countable outcomes (dice roll, coin flip)
-- ==Continuous==: Uncountable outcomes (height, weight, time)
+- **Discrete**: Countable outcomes (dice roll, coin flip)
+- **Continuous**: Uncountable outcomes (height, weight, time)
 
 ## Discrete Probability Distributions
 

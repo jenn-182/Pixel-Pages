@@ -81,28 +81,28 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
     }
   };
 
-  const getTimeBasedGreeting = () => {
+  const getGreeting = () => {
     const hour = new Date().getHours();
-    const playerName = "user";
+    const playerName = "Jroc_182"; // Changed from "user"
     
     if (hour >= 5 && hour < 12) {
       return {
-        greeting: `Good morning, Jroc_182!`,
+        greeting: `Good morning, ${playerName}!`, // Use dynamic name
         subtitle: "Ready to start your productivity missions?"
       };
     } else if (hour >= 12 && hour < 17) {
       return {
-        greeting: `Good afternoon, Jroc_182!`,
+        greeting: `Good afternoon, ${playerName}!`, // Use dynamic name
         subtitle: "How's your mission progress today?",
       };
     } else if (hour >= 17 && hour < 22) {
       return {
-        greeting: `Good evening, Jroc_182!`,
+        greeting: `Good evening, ${playerName}!`, // Use dynamic name
         subtitle: "Time to review today's achievements!"
       };
     } else {
       return {
-        greeting: `Burning the midnight oil, Jroc_182?`,
+        greeting: `Burning the midnight oil, ${playerName}?`, // Use dynamic name
         subtitle: "Night owls are most productive at night!"
       };
     }
@@ -131,7 +131,7 @@ const DashboardTab = ({ username = 'user', tabColor = '#67E8F9', onTabChange }) 
     return archiveActivity.sort((a, b) => b.activity - a.activity)[0];
   };
 
-  const currentGreeting = getTimeBasedGreeting();
+  const currentGreeting = getGreeting();
   const mostActiveArchive = getMostActiveArchive();
 
   return (

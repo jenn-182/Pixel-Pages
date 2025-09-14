@@ -8,6 +8,7 @@ import com.pixelpages.repository.AchievementRepository; // Add this import
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -206,6 +207,103 @@ public class AchievementController {
             errorResponse.put("message", "Failed to update achievements: " + e.getMessage());
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Get all unlocked achievements for a user (DATABASE ONLY)
+     */
+    @GetMapping("/user/{username}")
+    public ResponseEntity<List<String>> getUserAchievements(@PathVariable String username) {
+        try {
+            List<String> unlockedIds = achievementService.getUnlockedAchievements(username);
+            return ResponseEntity.ok(unlockedIds);
+        } catch (Exception e) {
+            System.err.println("Error getting user achievements: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Unlock a new achievement for a user (DATABASE ONLY)
+     */
+    @PostMapping("/unlock")
+    public ResponseEntity<Map<String, Object>> unlockAchievement(@RequestBody Map<String, Object> request) {
+        try {
+            String username = (String) request.get("username");
+            String achievementId = (String) request.get("achievementId");
+            String unlockedAtStr = (String) request.get("unlockedAt");
+            LocalDateTime unlockedAt = null;
+            if (unlockedAtStr != null) {
+                unlockedAt = LocalDateTime.parse(unlockedAtStr);
+            }
+            
+            boolean success = achievementService.unlockAchievement(username, achievementId, unlockedAt);
+            
+            if (success) {
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Achievement unlocked successfully"
+                ));
+            } else {
+                return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "message", "Achievement already unlocked"
+                ));
+            }
+        } catch (Exception e) {
+            System.err.println("Error unlocking achievement: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get user's calculated stats (DATABASE ONLY)
+     */
+    @GetMapping("/stats/{username}")
+    public ResponseEntity<Map<String, Object>> getUserStats(@PathVariable String username) {
+        try {
+            Map<String, Object> stats = achievementService.calculateAndGetUserStats(username);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            System.err.println("Error getting user stats: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Recalculate and check all achievements for a user (DATABASE ONLY)
+     */
+    @PostMapping("/recalculate/{username}")
+    public ResponseEntity<Map<String, Object>> recalculateAchievements(@PathVariable String username) {
+        try {
+            List<String> newlyUnlocked = achievementService.recalculateAllAchievements(username);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "newlyUnlocked", newlyUnlocked,
+                "count", newlyUnlocked.size()
+            ));
+        } catch (Exception e) {
+            System.err.println("Error recalculating achievements: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Reset all achievements for a user (DATABASE ONLY - for testing)
+     */
+    @DeleteMapping("/reset/{username}")
+    public ResponseEntity<Map<String, Object>> resetAchievements(@PathVariable String username) {
+        try {
+            achievementService.resetUserAchievements(username);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Achievements reset"));
+        } catch (Exception e) {
+            System.err.println("Error resetting achievements: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "error", e.getMessage()));
         }
     }
 }

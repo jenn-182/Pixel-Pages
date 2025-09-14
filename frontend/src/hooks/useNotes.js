@@ -18,7 +18,7 @@ const useNotes = () => {
     try {
       setLoading(true);
       // ✅ FIX: Use consistent API endpoint
-      const response = await fetch(`${API_BASE}?username=user`);
+      const response = await fetch(`${API_BASE}?username=Jroc_182`);
       if (response.ok) {
         const data = await response.json();
         setNotes(data);
@@ -53,7 +53,7 @@ const useNotes = () => {
       
       console.log('📝 Note with timestamp and fixed tags:', noteWithTimestamp);
       
-      const response = await fetch(`${API_BASE}?username=user`, {
+      const response = await fetch(`${API_BASE}?username=Jroc_182`, { // Changed from 'user'
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const useNotes = () => {
       };
 
       // ✅ FIX: Use consistent API endpoint
-      const response = await fetch(`${API_BASE}/${id}?username=user`, {
+      const response = await fetch(`${API_BASE}/${id}?username=Jroc_182`, { // Changed from 'user'
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ const useNotes = () => {
       console.log('useNotes: Deleting note with ID:', id);
       
       // ✅ FIX: Use consistent API endpoint
-      const response = await fetch(`${API_BASE}/${id}?username=user`, {
+      const response = await fetch(`${API_BASE}/${id}?username=Jroc_182`, { // Changed from 'user'
         method: 'DELETE',
       });
 
@@ -160,7 +160,7 @@ const useNotes = () => {
       }
     } catch (error) {
       console.error('Error deleting note:', error);
-      setError(error.message);  // ✅ Set error state
+      setError(error.message);
       throw error;
     }
   };

@@ -28,7 +28,7 @@ import AchievementNotification from './ui/AchievementNotification'; // Fixed pat
 import { ThemeProvider } from '../contexts/ThemeContext';
 
 const PixelPages = () => {
-  const username = 'user'; // Add this line near the top
+  const username = 'Jroc_182'; // Fixed username for test data
 
   // Add tab functionality
   const { activeTab, changeTab } = useTabs();
