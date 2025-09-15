@@ -132,24 +132,23 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
           style={{
-            position: 'absolute',
+            position: 'fixed', // Changed from 'absolute' to 'fixed'
             right: '0px', // Reaches screen edge
-            top: '-3px',
+            top: '0px', // Changed from '-3px' to '0px' for more consistent positioning
             zIndex: 20,
             // Wide tab styling extending to edge
             border: '2px solid rgba(255,255,255,0.3)',
             background: 'rgba(255,255,255,0.05)',
             padding: '8px 24px',
             borderRadius: '4px',
-            borderTopRightRadius: '0px', // Remove right border radius to reach edge
-            borderBottomRightRadius: '0px', // Remove right border radius to reach edge
+            borderTopRightRadius: '0px',
+            borderBottomRightRadius: '0px',
             boxShadow: '0 0 5px rgba(255,255,255,0.2)',
-            minWidth: '200px', // Reduced minimum width
-            width: 'calc(100vw - 1158px)', // Increased from 800px to 900px to account for PORTAL tab
-            maxWidth: '350px', // Slightly reduced max width
+            width: '264px', // Keep the perfect width
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            height: '56px' // Add explicit height to match tab bar height
           }}
         >
           <img 
@@ -157,9 +156,9 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
             alt="Pixel Pages Logo" 
             className="app-logo"
             style={{
-              height: '40px', // Keep the bigger size
+              height: '40px',
               width: 'auto',
-              maxWidth: '320x', // Slightly reduced to fit better
+              maxWidth: '320px',
               filter: 'brightness(1.1) contrast(1.1)',
               opacity: 0.9,
               display: 'block',
