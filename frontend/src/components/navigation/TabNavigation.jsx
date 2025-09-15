@@ -4,14 +4,15 @@ import { FileText, Archive, Trophy, User, CheckSquare, Clock, LayoutGrid, Timer,
 
 const TabNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'dashboard', label: 'DASHBOARD', icon: LayoutGrid },
+    { id: 'dashboard', label: 'DASH', icon: LayoutGrid },
     { id: 'notes', label: 'LOGS', icon: FileText },
     { id: 'tasks', label: 'MISSIONS', icon: CheckSquare },
     { id: 'library', label: 'VAULT', icon: Archive },
     { id: 'focus', label: 'FOCUS', icon: Timer },
     { id: 'tracker', label: 'SKILLS', icon: BarChart3 },
-    { id: 'achievements', label: 'ACHIEVEMENTS', icon: Trophy },
-    { id: 'profile', label: 'PROFILE', icon: User }
+    { id: 'achievements', label: 'BADGES', icon: Trophy },
+    { id: 'profile', label: 'PROFILE', icon: User },
+    { id: 'portal', label: 'PORTAL', icon: User }
   ];
 
   return (
@@ -124,17 +125,31 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
           })}
         </div>
 
-        {/* ✅ Right side - App Logo - Updated to use ppcolor.png */}
+        {/* ✅ Right side - App Logo styled as wide tab extending to screen edge */}
         <motion.div 
-          className="app-logo-container"
+          className="app-logo-container pixel-tab"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
           style={{
             position: 'absolute',
-            right: '20px',
-            top: '0px',
-            zIndex: 20
+            right: '0px', // Reaches screen edge
+            top: '-3px',
+            zIndex: 20,
+            // Wide tab styling extending to edge
+            border: '2px solid rgba(255,255,255,0.3)',
+            background: 'rgba(255,255,255,0.05)',
+            padding: '8px 24px',
+            borderRadius: '4px',
+            borderTopRightRadius: '0px', // Remove right border radius to reach edge
+            borderBottomRightRadius: '0px', // Remove right border radius to reach edge
+            boxShadow: '0 0 5px rgba(255,255,255,0.2)',
+            minWidth: '200px', // Reduced minimum width
+            width: 'calc(100vw - 1158px)', // Increased from 800px to 900px to account for PORTAL tab
+            maxWidth: '350px', // Slightly reduced max width
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
           <img 
@@ -142,9 +157,9 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
             alt="Pixel Pages Logo" 
             className="app-logo"
             style={{
-              height: '60px',
+              height: '40px', // Keep the bigger size
               width: 'auto',
-              maxWidth: '250px',
+              maxWidth: '320x', // Slightly reduced to fit better
               filter: 'brightness(1.1) contrast(1.1)',
               opacity: 0.9,
               display: 'block',
