@@ -23,21 +23,21 @@ const ProfileTab = ({ username = 'Jroc_182', tabColor = '#A78BFA' }) => { // Cha
         taskLists={taskLists} 
       />
       
-      {/* About Player - New section */}
+      {/* About Player - Player information and bio */}
       <AboutPlayer />
       
-      {/* Skill Tree Widget */}
-      <SkillTreeWidget />
+      {/* Favorite Badges - Showcase selected achievements */}
+      <FavoriteBadges />
       
-      {/* Profile Stats */}
+      {/* Profile Stats - Performance metrics */}
       <ProfileStats 
         notes={notes} 
         tasks={tasks} 
         taskLists={taskLists} 
       />
       
-      {/* Favorite Badges - Showcase selected achievements */}
-      <FavoriteBadges />
+      {/* Skill Tree Widget - Player skills and progression */}
+      <SkillTreeWidget />
     </div>
   );
 };

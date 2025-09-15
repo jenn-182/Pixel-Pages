@@ -169,7 +169,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
               <Star className="text-yellow-400" size={20} />
               {Math.floor(totalTimeSpent / 60)} XP
             </div>
-            <div className="text-sm text-gray-400 font-mono">GRIND POINTS EARNED</div>
+            <div className="text-sm text-gray-400 font-mono">POINTS EARNED</div>
           </div>
         </div>
       </div>
@@ -210,20 +210,24 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
             <div className="relative inline-block">
               <CircularProgress
                 progress={progress}
-                size={400}
-                strokeWidth={24}
+                size={isActive ? 400 : 250}
+                strokeWidth={isActive ? 24 : 12}
                 color={isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'}
                 backgroundColor="#1F2937"
               >
                 <div className="text-center">
                   {/* Main Timer */}
-                  <div className="text-8xl font-mono font-bold text-white mb-4 tracking-wider">
+                  <div className={`font-mono font-bold text-white mb-2 tracking-wider ${
+                    isActive ? 'text-8xl mb-4' : 'text-4xl'
+                  }`}>
                     {isActive ? formatTime() : '00:00'}
                   </div>
 
                   {/* Duration info */}
                   {duration && (
-                    <div className="text-xl font-mono text-gray-400 mb-3">
+                    <div className={`font-mono text-gray-400 ${
+                      isActive ? 'text-xl mb-3' : 'text-sm mb-2'
+                    }`}>
                       / {duration} min mission
                     </div>
                   )}
@@ -231,13 +235,17 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
                   {/* Status with icon */}
                   <div className="flex items-center justify-center gap-2">
                     <div
-                      className="w-3 h-3 rounded-full animate-pulse"
+                      className={`rounded-full animate-pulse ${
+                        isActive ? 'w-3 h-3' : 'w-2 h-2'
+                      }`}
                       style={{
                         backgroundColor: isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'
                       }}
                     />
                     <span
-                      className="text-sm font-mono font-bold tracking-wider"
+                      className={`font-mono font-bold tracking-wider ${
+                        isActive ? 'text-sm' : 'text-xs'
+                      }`}
                       style={{
                         color: isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'
                       }}
@@ -245,7 +253,9 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
                       {timerStatus.text}
                     </span>
                     <div
-                      className="w-3 h-3 rounded-full animate-pulse"
+                      className={`rounded-full animate-pulse ${
+                        isActive ? 'w-3 h-3' : 'w-2 h-2'
+                      }`}
                       style={{
                         backgroundColor: isRunning ? '#FFFFFF' : isPaused ? '#F59E0B' : '#6B7280'
                       }}

@@ -140,8 +140,8 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
             justifyContent: 'center',
             height: '56px',
             position: 'relative',
-            marginLeft: 'auto', // Push to right side
-            flexShrink: 0 // Prevent shrinking
+            marginLeft: 'auto',
+            flexShrink: 0
           }}
         >
           <img 
