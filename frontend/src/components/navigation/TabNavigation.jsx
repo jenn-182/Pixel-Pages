@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Archive, Trophy, User, CheckSquare, Clock, LayoutGrid, Timer, BarChart3 } from 'lucide-react';
+import { FileText, Archive, Trophy, User, CheckSquare, Clock, LayoutGrid, Timer, Globe, BarChart3 } from 'lucide-react';
 
 const TabNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
@@ -12,7 +12,7 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
     { id: 'tracker', label: 'SKILLS', icon: BarChart3 },
     { id: 'achievements', label: 'BADGES', icon: Trophy },
     { id: 'profile', label: 'PROFILE', icon: User },
-    { id: 'portal', label: 'PORTAL', icon: User }
+    { id: 'portal', label: 'PORTAL', icon: Globe }
   ];
 
   return (

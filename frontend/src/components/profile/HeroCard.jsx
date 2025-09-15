@@ -6,9 +6,10 @@ import { getRankByXP, getNextRank } from '../../data/ranks';
 import { useTheme } from '../../contexts/ThemeContext';
 import backendAchievementService from '../../services/backendAchievementService';
 import { defaultProfilePics, getSelectedProfilePic, saveProfilePicSelection, getProfilePicById } from '../../data/profilePics';
+import SecretPage from '../easter-eggs/SecretPage'; // 👈 Import the SecretPage
 
 const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
-  const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [showSecretGame, setShowSecretGame] = useState(false); // 👈 Changed from showEasterEgg to showSecretGame
   const [showStyleDropdown, setShowStyleDropdown] = useState(false);
   const [showProfilePicEditor, setShowProfilePicEditor] = useState(false);
   const [selectedProfilePic, setSelectedProfilePic] = useState(() => getSelectedProfilePic());
@@ -37,7 +38,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
       const getProfessionForSkill = (skillName, level) => {
         const skillProfessions = {
           'Programming': {
-            1: { name: 'Code Newbie', icon: '�' },
+            1: { name: 'Code Newbie', icon: '💻' },
             3: { name: 'Junior Dev', icon: '⚡' },
             5: { name: 'Programmer', icon: '🖥️' },
             8: { name: 'Senior Dev', icon: '🚀' },
@@ -444,7 +445,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                 </span>
               </div>
               
-              {/* Online Status Indicator */}
+              {/* Online Status Indicator - SECRET TRIGGER */}
               <div className="mt-2 flex items-center justify-center gap-2 px-3 py-1"
                    style={{
                      backgroundColor: themeColors.backgroundColor,
@@ -455,7 +456,7 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
                        : `0 0 4px ${themeColors.primary}50, 2px 2px 0px 0px rgba(0,0,0,1)`
                    }}>
                 <button
-                  onClick={() => setShowEasterEgg(true)}
+                  onClick={() => setShowSecretGame(true)} // 👈 Changed to open SecretPage
                   className="w-2 h-2 bg-green-400 rounded-full animate-pulse cursor-pointer hover:bg-green-300 transition-colors" 
                   style={{ 
                     boxShadow: '0 0 6px rgba(34, 197, 94, 0.8)' 
@@ -809,88 +810,11 @@ const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
 
       </motion.div>
 
-      {/* Easter Egg Modal - unchanged */}
-      <AnimatePresence>
-        {showEasterEgg && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={() => setShowEasterEgg(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-gray-800 border-2 border-cyan-400 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 max-w-md mx-4 relative"
-              style={{
-                boxShadow: '0 0 20px rgba(147, 51, 234, 0.3), 8px 8px 0px 0px rgba(0,0,0,1)'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Animated border */}
-              <div className="absolute inset-0 border-2 border-cyan-400 opacity-50 animate-pulse pointer-events-none" />
-              
-              {/* Close button */}
-              <button
-                onClick={() => setShowEasterEgg(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
-
-              {/* Content - unchanged */}
-              <div className="text-center">
-                <motion.div
-                  className="mb-6"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                >
-                  <Trophy size={64} className="text-cyan-400 mx-auto" />
-                </motion.div>
-
-                <h2 className="text-2xl font-mono font-bold text-white mb-2">
-                  EASTER EGG ACHIEVEMENTS
-                </h2>
-                
-                <p className="text-cyan-400 font-mono text-sm mb-6">
-                  You found the hidden easter egg level!
-                </p>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-gray-900 border border-cyan-400 p-4 mb-6"
-                >
-                  <h3 className="text-xl font-mono font-bold text-cyan-400 mb-4">
-                    COMING SOON
-                  </h3>
-                </motion.div>
-
-                <div className="flex items-center justify-center gap-1">
-                  <motion.div
-                    className="w-2 h-2 bg-cyan-400 rounded-full"
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 bg-cyan-400 rounded-full"
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 bg-cyan-400 rounded-full"
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* SECRET GAME MODAL - 🎮 This is where the magic happens! */}
+      <SecretPage 
+        isOpen={showSecretGame}
+        onClose={() => setShowSecretGame(false)}
+      />
 
       {/* Profile Pic Editor Modal */}
       <AnimatePresence>
