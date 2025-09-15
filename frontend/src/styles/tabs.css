@@ -408,3 +408,48 @@
     grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 }
+
+/* Lock the logo tab in place */
+.static-logo-tab {
+  position: fixed !important;
+  right: 0px !important;
+  top: 0px !important;
+  z-index: 9999 !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  will-change: auto !important;
+  backface-visibility: hidden !important;
+  /* Prevent any movement */
+  margin: 0 !important;
+  padding: 8px 24px !important;
+  width: 264px !important;
+  height: 56px !important;
+  /* Override any inherited transforms */
+  -webkit-transform: none !important;
+  -moz-transform: none !important;
+  -ms-transform: none !important;
+  -o-transform: none !important;
+}
+
+/* Prevent logo from being affected by parent transforms */
+.static-logo-tab * {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Override any hover effects on logo */
+.static-logo-tab:hover {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Disable all tab animations that might affect layout */
+.pixel-tab.starfield-theme:hover {
+  transform: none !important; /* Remove the translateY(-2px) */
+}
+
+.pixel-tab.starfield-theme.active {
+  transform: none !important; /* Remove the translateY(-3px) */
+}

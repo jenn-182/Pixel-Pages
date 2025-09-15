@@ -26,7 +26,7 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
         <div className="star star-5"></div>
       </div>
       
-      {/* ✅ Updated container to justify space between tabs and logo */}
+      {/* Tab container */}
       <div className="tab-container justify-between items-center">
         {/* Left side - Navigation tabs */}
         <div className="flex">
@@ -125,36 +125,28 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
           })}
         </div>
 
-        {/* ✅ Right side - App Logo styled as wide tab extending to screen edge */}
-        <motion.div 
-          className="app-logo-container pixel-tab"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
+        {/* Logo integrated as static tab element */}
+        <div 
+          className="static-logo-tab"
           style={{
-            position: 'fixed', // Changed from 'absolute' to 'fixed'
-            right: '0px', // Reaches screen edge
-            top: '0px', // Changed from '-3px' to '0px' for more consistent positioning
-            zIndex: 20,
-            // Wide tab styling extending to edge
             border: '2px solid rgba(255,255,255,0.3)',
             background: 'rgba(255,255,255,0.05)',
             padding: '8px 24px',
             borderRadius: '4px',
-            borderTopRightRadius: '0px',
-            borderBottomRightRadius: '0px',
             boxShadow: '0 0 5px rgba(255,255,255,0.2)',
-            width: '264px', // Keep the perfect width
+            width: '264px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            height: '56px' // Add explicit height to match tab bar height
+            height: '56px',
+            position: 'relative',
+            marginLeft: 'auto', // Push to right side
+            flexShrink: 0 // Prevent shrinking
           }}
         >
           <img 
             src="/ppcolor.png"
             alt="Pixel Pages Logo" 
-            className="app-logo"
             style={{
               height: '40px',
               width: 'auto',
@@ -164,32 +156,8 @@ const TabNavigation = ({ activeTab, onTabChange }) => {
               display: 'block',
               objectFit: 'contain'
             }}
-            onLoad={() => {
-              console.log('Image loaded successfully! Dimensions:', 
-                document.querySelector('.app-logo').naturalWidth, 'x', 
-                document.querySelector('.app-logo').naturalHeight);
-            }}
-            onError={(e) => {
-              console.log('Image failed to load:', e.target.src);
-              // Show fallback text if image fails
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'block';
-            }}
           />
-          {/* Fallback text */}
-          <div 
-            style={{ 
-              display: 'none',
-              color: '#22D3EE',
-              fontFamily: 'monospace',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              textShadow: '0 0 10px rgba(34, 211, 238, 0.5)'
-            }}
-          >
-            📖 PIXEL PAGES
-          </div>
-        </motion.div>
+        </div>
       </div>
       
       {/* Add shooting star across navigation */}
