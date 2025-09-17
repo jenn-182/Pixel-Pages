@@ -1,4 +1,5 @@
 import React from 'react';
+import SparkleTrail from '../profile/SparkleTrail';
 import HeroCard from '../profile/HeroCard';
 import ProfileStats from '../profile/ProfileStats';
 import AboutPlayer from '../profile/AboutPlayer';
@@ -7,6 +8,7 @@ import SkillTreeWidget from '../profile/SkillTreeWidget';
 import { usePlayer } from '../../hooks/usePlayer';
 import useNotes from '../../hooks/useNotes';
 import useTasks from '../../hooks/useTasks';
+import DataStreamCursor from '../profile/CursorEffects';
 
 const ProfileTab = ({ username = 'Jroc_182', tabColor = '#A78BFA' }) => { // Changed default
   const { player } = usePlayer();
@@ -15,6 +17,8 @@ const ProfileTab = ({ username = 'Jroc_182', tabColor = '#A78BFA' }) => { // Cha
 
   return (
     <div className="p-6 space-y-6">
+      <SparkleTrail />
+       <DataStreamCursor />
       {/* Hero Card - Direct Integration without Pink Wrapper */}
       <HeroCard 
         player={player} 
