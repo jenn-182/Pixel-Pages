@@ -278,7 +278,7 @@ const TimeManagementMatrix = ({ tabColor, tabColorRgb, onClose }) => {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.8 }}
             >
-              TOTAL GRIND TIME
+              TOTAL FOCUS TIME
             </motion.div>
             <motion.div 
               className="text-sm font-mono text-gray-500 mt-2"

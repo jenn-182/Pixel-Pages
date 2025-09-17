@@ -370,7 +370,7 @@ const FocusTab = ({ username = 'user', tabColor = '#8B5CF6' }) => {
                       }`}
                   />
                   <div className="relative z-10">
-                    <div className="text-white font-bold text-sm">CUSTOM MISSION</div>
+                    <div className="text-white font-bold text-sm">CUSTOM FOCUS TIMER</div>
                     <div className="text-xs text-gray-400">Set your own duration</div>
                   </div>
                 </button>

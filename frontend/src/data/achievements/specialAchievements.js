@@ -3,7 +3,7 @@ export const specialAchievements = [
   {
     id: 'triple_threat',
     name: 'TRIPLE THREAT',
-    description: 'Create a log, mission and grind in one day',
+    description: 'Create a log, mission and focus session in one day',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Star',
@@ -17,7 +17,7 @@ export const specialAchievements = [
   {
     id: 'balanced_user',
     name: 'BALANCED USER',
-    description: 'Complete a log, mission and grind in one week',
+    description: 'Complete a log, mission and focus session in one week',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Scale',
@@ -31,7 +31,7 @@ export const specialAchievements = [
   {
     id: 'productivity_stack',
     name: 'PRODUCTIVITY STACK',
-    description: 'Complete 5 missions + 1 grind + 1 log in one day',
+    description: 'Complete 5 missions + 1 focus session + 1 log in one day',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Layers',
@@ -47,7 +47,7 @@ export const specialAchievements = [
   {
     id: 'weekend_grinder',
     name: 'WEEKEND GRINDER',
-    description: 'Complete a log, mission and grind on both weekend days',
+    description: 'Complete a log, mission and focus session on both weekend days',
     tier: 'uncommon',
     category: 'combo',
     icon: 'Calendar',
@@ -91,7 +91,7 @@ export const specialAchievements = [
   {
     id: 'power_user',
     name: 'POWER USER',
-    description: 'Complete a log, mission and grind for 7 consecutive days',
+    description: 'Complete a log, mission and focus session for 7 consecutive days',
     tier: 'rare',
     category: 'combo',
     icon: 'Zap',
@@ -120,7 +120,7 @@ export const specialAchievements = [
   {
     id: 'habit_master',
     name: 'HABIT MASTER',
-    description: 'Complete a log, mission and grind for 14 days',
+    description: 'Complete a log, mission and focus session for 14 days',
     tier: 'rare',
     category: 'combo',
     icon: 'Repeat',

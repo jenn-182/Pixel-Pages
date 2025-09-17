@@ -650,27 +650,55 @@ const SecretPage = ({ isOpen, onClose }) => {
                   flexShrink: 0 
                 }}
               >
+                {/* OPTION 1: Plain White Text */}
                 <motion.h1
-                  className="text-3xl font-bold mb-3" // Slightly smaller text
+                  className="text-3xl font-bold mb-3"
                   style={{
                     fontFamily: 'ui-monospace, SFMono-Regular, "Courier New", monospace',
-                    background: 'linear-gradient(45deg, #00ffff, #ff00ff, #00ffff)',
-                    backgroundSize: '200% 200%',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    textShadow: '0 0 20px rgba(0, 255, 255, 0.5)',
-                    filter: 'drop-shadow(0 0 10px rgba(255, 0, 255, 0.3))',
-                    letterSpacing: '1.5px' // Slightly reduced
+                    color: '#ffffff',
+                    textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+                    letterSpacing: '1.5px'
                   }}
-                  animate={{
-                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
                 >
                   EASTER EGG LEVEL
                 </motion.h1>
-                
+
+                {/* OR OPTION 2: White Text with Rainbow Glow */}
+                {/* 
+                <motion.h1
+                  className="text-3xl font-bold mb-3"
+                  style={{
+                    fontFamily: 'ui-monospace, SFMono-Regular, "Courier New", monospace',
+                    color: '#ffffff',
+                    letterSpacing: '1.5px'
+                  }}
+                  animate={{
+                    textShadow: [
+                      '0 0 20px #ff0000, 0 0 40px #ff0000',
+                      '0 0 20px #ff8000, 0 0 40px #ff8000',
+                      '0 0 20px #ffff00, 0 0 40px #ffff00',
+                      '0 0 20px #00ff00, 0 0 40px #00ff00',
+                      '0 0 20px #0080ff, 0 0 40px #0080ff',
+                      '0 0 20px #8000ff, 0 0 40px #8000ff',
+                      '0 0 20px #ff0080, 0 0 40px #ff0080',
+                      '0 0 20px #ff0000, 0 0 40px #ff0000'
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity, 
+                    ease: "linear" 
+                  }}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  EASTER EGG LEVEL
+                </motion.h1>
+                */}
+
                 {/* Congratulations Text with Compact Spacing */}
                 <div 
                   className="text-center space-y-6 flex-1 flex flex-col justify-center" 

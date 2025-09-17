@@ -171,7 +171,6 @@ const SaveSessionModal = ({
         <div className="relative z-10">
           {/* Header */}
           <div className="text-center mb-6">
-            <Trophy size={32} className="text-yellow-400 mx-auto mb-2" />
             <h3 className="font-mono text-xl font-bold text-white mb-2">
               {sessionType === 'partial' ? 'PARTIAL SESSION COMPLETE!' : 'SESSION COMPLETE!'}
             </h3>
@@ -179,7 +178,7 @@ const SaveSessionModal = ({
               +{timeSpent} minutes earned
             </p>
             <p className="font-mono text-gray-400 text-sm mt-1">
-              Choose a category to gain XP or discard
+              Choose a skill branch to gain XP or discard
             </p>
           </div>
 
@@ -238,7 +237,7 @@ const SaveSessionModal = ({
               />
               <div className="flex items-center justify-center gap-2 relative z-10">
                 <Plus size={16} className="text-gray-400" />
-                <span className="text-white">Create New Category</span>
+                <span className="text-white">Create New Skill Branch</span>
               </div>
             </button>
 

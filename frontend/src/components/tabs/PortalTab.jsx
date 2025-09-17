@@ -313,7 +313,7 @@ const PortalTab = () => {
               }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              PORTAL COMMAND CENTER
+              PLAYER PORTAL TERMINAL
             </motion.h1>
           </div>
 
@@ -332,7 +332,7 @@ const PortalTab = () => {
                 }}
               >
                 <UserPlus size={16} />
-                ADD PIXEL PAL
+                ADD FRIEND
               </motion.button>
 
               <motion.button
@@ -381,7 +381,7 @@ const PortalTab = () => {
         >
           <h2 className="text-xl font-bold font-mono text-white mb-4 flex items-center gap-2 flex-shrink-0">
             <Activity size={20} className="text-white" />
-            PIXEL PAL ACTIVITY
+            FRIEND ACTIVITY
           </h2>
 
           <div className="flex-1 overflow-y-auto space-y-4">
@@ -763,7 +763,7 @@ const PortalTab = () => {
                 <div className="text-center">
                   <Users size={48} className="mx-auto mb-4 text-white/40" />
                   <h3 className="text-xl font-bold font-mono text-white mb-3">MEMBER INTEL</h3>
-                  <p className="text-white/60 font-mono">Select a pixel pal to view their intel</p>
+                  <p className="text-white/60 font-mono">Select amember to view their intel</p>
                 </div>
               </motion.div>
             )}
