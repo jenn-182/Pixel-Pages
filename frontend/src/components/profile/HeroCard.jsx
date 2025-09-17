@@ -8,7 +8,6 @@ import backendAchievementService from '../../services/backendAchievementService'
 import { defaultProfilePics, getSelectedProfilePic, saveProfilePicSelection, getProfilePicById } from '../../data/profilePics';
 import SecretPage from '../easter-eggs/SecretPage'; // 👈 Import the SecretPage
 import HeartProgressBar from '../profile/HeartProgressBar';
-import CrystalShineBar from "@/components/profile/CrystalShineBar";
 
 const HeroCard = ({ player, notes = [], tasks = [], taskLists = [] }) => {
   const [showSecretGame, setShowSecretGame] = useState(false); // 👈 Changed from showEasterEgg to showSecretGame
